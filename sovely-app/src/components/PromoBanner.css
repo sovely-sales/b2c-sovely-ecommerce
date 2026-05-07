@@ -1,0 +1,200 @@
+/* ===========================
+   PROMO BANNERS
+   =========================== */
+
+.promo-section {
+  padding: 60px 0;
+  background: var(--white);
+}
+
+.promo-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Shared card */
+.promo-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 36px;
+  position: relative;
+  gap: 20px;
+  transition: var(--transition);
+}
+.promo-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Main promo */
+.promo-card--main {
+  background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary) 100%);
+  color: var(--white);
+  min-height: 280px;
+}
+
+.promo-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.2);
+  color: var(--white);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(6px);
+  width: fit-content;
+}
+
+.promo-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--white);
+}
+
+.promo-highlight {
+  color: #fde68a;
+}
+
+.promo-desc {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  max-width: 260px;
+}
+
+.promo-cta {
+  width: fit-content;
+  padding: 12px 24px;
+}
+
+/* Countdown */
+.promo-countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.8);
+}
+.countdown-blocks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.countdown-block {
+  background: rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 4px 10px;
+  text-align: center;
+  backdrop-filter: blur(6px);
+}
+.countdown-block span {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--white);
+  font-family: var(--font-heading);
+  line-height: 1;
+}
+.countdown-block small {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+}
+.countdown-sep {
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.promo-visual {
+  flex-shrink: 0;
+  width: 180px;
+  height: 180px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+.promo-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right column */
+.promo-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.promo-card--grocery {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #bbf7d0;
+  padding: 28px;
+  min-height: 130px;
+}
+.promo-card--fashion {
+  background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+  border: 1px solid #fbcfe8;
+  padding: 28px;
+  min-height: 130px;
+}
+
+.promo-mini-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.promo-mini-desc {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+}
+
+.promo-mini-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  transition: var(--transition);
+}
+.promo-mini-link:hover {
+  gap: 8px;
+}
+
+.promo-mini-img {
+  width: 90px;
+  height: 90px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .promo-grid { grid-template-columns: 1fr; }
+  .promo-card--main { min-height: 220px; }
+  .promo-visual { width: 130px; height: 130px; }
+}
+@media (max-width: 500px) {
+  .promo-visual { display: none; }
+  .promo-mini-img { display: none; }
+}

@@ -1,0 +1,22 @@
+const mongoose = require('mongoose');
+
+const orderSchema = new mongoose.Schema({
+  customerName: { type: String, required: true },
+  email:        { type: String, required: true },
+  phone:        { type: String },
+  address:      { type: String },
+  city:         { type: String },
+  postalCode:   { type: String },
+  items:        [{
+    id: String,
+    name: String,
+    price: Number,
+    quantity: Number,
+    image: String
+  }],
+  total:        { type: Number, required: true },
+  paymentMethod: { type: String, default: 'razorpay' },
+  status:       { type: String, default: 'Pending' }
+}, { timestamps: true, collection: 'b2c_orders' });
+
+module.exports = mongoose.model('Order', orderSchema);
