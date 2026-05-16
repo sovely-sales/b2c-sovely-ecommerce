@@ -1,21 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
-  /* Core Colors - Slate & Emerald Theme */
   --primary: #10b981;
   --primary-dark: #059669;
   --primary-light: #d1fae5;
   --secondary: #0ea5e9;
   --accent: #f59e0b;
-  
+
   --bg-main: #f1f5f9;
   --bg-card: #ffffff;
   --bg-sidebar: #0f172a;
-  
+
   --text-main: #1e293b;
   --text-muted: #64748b;
   --text-on-dark: #f8fafc;
-  
+
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
@@ -27,17 +26,17 @@
   --gray-800: #1e293b;
   --gray-900: #0f172a;
 
-  /* Glassmorphism & Effects */
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-blur: 16px;
-  
+
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
-  
-  /* Layout */
+
   --header-height: 80px;
   --sidebar-width: 280px;
   --radius-sm: 8px;
@@ -46,10 +45,9 @@
   --radius-xl: 32px;
   --container-max: 1240px;
 
-  /* Typography */
-  --font-main: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  
+  --font-main: "Inter", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+
   --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -68,18 +66,36 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: 800;
   color: var(--gray-900);
   line-height: 1.2;
 }
 
-a { text-decoration: none; color: inherit; transition: var(--transition); }
-button { cursor: pointer; border: none; background: none; font-family: inherit; transition: var(--transition); }
-input, textarea, select { font-family: inherit; }
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  transition: var(--transition);
+}
+input,
+textarea,
+select {
+  font-family: inherit;
+}
 
-/* Utilities */
 .container {
   max-width: var(--container-max);
   margin: 0 auto;
@@ -106,7 +122,6 @@ input, textarea, select { font-family: inherit; }
   border: 1px solid var(--gray-100);
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -142,10 +157,15 @@ input, textarea, select { font-family: inherit; }
   background: var(--primary-light);
 }
 
-/* Animations */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeUp {
@@ -153,8 +173,14 @@ input, textarea, select { font-family: inherit; }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-scaleIn {
@@ -162,9 +188,16 @@ input, textarea, select { font-family: inherit; }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .animate-shake {

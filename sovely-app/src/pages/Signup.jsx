@@ -1,55 +1,72 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { User, Mail, Lock, ArrowRight, CheckCircle, ShieldCheck, ShoppingBag, LogIn } from 'lucide-react';
-import { useData } from '../context/DataContext';
-import './Signup.css';
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Lock,
+  ArrowRight,
+  CheckCircle,
+  ShieldCheck,
+  ShoppingBag,
+  LogIn,
+} from "lucide-react";
+import { useData } from "../context/DataContext";
+import "./Signup.css";
 
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8014';
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
 
 export default function Signup() {
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const { login } = useData();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
     const endpoint = isLogin ? `${API}/api/login` : `${API}/api/register`;
 
     try {
       const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      
+
       if (data.success) {
-        // Use global login helper
-        login({ name: data.name, email: data.email, role: data.role }, data.token);
-        
+        login(
+          { name: data.name, email: data.email, role: data.role || "user" },
+          data.token,
+        );
+
         setSuccess(true);
         setTimeout(() => {
-          if (data.role === 'admin') {
-            navigate('/admin');
+          if (data.role === "admin") {
+            navigate("/admin");
           } else {
-            navigate(location.state?.from || '/');
+            navigate(location.state?.from || "/");
           }
         }, 1500);
       } else {
-        setError(data.message || 'Authentication failed');
+        setError(data.message || "Authentication failed");
       }
     } catch (err) {
-      setError('Connection error. Please check your backend.');
+      setError("Connection error. Please check your backend.");
     } finally {
       setLoading(false);
     }
@@ -62,20 +79,31 @@ export default function Signup() {
           <div className="auth-logo-badge">
             <ShoppingBag size={32} />
           </div>
-          <h1>Welcome to <span className="text-primary">Sovely</span></h1>
-          <p>Join thousands of happy shoppers discovering the best deals on electronics, fashion, and more.</p>
-          
+          <h1>
+            Welcome to <span className="text-primary">Sovely</span>
+          </h1>
+          <p>
+            Join thousands of happy shoppers discovering the best deals on
+            electronics, fashion, and more.
+          </p>
+
           <div className="auth-features">
             <div className="auth-feature">
-              <div className="feature-icon"><CheckCircle size={18} /></div>
+              <div className="feature-icon">
+                <CheckCircle size={18} />
+              </div>
               <span>Premium Curated Products</span>
             </div>
             <div className="auth-feature">
-              <div className="feature-icon"><CheckCircle size={18} /></div>
+              <div className="feature-icon">
+                <CheckCircle size={18} />
+              </div>
               <span>Lightning Fast Delivery</span>
             </div>
             <div className="auth-feature">
-              <div className="feature-icon"><CheckCircle size={18} /></div>
+              <div className="feature-icon">
+                <CheckCircle size={18} />
+              </div>
               <span>24/7 Priority Support</span>
             </div>
           </div>
@@ -95,11 +123,27 @@ export default function Signup() {
             ) : (
               <>
                 <div className="auth-type-pill">
-                  <button className={isLogin ? 'active' : ''} onClick={() => setIsLogin(true)}>Login</button>
-                  <button className={!isLogin ? 'active' : ''} onClick={() => setIsLogin(false)}>Sign Up</button>
+                  <button
+                    className={isLogin ? "active" : ""}
+                    onClick={() => setIsLogin(true)}
+                  >
+                    Login
+                  </button>
+                  <button
+                    className={!isLogin ? "active" : ""}
+                    onClick={() => setIsLogin(false)}
+                  >
+                    Sign Up
+                  </button>
                 </div>
-                <h2>{isLogin ? 'Great to see you again' : 'Create your account'}</h2>
-                <p className="auth-subtitle">{isLogin ? 'Enter your credentials to access your account' : 'Start your premium shopping journey today'}</p>
+                <h2>
+                  {isLogin ? "Great to see you again" : "Create your account"}
+                </h2>
+                <p className="auth-subtitle">
+                  {isLogin
+                    ? "Enter your credentials to access your account"
+                    : "Start your premium shopping journey today"}
+                </p>
               </>
             )}
           </div>
@@ -107,28 +151,64 @@ export default function Signup() {
           {!success && (
             <form onSubmit={handleSubmit} className="auth-form">
               {error && <div className="auth-error animate-shake">{error}</div>}
-              
+
               {!isLogin && (
                 <>
                   <div className="input-field">
-                    <label><User size={16} /> Full Name</label>
-                    <input type="text" name="name" placeholder="John Doe" value={form.name} onChange={handleChange} required />
+                    <label>
+                      <User size={16} /> Full Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="John Doe"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="input-field">
-                    <label><User size={16} /> Phone Number</label>
-                    <input type="tel" name="phone" placeholder="+91 98765 43210" value={form.phone} onChange={handleChange} required />
+                    <label>
+                      <User size={16} /> Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="+91 98765 43210"
+                      value={form.phone}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                 </>
               )}
-              
+
               <div className="input-field">
-                <label><Mail size={16} /> Email Address</label>
-                <input type="email" name="email" placeholder="john@example.com" value={form.email} onChange={handleChange} required />
+                <label>
+                  <Mail size={16} /> Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="john@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
               </div>
-              
+
               <div className="input-field">
-                <label><Lock size={16} /> Password</label>
-                <input type="password" name="password" placeholder="••••••••" value={form.password} onChange={handleChange} required />
+                <label>
+                  <Lock size={16} /> Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                />
               </div>
 
               {isLogin && (
@@ -136,14 +216,22 @@ export default function Signup() {
                   <label className="checkbox-label">
                     <input type="checkbox" /> Remember me
                   </label>
-                  <button type="button" className="forgot-btn">Forgot password?</button>
+                  <button type="button" className="forgot-btn">
+                    Forgot password?
+                  </button>
                 </div>
               )}
 
-              <button type="submit" className="auth-btn btn btn-primary" disabled={loading}>
-                {loading ? <div className="loader"></div> : (
+              <button
+                type="submit"
+                className="auth-btn btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="loader"></div>
+                ) : (
                   <>
-                    {isLogin ? 'Sign In' : 'Create Account'}
+                    {isLogin ? "Sign In" : "Create Account"}
                     <ArrowRight size={18} />
                   </>
                 )}
@@ -152,7 +240,10 @@ export default function Signup() {
           )}
 
           <div className="auth-footer">
-            <p>Protected by <strong>Sovely Shield</strong> <ShieldCheck size={14} /></p>
+            <p>
+              Protected by <strong>Sovely Shield</strong>{" "}
+              <ShieldCheck size={14} />
+            </p>
           </div>
         </div>
       </div>

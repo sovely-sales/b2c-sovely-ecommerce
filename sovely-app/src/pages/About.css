@@ -94,6 +94,10 @@
 }
 
 @media (max-width: 768px) {
-  .about-story { grid-template-columns: 1fr; }
-  .about-hero h1 { font-size: 2.5rem; }
+  .about-story {
+    grid-template-columns: 1fr;
+  }
+  .about-hero h1 {
+    font-size: 2.5rem;
+  }
 }

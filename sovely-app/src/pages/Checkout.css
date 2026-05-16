@@ -1,5 +1,4 @@
 .checkout-page {
-  /* Inherits from global container */
 }
 
 .checkout-header {
@@ -32,7 +31,6 @@
   font-weight: 800;
 }
 
-/* Address Cards */
 .address-selection-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -107,7 +105,6 @@
   font-size: 0.9rem;
 }
 
-/* New Form */
 .new-address-form {
   display: flex;
   flex-direction: column;
@@ -155,7 +152,6 @@
   cursor: pointer;
 }
 
-/* Payment */
 .payment-options {
   display: flex;
   flex-direction: column;
@@ -209,7 +205,6 @@
   text-transform: uppercase;
 }
 
-/* Summary Card */
 .summary-card-checkout {
   padding: 32px;
   border-radius: var(--radius-xl);

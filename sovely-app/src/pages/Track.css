@@ -91,7 +91,6 @@
   color: var(--gray-800);
 }
 
-/* Stepper */
 .track-stepper {
   display: flex;
   justify-content: space-between;
@@ -163,7 +162,6 @@
   color: var(--gray-800);
 }
 
-/* Details Mini */
 .order-details-mini {
   background: var(--gray-50);
   padding: 24px;

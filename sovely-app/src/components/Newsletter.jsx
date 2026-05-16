@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { Mail, Send, CheckCircle } from 'lucide-react';
-import './Newsletter.css';
+import { useState } from "react";
+import { Mail, Send, CheckCircle } from "lucide-react";
+import "./Newsletter.css";
 
 export default function Newsletter() {
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email) return;
     setSubmitted(true);
-    setEmail('');
+    setEmail("");
   };
 
   return (
@@ -23,7 +23,8 @@ export default function Newsletter() {
           <div>
             <h2 className="newsletter-title">Stay in the Loop</h2>
             <p className="newsletter-desc">
-              Subscribe and get exclusive deals, early access to sales & weekly curated picks — straight to your inbox.
+              Subscribe and get exclusive deals, early access to sales & weekly
+              curated picks — straight to your inbox.
             </p>
           </div>
         </div>
@@ -34,23 +35,33 @@ export default function Newsletter() {
               <CheckCircle size={24} />
               <div>
                 <p className="success-title">You're in! 🎉</p>
-                <p className="success-sub">Check your inbox for a welcome gift.</p>
+                <p className="success-sub">
+                  Check your inbox for a welcome gift.
+                </p>
               </div>
             </div>
           ) : (
-            <form className="newsletter-form" onSubmit={handleSubmit} id="newsletter-form">
+            <form
+              className="newsletter-form"
+              onSubmit={handleSubmit}
+              id="newsletter-form"
+            >
               <div className="newsletter-input-wrap">
                 <Mail size={16} className="newsletter-input-icon" />
                 <input
                   type="email"
                   placeholder="Enter your email address"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   id="newsletter-email-input"
                 />
               </div>
-              <button type="submit" className="btn btn-white newsletter-submit-btn" id="newsletter-submit-btn">
+              <button
+                type="submit"
+                className="btn btn-white newsletter-submit-btn"
+                id="newsletter-submit-btn"
+              >
                 Subscribe <Send size={15} />
               </button>
             </form>

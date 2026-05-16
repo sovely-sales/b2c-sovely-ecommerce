@@ -1,12 +1,7 @@
-/* ===========================
-   TESTIMONIALS
-   =========================== */
-
 .testimonials-section {
   background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
 }
 
-/* Stats bar */
 .stats-bar {
   display: flex;
   align-items: center;
@@ -37,11 +32,10 @@
 
 .stat-label {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
 }
 
-/* Header */
 .testimonials-header {
   text-align: center;
   margin-bottom: 48px;
@@ -51,9 +45,10 @@
 .testimonials-header .section-subtitle {
   text-align: center;
 }
-.testimonials-header .section-subtitle { margin-bottom: 0; }
+.testimonials-header .section-subtitle {
+  margin-bottom: 0;
+}
 
-/* Grid */
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -132,11 +127,16 @@
   margin-top: 2px;
 }
 
-/* Responsive */
 @media (max-width: 900px) {
-  .testimonials-grid { grid-template-columns: 1fr 1fr; }
-  .stats-bar { padding: 24px; }
+  .testimonials-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stats-bar {
+    padding: 24px;
+  }
 }
 @media (max-width: 600px) {
-  .testimonials-grid { grid-template-columns: 1fr; }
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,55 +1,63 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import {
-  Globe, Share2, Rss, MessageCircle, Send,
-  Mail, Phone, MapPin, ArrowRight,
-} from 'lucide-react';
-import sovelLogo from '../assets/sovely-logo.png';
-import './Footer.css';
+  Globe,
+  Share2,
+  Rss,
+  MessageCircle,
+  Send,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
+import sovelLogo from "../assets/sovely-logo.png";
+import "./Footer.css";
 
 const FOOTER_LINKS = {
-  'Shop': [
-    { label: 'All Products', path: '/products' },
-    { label: 'Grocery', path: '/products?category=grocery' },
-    { label: 'Electronics', path: '/products?category=electronics' },
-    { label: 'Fashion', path: '/products?category=fashion' },
-    { label: "Today's Deals", path: '/deals' },
+  Shop: [
+    { label: "All Products", path: "/products" },
+    { label: "Grocery", path: "/products?category=grocery" },
+    { label: "Electronics", path: "/products?category=electronics" },
+    { label: "Fashion", path: "/products?category=fashion" },
+    { label: "Today's Deals", path: "/deals" },
   ],
-  'Help': [
-    { label: 'Track Order', path: '/track' },
-    { label: 'Returns & Refunds', path: '/returns' },
-    { label: 'Shipping Info', path: '/shipping' },
-    { label: 'FAQs', path: '/faq' },
-    { label: 'Contact Us', path: '/contact' },
+  Help: [
+    { label: "Track Order", path: "/track" },
+    { label: "Returns & Refunds", path: "/returns" },
+    { label: "Shipping Info", path: "/shipping" },
+    { label: "FAQs", path: "/faq" },
+    { label: "Contact Us", path: "/contact" },
   ],
-  'Company': [
-    { label: 'About Sovely', path: '/about' },
-    { label: 'Sell on Sovely', path: '/seller' },
-    { label: 'Careers', path: '/careers' },
-    { label: 'Press', path: '/press' },
-    { label: 'Privacy Policy', path: '/privacy' },
+  Company: [
+    { label: "About Sovely", path: "/about" },
+    { label: "Sell on Sovely", path: "/seller" },
+    { label: "Careers", path: "/careers" },
+    { label: "Press", path: "/press" },
+    { label: "Privacy Policy", path: "/privacy" },
   ],
 };
 
 const SOCIALS = [
-  { icon: Globe,          href: '#', label: 'Website' },
-  { icon: Share2,         href: '#', label: 'Share' },
-  { icon: MessageCircle,  href: '#', label: 'Chat' },
-  { icon: Rss,            href: '#', label: 'Blog' },
-  { icon: Send,           href: '#', label: 'Telegram' },
+  { icon: Globe, href: "#", label: "Website" },
+  { icon: Share2, href: "#", label: "Share" },
+  { icon: MessageCircle, href: "#", label: "Chat" },
+  { icon: Rss, href: "#", label: "Blog" },
+  { icon: Send, href: "#", label: "Telegram" },
 ];
 
 export default function Footer() {
   return (
     <footer className="footer" id="footer">
-      {/* Main footer */}
+      {}
       <div className="container footer-main">
-        {/* Brand column */}
+        {}
         <div className="footer-brand">
           <Link to="/" className="footer-logo">
             <img src={sovelLogo} alt="Sovely" />
           </Link>
           <p className="footer-tagline">
-            Sovely – All-in-One Shopping. Your daily needs, premium products, and everything in between — delivered fast.
+            Sovely – All-in-One Shopping. Your daily needs, premium products,
+            and everything in between — delivered fast.
           </p>
           <div className="footer-contact">
             <div className="footer-contact-item">
@@ -65,7 +73,7 @@ export default function Footer() {
               <span>Bengaluru, Karnataka, India</span>
             </div>
           </div>
-          {/* Social icons */}
+          {}
           <div className="footer-socials">
             {SOCIALS.map(({ icon: Icon, href, label }) => (
               <a
@@ -81,14 +89,18 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Link columns */}
+        {}
         {Object.entries(FOOTER_LINKS).map(([section, links]) => (
           <div className="footer-col" key={section}>
             <h4 className="footer-col-title">{section}</h4>
             <ul className="footer-link-list">
-              {links.map(link => (
+              {links.map((link) => (
                 <li key={link.path}>
-                  <Link to={link.path} className="footer-link" id={`footer-link-${link.label.replace(/\s+/g,'-').toLowerCase()}`}>
+                  <Link
+                    to={link.path}
+                    className="footer-link"
+                    id={`footer-link-${link.label.replace(/\s+/g, "-").toLowerCase()}`}
+                  >
                     <ArrowRight size={12} />
                     {link.label}
                   </Link>
@@ -98,7 +110,7 @@ export default function Footer() {
           </div>
         ))}
 
-        {/* App download */}
+        {}
         <div className="footer-col footer-app">
           <h4 className="footer-col-title">Get the App</h4>
           <p className="footer-app-desc">Shop faster with the Sovely app</p>
@@ -119,11 +131,12 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom bar */}
+      {}
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
           <p className="footer-copy">
-            © {new Date().getFullYear()} Sovely Technologies Pvt. Ltd. All rights reserved.
+            © {new Date().getFullYear()} Sovely Technologies Pvt. Ltd. All
+            rights reserved.
           </p>
           <div className="footer-bottom-links">
             <Link to="/terms">Terms of Service</Link>
@@ -131,8 +144,10 @@ export default function Footer() {
             <Link to="/cookies">Cookie Policy</Link>
           </div>
           <div className="footer-payments">
-            {['Visa', 'Mastercard', 'UPI', 'Razorpay'].map(p => (
-              <span key={p} className="payment-chip">{p}</span>
+            {["Visa", "Mastercard", "UPI", "Razorpay"].map((p) => (
+              <span key={p} className="payment-chip">
+                {p}
+              </span>
             ))}
           </div>
         </div>

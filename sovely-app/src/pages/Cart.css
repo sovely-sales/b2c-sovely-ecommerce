@@ -1,5 +1,4 @@
 .cart-page {
-  /* Inherits from global container */
 }
 
 .cart-header {
@@ -23,7 +22,6 @@
   align-items: flex-start;
 }
 
-/* Cart Items */
 .cart-items-section {
   display: flex;
   flex-direction: column;
@@ -137,7 +135,6 @@
   font-family: var(--font-heading);
 }
 
-/* Summary Card */
 .summary-card {
   padding: 32px;
   border-radius: var(--radius-xl);
@@ -219,7 +216,6 @@
   color: var(--primary);
 }
 
-/* Empty State */
 .cart-empty-state {
   display: flex;
   justify-content: center;

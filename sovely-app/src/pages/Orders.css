@@ -1,5 +1,4 @@
 .orders-page {
-  /* Inherits from global container */
 }
 
 .orders-header {
@@ -60,7 +59,8 @@
   gap: 32px;
 }
 
-.order-id-block, .order-date-block {
+.order-id-block,
+.order-date-block {
   display: flex;
   flex-direction: column;
 }

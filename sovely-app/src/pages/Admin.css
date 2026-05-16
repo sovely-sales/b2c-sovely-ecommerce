@@ -6,7 +6,6 @@
   overflow: hidden;
 }
 
-/* Sidebar */
 .admin-sidebar {
   width: 280px;
   background: #0f172a;
@@ -16,7 +15,7 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   z-index: 1000;
-  box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
 }
 
 .admin-sidebar.closed {
@@ -29,7 +28,7 @@
   align-items: center;
   padding: 0 30px;
   gap: 16px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .brand-logo {
@@ -71,7 +70,7 @@
 }
 
 .sidebar-nav button:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   color: white;
   transform: translateX(4px);
 }
@@ -89,7 +88,7 @@
 
 .sidebar-footer {
   padding: 24px 15px;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logout-btn {
@@ -107,7 +106,6 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
-/* Main Content Area */
 .admin-main-wrapper {
   flex: 1;
   display: flex;
@@ -117,10 +115,9 @@
   position: relative;
 }
 
-/* Fixed Header */
 .admin-header-fixed {
   height: 90px;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e2e8f0;
   display: flex;
@@ -174,7 +171,6 @@
   font-size: 1.1rem;
 }
 
-/* Scrollable Content */
 .admin-scroll-content {
   flex: 1;
   overflow-y: auto;
@@ -186,7 +182,6 @@
   margin: 0 auto;
 }
 
-/* Stats Cards */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -208,7 +203,7 @@
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
 .stat-icon {
@@ -220,10 +215,22 @@
   justify-content: center;
 }
 
-.stat-icon.purple { background: #f5f3ff; color: #7c3aed; }
-.stat-icon.emerald { background: #ecfdf5; color: #10b981; }
-.stat-icon.blue { background: #eff6ff; color: #3b82f6; }
-.stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+.stat-icon.purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+.stat-icon.emerald {
+  background: #ecfdf5;
+  color: #10b981;
+}
+.stat-icon.blue {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.stat-icon.amber {
+  background: #fffbeb;
+  color: #f59e0b;
+}
 
 .td-customer-info {
   display: flex;
@@ -263,11 +270,10 @@
   font-weight: 900;
 }
 
-/* Tables */
 .card {
   background: white;
   border-radius: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   border: 1px solid #f1f5f9;
   overflow: hidden;
 }
@@ -293,12 +299,36 @@
   font-weight: 800;
 }
 
-.status-pill.pending { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-.status-pill.paid { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
-.status-pill.shipped { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
-.status-pill.delivered { background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
-.status-pill.processing { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
-.status-pill.cancelled { background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
+.status-pill.pending {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+.status-pill.paid {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #d1fae5;
+}
+.status-pill.shipped {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+}
+.status-pill.delivered {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+}
+.status-pill.processing {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.status-pill.cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
 
 .status-select {
   padding: 8px 16px;

@@ -1,4 +1,3 @@
-/* App-level layout resets */
 #root {
   display: flex;
   flex-direction: column;
