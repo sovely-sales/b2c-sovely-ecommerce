@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import CartSidebar from './components/CartSidebar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -23,6 +24,7 @@ export default function App() {
     <BrowserRouter>
       <DataProvider>
         <Navbar />
+        <CartSidebar />
         <Routes>
           <Route path="/"            element={<Home />} />
           <Route path="/products"    element={<Products />} />

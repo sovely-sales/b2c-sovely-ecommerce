@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useData } from '../context/DataContext';
@@ -6,13 +6,63 @@ import './ProductDetail.css';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products, loading, addToCart } = useData();
-  const product = products.find(p => p.id.toString() === id);
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
+  const { products, loading: contextLoading, addToCart, categories } = useData();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 1. Try to find in global context first
+    const found = products.find(p => p.id.toString() === id);
+    if (found) {
+      setProduct(found);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Otherwise fetch from backend
+    const fetchProduct = async () => {
+      setLoading(true);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8014';
+      try {
+        const res = await fetch(`${API_URL}/api/products/${id}`);
+        if (res.ok) {
+          const p = await res.json();
+          const categoryMap = {};
+          categories.forEach(c => {
+            categoryMap[String(c.id || c._id)] = c.name;
+          });
+          const rawCategory = String(p.categoryId || p.category || '');
+          const categoryName = categoryMap[rawCategory] || rawCategory || 'Uncategorized';
+          
+          setProduct({
+            id: p._id || p.id,
+            name: p.title || p.name,
+            category: categoryName,
+            categoryId: rawCategory,
+            price: p.dropshipBasePrice || p.price || 0,
+            originalPrice: p.suggestedRetailPrice || p.originalPrice || p.dropshipBasePrice || 0,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
+            badgeColor: p.badgeColor || '#ef4444',
+            image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+            freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching product detail:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!contextLoading) {
+      fetchProduct();
+    }
+  }, [id, products, contextLoading, categories]);
 
   const handleAddToCart = () => {
-    // Add the selected quantity to the global cart
+    if (!product) return;
     for (let i = 0; i < quantity; i++) {
       addToCart(product);
     }
@@ -22,6 +72,9 @@ export default function ProductDetail() {
 
   const formatPrice = (n) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
 
   if (loading) return <div className="section container"><div className="empty-state">Loading product details...</div></div>;
   if (!product) return <div className="section container"><div className="empty-state">Product not found. <Link to="/products">Back to products</Link></div></div>;

@@ -1,21 +1,124 @@
 import { useLocation, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, Filter, LayoutGrid, List } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import ProductCard from '../components/ProductCard';
 import './Products.css';
 
+const PAGE_SIZE = 24;
+
 export default function Products() {
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const categoryFilter = queryParams.get('category');
 
-  const { products: FEATURED_PRODUCTS, loading } = useData();
+  const { categories, loading: contextLoading } = useData();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
-  if (loading) return <div className="products-page section container">Loading products...</div>;
+  // Build categoryMap for mapping
+  const categoryMap = useMemo(() => {
+    const map = {};
+    categories.forEach(c => {
+      const key = String(c.id || c._id);
+      map[key] = c.name;
+    });
+    return map;
+  }, [categories]);
 
-  const products = categoryFilter 
-    ? FEATURED_PRODUCTS.filter(p => p.category?.toLowerCase() === categoryFilter.toLowerCase() || p.category === categoryFilter)
-    : FEATURED_PRODUCTS;
+  useEffect(() => {
+    let active = true;
+    const fetchProducts = async () => {
+      setLoading(true);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8014';
+      try {
+        const queryParams = new URLSearchParams({
+          limit: PAGE_SIZE,
+          skip: 0,
+          category: categoryFilter || ''
+        });
+        const res = await fetch(`${API_URL}/api/products?${queryParams.toString()}`);
+        if (res.ok && active) {
+          const data = await res.json();
+          const mapped = data.map(p => {
+            const rawCategory = String(p.categoryId || p.category || '');
+            const categoryName = categoryMap[rawCategory] || rawCategory || 'Uncategorized';
+            return {
+              id: p._id || p.id,
+              name: p.title || p.name,
+              category: categoryName,
+              categoryId: rawCategory,
+              price: p.dropshipBasePrice || p.price || 0,
+              originalPrice: p.suggestedRetailPrice || p.originalPrice || p.dropshipBasePrice || 0,
+              rating: p.averageRating || p.rating || 0,
+              reviews: p.reviewCount || p.reviews || 0,
+              badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
+              badgeColor: p.badgeColor || '#ef4444',
+              image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
+            };
+          });
+          setProducts(mapped);
+          setPage(0);
+          setHasMore(data.length === PAGE_SIZE);
+        }
+      } catch (error) {
+        console.error('Error fetching products page:', error);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    if (!contextLoading && categories.length > 0) {
+      fetchProducts();
+    }
+    return () => {
+      active = false;
+    };
+  }, [categoryFilter, contextLoading, categories, categoryMap]);
+
+  const handleShowMore = async () => {
+    const nextPage = page + 1;
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8014';
+    try {
+      const queryParams = new URLSearchParams({
+        limit: PAGE_SIZE,
+        skip: nextPage * PAGE_SIZE,
+        category: categoryFilter || ''
+      });
+      const res = await fetch(`${API_URL}/api/products?${queryParams.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        const mapped = data.map(p => {
+          const rawCategory = String(p.categoryId || p.category || '');
+          const categoryName = categoryMap[rawCategory] || rawCategory || 'Uncategorized';
+          return {
+            id: p._id || p.id,
+            name: p.title || p.name,
+            category: categoryName,
+            categoryId: rawCategory,
+            price: p.dropshipBasePrice || p.price || 0,
+            originalPrice: p.suggestedRetailPrice || p.originalPrice || p.dropshipBasePrice || 0,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
+            badgeColor: p.badgeColor || '#ef4444',
+            image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+            freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
+          };
+        });
+        setProducts(prev => [...prev, ...mapped]);
+        setPage(nextPage);
+        setHasMore(data.length === PAGE_SIZE);
+      }
+    } catch (error) {
+      console.error('Error fetching more products page:', error);
+    }
+  };
+
+  if (loading && products.length === 0) return <div className="products-page section container">Loading products...</div>;
 
   return (
     <div className="products-page section container">
@@ -72,13 +175,23 @@ export default function Products() {
       {products.length === 0 ? (
         <div className="empty-state">No products found in this category.</div>
       ) : (
-        <div className="products-grid-full">
-          {products.map(product => (
-            <Link to={`/product/${product.id}`} key={product.id} className="product-link">
-              <ProductCard product={product} />
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="products-grid-full">
+            {products.map(product => (
+              <Link to={`/product/${product.id}`} key={product.id} className="product-link">
+                <ProductCard product={product} />
+              </Link>
+            ))}
+          </div>
+          
+          {hasMore && (
+            <div className="show-more-container" style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
+              <button className="show-more-btn" onClick={handleShowMore}>
+                Show More
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

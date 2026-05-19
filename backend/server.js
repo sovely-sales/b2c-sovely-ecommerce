@@ -49,21 +49,73 @@ app.get('/api/categories', async (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
-    const { category, limit } = req.query;
-    const filter = category ? { category } : {};
-    const parsedLimit = parseInt(limit) || 100;
-    res.json(await Product.find(filter).limit(parsedLimit));
-  } catch {
+    const { category, limit, skip, search, deals } = req.query;
+    let filter = {};
+
+    if (category && category !== 'All') {
+      const Category = require('./models/Category');
+      const mongoose = require('mongoose');
+      
+      const categoryDoc = await Category.findOne({
+        $or: [
+          { name: { $regex: new RegExp('^' + category + '$', 'i') } },
+          { id: category }
+        ]
+      });
+
+      if (categoryDoc) {
+        filter.categoryId = categoryDoc._id;
+      } else if (mongoose.Types.ObjectId.isValid(category)) {
+        filter.categoryId = new mongoose.Types.ObjectId(category);
+      } else {
+        filter.categoryId = category;
+      }
+    }
+
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [
+        { name: searchRegex },
+        { title: searchRegex }
+      ];
+    }
+
+    if (deals === 'true') {
+      filter.$or = [
+        { $expr: { $gt: [ "$suggestedRetailPrice", "$dropshipBasePrice" ] } },
+        { $expr: { $gt: [ "$originalPrice", "$price" ] } }
+      ];
+    }
+
+    const query = Product.find(filter);
+    const queryLimit = limit ? parseInt(limit) : 24;
+    const querySkip = skip ? parseInt(skip) : 0;
+    
+    query.skip(querySkip).limit(queryLimit);
+
+    const products = await query;
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 });
 
 app.get('/api/products/:id', async (req, res) => {
   try {
-    const product = await Product.findOne({ id: req.params.id });
+    const { id } = req.params;
+    const mongoose = require('mongoose');
+    let query = {};
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      query = { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] };
+    } else {
+      query = { id: isNaN(id) ? -1 : parseInt(id) };
+    }
+    const product = await Product.findOne(query);
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
-  } catch {
+  } catch (error) {
+    console.error('Error fetching product details:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 });

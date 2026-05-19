@@ -8,6 +8,9 @@ export function DataProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [cartItems, setCartItems] = useState([]);
   const [user, setUser] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchFilter, setSearchFilter] = useState('');
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Initialize Auth
   useEffect(() => {
@@ -65,27 +68,41 @@ export function DataProvider({ children }) {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8014';
       try {
         const [productsRes, categoriesRes] = await Promise.all([
-          fetch(`${API_URL}/api/products`),
+          fetch(`${API_URL}/api/products?limit=12`),
           fetch(`${API_URL}/api/categories`)
         ]);
         
         if (productsRes.ok && categoriesRes.ok) {
           const productsData = await productsRes.json();
           const categoriesData = await categoriesRes.json();
+
+          // Build a lookup map: categoryId -> categoryName
+          const categoryMap = {};
+          categoriesData.forEach(c => {
+            const key = String(c._id || c.id);
+            categoryMap[key] = c.name;
+          });
           
-          const mappedProducts = productsData.map(p => ({
-            id: p._id || p.id,
-            name: p.title || p.name,
-            category: p.categoryId || p.category || 'Uncategorized',
-            price: p.dropshipBasePrice || p.price || 0,
-            originalPrice: p.suggestedRetailPrice || p.originalPrice || p.dropshipBasePrice || 0,
-            rating: p.averageRating || p.rating || 0,
-            reviews: p.reviewCount || p.reviews || 0,
-            badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
-            badgeColor: p.badgeColor || '#ef4444',
-            image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
-            freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
-          }));
+          const mappedProducts = productsData.map(p => {
+            // Resolve category ID to human-readable name
+            const rawCategory = String(p.categoryId || p.category || '');
+            const categoryName = categoryMap[rawCategory] || rawCategory || 'Uncategorized';
+
+            return {
+              id: p._id || p.id,
+              name: p.title || p.name,
+              category: categoryName,
+              categoryId: rawCategory,
+              price: p.dropshipBasePrice || p.price || 0,
+              originalPrice: p.suggestedRetailPrice || p.originalPrice || p.dropshipBasePrice || 0,
+              rating: p.averageRating || p.rating || 0,
+              reviews: p.reviewCount || p.reviews || 0,
+              badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
+              badgeColor: p.badgeColor || '#ef4444',
+              image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
+            };
+          });
 
           const colors = [
             { color: '#22c55e', bg: '#f0fdf4', icon: '🥦' },
@@ -127,7 +144,10 @@ export function DataProvider({ children }) {
       products, categories, loading,
       cartItems, updateQuantity, removeFromCart, addToCart, clearCart,
       cartSubtotal, cartDelivery, cartTotal,
-      user, login, logout
+      user, login, logout,
+      selectedCategory, setSelectedCategory,
+      searchFilter, setSearchFilter,
+      isCartOpen, setIsCartOpen
     }}>
       {children}
     </DataContext.Provider>

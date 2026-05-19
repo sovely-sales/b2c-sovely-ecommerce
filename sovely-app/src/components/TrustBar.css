@@ -1,0 +1,63 @@
+.trust-bar-section {
+  background: var(--gray-50);
+  padding: 40px 0;
+  border-top: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.trust-bar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.trust-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.trust-badge h4 {
+  font-size: 0.88rem;
+  font-weight: 750;
+  color: var(--gray-800);
+  margin-bottom: 2px;
+}
+
+.trust-badge p {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .trust-bar-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .trust-bar-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .trust-badge {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
