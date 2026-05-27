@@ -37,8 +37,8 @@ export default function CategoryGrid() {
                 <div className="category-overlay" style={{ background: `${cat.color}22` }} />
               </div>
               <div className="category-info">
-                <div className="category-icon" style={{ background: cat.bg, color: cat.color }}>
-                  <span>{cat.icon}</span>
+                <div className="category-icon" style={{ background: cat.bg }}>
+                  <img src={cat.image} alt={cat.name} className="category-icon-img" />
                 </div>
                 <div>
                   <p className="category-name">{cat.name}</p>

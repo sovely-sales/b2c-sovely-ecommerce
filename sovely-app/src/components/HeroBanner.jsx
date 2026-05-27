@@ -4,22 +4,22 @@ import './HeroBanner.css';
 
 const OFFERS = [
   {
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=80',
-    title: 'NO HANDLING FEES',
-    subtitle: 'FREE SHIPPING ON ORDERS OVER $99.00*',
-    cta: 'SHOP COLLECTION'
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80',
+    title: 'SUPER SAVER DEALS',
+    subtitle: 'FREE SHIPPING ON ORDERS OVER ₹499*',
+    cta: 'SHOP NOW'
   },
   {
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=2000&q=80',
-    title: 'NEW SEASON ARRIVALS',
-    subtitle: 'EXPLORE THE LATEST PREMIUM INTERIOR & ESSENTIALS',
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=2000&q=80',
+    title: 'PREMIUM ACTIVEWEAR & GEAR',
+    subtitle: 'UP TO 30% OFF ON SPORTS & FITNESS ESSENTIALS',
+    cta: 'EXPLORE NOW'
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=2000&q=80',
+    title: 'TRENDING TECH & GADGETS',
+    subtitle: 'UP TO 50% OFF ON SMARTPHONES & ACCESSORIES',
     cta: 'DISCOVER NOW'
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=80',
-    title: 'LIMITED TIME OFFERS',
-    subtitle: 'ENJOY UP TO 40% OFF SELECT ESSENTIALS',
-    cta: 'VIEW DEALS'
   }
 ];
 

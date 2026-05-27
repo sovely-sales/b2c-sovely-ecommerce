@@ -26,7 +26,7 @@ export default function CategoryStrip() {
               onClick={() => handleClick(cat.name)}
             >
               <div className="strip-icon-circle" style={{ background: cat.bg }}>
-                <span>{cat.icon}</span>
+                <img src={cat.image} alt={cat.name} className="strip-img" />
               </div>
               <span className="strip-label">{cat.name}</span>
             </button>

@@ -322,7 +322,7 @@ app.get('/api/user/addresses', authenticate('user'), async (req, res) => {
 });
 
 // POST /api/razorpay/order - Create order for razorpay
-app.post('/api/razorpay/order', authenticate('user'), async (req, res) => {
+app.post('/api/razorpay/order', async (req, res) => {
   try {
     const { amount } = req.body; 
     const options = {

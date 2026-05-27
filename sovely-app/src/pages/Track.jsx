@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Search, Package, Truck, CheckCircle, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
 import './Track.css';
 
@@ -9,16 +10,17 @@ export default function Track() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const location = useLocation();
 
-  const handleTrack = async (e) => {
-    e.preventDefault();
-    if (!orderId.trim()) return;
+  const trackOrderById = async (id) => {
+    if (!id.trim()) return;
     setLoading(true);
     setError('');
     setOrder(null);
 
     try {
-      const res = await fetch(`${API}/api/orders/track/${orderId.trim()}`);
+      const res = await fetch(`${API}/api/orders/track/${id.trim()}`);
       const data = await res.json();
       if (res.ok) {
         setOrder(data);
@@ -31,6 +33,20 @@ export default function Track() {
       setLoading(false);
     }
   };
+
+  const handleTrack = (e) => {
+    e.preventDefault();
+    trackOrderById(orderId);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const idParam = params.get('orderId') || location.state?.orderId;
+    if (idParam) {
+      setOrderId(idParam);
+      trackOrderById(idParam);
+    }
+  }, [location]);
 
   const getStatusStep = (status) => {
     const steps = ['Pending', 'Processing', 'Shipped', 'Delivered'];

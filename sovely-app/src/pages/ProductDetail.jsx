@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import ProductCard from '../components/ProductCard';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -9,12 +10,14 @@ export default function ProductDetail() {
   const { products, loading: contextLoading, addToCart, categories } = useData();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(null);
 
   useEffect(() => {
     // 1. Try to find in global context first
     const found = products.find(p => p.id.toString() === id);
     if (found) {
       setProduct(found);
+      setActiveImage(found.image);
       setLoading(false);
       return;
     }
@@ -34,6 +37,8 @@ export default function ProductDetail() {
           const rawCategory = String(p.categoryId || p.category || '');
           const categoryName = categoryMap[rawCategory] || rawCategory || 'Uncategorized';
           
+          const activeImg = (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';
+          
           setProduct({
             id: p._id || p.id,
             name: p.title || p.name,
@@ -45,9 +50,11 @@ export default function ProductDetail() {
             reviews: p.reviewCount || p.reviews || 0,
             badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
             badgeColor: p.badgeColor || '#ef4444',
-            image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+            image: activeImg,
+            images: (p.images && p.images.length > 0) ? p.images : (p.image ? [{ url: p.image }] : []),
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
           });
+          setActiveImage(activeImg);
         }
       } catch (error) {
         console.error('Error fetching product detail:', error);
@@ -60,6 +67,11 @@ export default function ProductDetail() {
       fetchProduct();
     }
   }, [id, products, contextLoading, categories]);
+
+  // Scroll to top when product ID changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -79,6 +91,15 @@ export default function ProductDetail() {
   if (loading) return <div className="section container"><div className="empty-state">Loading product details...</div></div>;
   if (!product) return <div className="section container"><div className="empty-state">Product not found. <Link to="/products">Back to products</Link></div></div>;
 
+  // Filter recommendations (same category first, exclude current product, fallback to general if less than 8)
+  let recommendations = products.filter(p => p.category === product.category && p.id.toString() !== id);
+  if (recommendations.length < 8) {
+    const additional = products.filter(p => p.id.toString() !== id && !recommendations.some(r => r.id === p.id));
+    recommendations = [...recommendations, ...additional].slice(0, 8);
+  } else {
+    recommendations = recommendations.slice(0, 8);
+  }
+
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
   return (
@@ -87,9 +108,25 @@ export default function ProductDetail() {
         {/* Images */}
         <div className="pd-image-section">
           <div className="pd-main-img-wrap">
-            <img src={product.image} alt={product.name} className="pd-main-img" />
+            <img src={activeImage || product.image} alt={product.name} className="pd-main-img" />
             {product.badge && <span className="pd-badge" style={{ backgroundColor: product.badgeColor }}>{product.badge}</span>}
           </div>
+          
+          {/* Gallery Thumbnails */}
+          {product.images && product.images.length > 0 && (
+            <div className="pd-thumbnails">
+              {product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  className={`pd-thumb-wrap ${activeImage === img.url ? 'active' : ''}`}
+                  onClick={() => setActiveImage(img.url)}
+                  type="button"
+                >
+                  <img src={img.url} alt={`${product.name} thumbnail ${idx + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -160,6 +197,18 @@ export default function ProductDetail() {
 
         </div>
       </div>
+
+      {/* Recommendations Section */}
+      {recommendations.length > 0 && (
+        <div className="pd-recommendations">
+          <h2 className="recommendations-title">You May Also Like</h2>
+          <div className="recommendations-scroll-container">
+            {recommendations.map(p => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

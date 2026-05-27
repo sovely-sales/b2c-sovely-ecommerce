@@ -57,6 +57,7 @@ export default function Products() {
               badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
               badgeColor: p.badgeColor || '#ef4444',
               image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+              images: (p.images && p.images.length > 0) ? p.images : (p.image ? [{ url: p.image }] : []),
               freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
             };
           });
@@ -106,6 +107,7 @@ export default function Products() {
             badge: p.badge || (p.suggestedRetailPrice > p.dropshipBasePrice ? 'Sale' : null),
             badgeColor: p.badgeColor || '#ef4444',
             image: (p.images && p.images.length > 0) ? p.images[0].url : p.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+            images: (p.images && p.images.length > 0) ? p.images : (p.image ? [{ url: p.image }] : []),
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false
           };
         });
@@ -178,9 +180,9 @@ export default function Products() {
         <>
           <div className="products-grid-full">
             {products.map(product => (
-              <Link to={`/product/${product.id}`} key={product.id} className="product-link">
+              <div key={product.id} className="product-link">
                 <ProductCard product={product} />
-              </Link>
+              </div>
             ))}
           </div>
           

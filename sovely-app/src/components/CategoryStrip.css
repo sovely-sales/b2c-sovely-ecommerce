@@ -48,6 +48,7 @@
   font-size: 1.6rem;
   border: 2px solid var(--gray-100);
   transition: all 0.25s ease;
+  overflow: hidden;
 }
 
 .strip-label {
@@ -61,4 +62,11 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.strip-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }

@@ -27,16 +27,14 @@ export default function Checkout() {
   const token = localStorage.getItem('userToken');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login', { state: { from: '/checkout' } });
-      return;
-    }
     if (cartItems.length === 0) {
       navigate('/cart');
       return;
     }
-    fetchSavedAddresses();
-  }, [token]);
+    if (token) {
+      fetchSavedAddresses();
+    }
+  }, [token, cartItems, navigate]);
 
   const fetchSavedAddresses = async () => {
     try {
@@ -76,7 +74,7 @@ export default function Checkout() {
     setOrderError('');
 
     // 1. Save address if new and requested
-    if (saveAddress && showNewForm) {
+    if (saveAddress && showNewForm && token) {
       try {
         await fetch(`${API}/api/user/address`, {
           method: 'POST',
@@ -92,12 +90,13 @@ export default function Checkout() {
     // 2. Razorpay Logic
     if (form.payment === 'razorpay') {
       try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
         const orderRes = await fetch(`${API}/api/razorpay/order`, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers,
           body: JSON.stringify({ amount: cartTotal }),
         });
         const orderData = await orderRes.json();
@@ -146,18 +145,23 @@ export default function Checkout() {
     };
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const res = await fetch(`${API}/api/orders`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers,
         body: JSON.stringify(orderPayload),
       });
       const data = await res.json();
       if (data.success) {
         clearCart();
-        navigate('/orders');
+        if (token) {
+          navigate('/orders');
+        } else {
+          navigate(`/track?orderId=${data.orderId}`, { state: { orderId: data.orderId } });
+        }
       } else {
         setOrderError(data.message || 'Order failed.');
       }
@@ -247,10 +251,12 @@ export default function Checkout() {
                     <input name="postalCode" value={form.postalCode} onChange={handleChange} required />
                   </div>
                 </div>
-                <label className="save-check">
-                  <input type="checkbox" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)} />
-                  Save this address for future use
-                </label>
+                {token && (
+                  <label className="save-check">
+                    <input type="checkbox" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)} />
+                    Save this address for future use
+                  </label>
+                )}
               </div>
             )}
           </section>
