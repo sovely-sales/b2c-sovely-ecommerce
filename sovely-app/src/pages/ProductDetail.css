@@ -156,6 +156,12 @@
   margin-bottom: 48px;
 }
 
+.pd-btn-group {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
 .pd-qty {
   display: flex;
   align-items: center;
@@ -263,8 +269,15 @@
     justify-content: center;
     width: 100%;
   }
-  .pd-cart-btn {
+  .pd-btn-group {
     width: 100%;
+    gap: 12px;
+  }
+  .pd-cart-btn {
+    flex: 1;
+  }
+  .pd-wishlist-btn {
+    flex-shrink: 0;
   }
   .pd-trust {
     grid-template-columns: 1fr;

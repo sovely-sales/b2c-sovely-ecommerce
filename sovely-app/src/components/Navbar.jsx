@@ -17,6 +17,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const navigate = useNavigate();
   const categoryRef = useRef(null);
 
@@ -94,7 +95,7 @@ export default function Navbar() {
 
           {/* Search */}
           {user?.role !== 'admin' && (
-            <div className="nav-search-section">
+            <div className={`nav-search-section ${showMobileSearch ? 'show-mobile' : ''}`}>
               <div className="search-bar">
                 <Search size={16} className="search-icon" />
                 <input 
@@ -116,6 +117,14 @@ export default function Navbar() {
           <div className="nav-actions">
             {user?.role !== 'admin' ? (
               <>
+                <button 
+                  className="action-link-text search-toggle-btn show-on-mobile-inline"
+                  onClick={() => setShowMobileSearch(!showMobileSearch)}
+                  title="Search"
+                >
+                  <Search size={20} className="nav-icon" />
+                </button>
+
                 <Link to="/wishlist" className="action-link-text" title="Wishlist">
                   <Heart size={20} className="nav-icon" />
                   <span className="hide-on-mobile">Wishlist</span>

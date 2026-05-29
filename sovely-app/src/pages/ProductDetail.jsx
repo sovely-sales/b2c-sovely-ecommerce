@@ -167,16 +167,18 @@ export default function ProductDetail() {
               <button onClick={() => setQuantity(quantity + 1)}>+</button>
             </div>
             
-            <button 
-              className={`btn btn-primary pd-cart-btn ${added ? 'added' : ''}`}
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart size={18} /> {added ? 'Added to Cart!' : 'Add to Cart'}
-            </button>
-            
-            <button className="btn btn-outline pd-wishlist-btn">
-              <Heart size={18} />
-            </button>
+            <div className="pd-btn-group">
+              <button 
+                className={`btn btn-primary pd-cart-btn ${added ? 'added' : ''}`}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart size={18} /> {added ? 'Added to Cart!' : 'Add to Cart'}
+              </button>
+              
+              <button className="btn btn-outline pd-wishlist-btn">
+                <Heart size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Trust */}
