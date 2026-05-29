@@ -9,6 +9,13 @@
   grid-template-columns: 1.2fr 1fr;
   gap: 60px;
   align-items: start;
+  max-width: 100%;
+}
+
+.pd-image-section,
+.pd-info-section {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Image Section */

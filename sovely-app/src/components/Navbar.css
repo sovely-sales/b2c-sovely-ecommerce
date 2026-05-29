@@ -363,6 +363,14 @@
   .nav-categories-dropdown {
     padding: 8px;
   }
+
+  .nav-categories-dropdown svg:last-child {
+    display: none !important; /* Hide categories dropdown chevron on mobile */
+  }
+
+  .nav-logo-text {
+    font-size: 1.25rem !important; /* Reduce logo size on mobile */
+  }
   
   .nav-container {
     flex-wrap: wrap;
@@ -373,12 +381,12 @@
   
   .nav-left {
     order: 1;
-    gap: 12px;
+    gap: 8px !important;
   }
   
   .nav-actions {
     order: 2;
-    gap: 16px;
+    gap: 10px !important; /* Reduce gap between icons on mobile to prevent overflow */
   }
   
   .nav-search-section {
