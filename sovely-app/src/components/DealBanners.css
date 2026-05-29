@@ -23,7 +23,7 @@
 }
 
 .deal-banner-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -30%;
   right: -20%;

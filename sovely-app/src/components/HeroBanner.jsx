@@ -1,26 +1,29 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import './HeroBanner.css';
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import "./HeroBanner.css";
 
 const OFFERS = [
   {
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80',
-    title: 'SUPER SAVER DEALS',
-    subtitle: 'FREE SHIPPING ON ORDERS OVER ₹499*',
-    cta: 'SHOP NOW'
+    image:
+      "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80",
+    title: "SUPER SAVER DEALS",
+    subtitle: "FREE SHIPPING ON ORDERS OVER ₹499*",
+    cta: "SHOP NOW",
   },
   {
-    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=2000&q=80',
-    title: 'PREMIUM ACTIVEWEAR & GEAR',
-    subtitle: 'UP TO 30% OFF ON SPORTS & FITNESS ESSENTIALS',
-    cta: 'EXPLORE NOW'
+    image:
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=2000&q=80",
+    title: "PREMIUM ACTIVEWEAR & GEAR",
+    subtitle: "UP TO 30% OFF ON SPORTS & FITNESS ESSENTIALS",
+    cta: "EXPLORE NOW",
   },
   {
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=2000&q=80',
-    title: 'TRENDING TECH & GADGETS',
-    subtitle: 'UP TO 50% OFF ON SMARTPHONES & ACCESSORIES',
-    cta: 'DISCOVER NOW'
-  }
+    image:
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=2000&q=80",
+    title: "TRENDING TECH & GADGETS",
+    subtitle: "UP TO 50% OFF ON SMARTPHONES & ACCESSORIES",
+    cta: "DISCOVER NOW",
+  },
 ];
 
 export default function HeroBanner() {
@@ -28,26 +31,29 @@ export default function HeroBanner() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % OFFERS.length);
+      setCurrent((prev) => (prev + 1) % OFFERS.length);
     }, 6000);
     return () => clearInterval(timer);
   }, []);
 
   const nextSlide = () => {
-    setCurrent(prev => (prev + 1) % OFFERS.length);
+    setCurrent((prev) => (prev + 1) % OFFERS.length);
   };
 
   const prevSlide = () => {
-    setCurrent(prev => (prev - 1 + OFFERS.length) % OFFERS.length);
+    setCurrent((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
   };
 
   return (
     <section className="hero-banner-slider" id="hero-section">
-      <div className="slider-wrapper" style={{ transform: `translateX(-${current * 100}%)` }}>
+      <div
+        className="slider-wrapper"
+        style={{ transform: `translateX(-${current * 100}%)` }}
+      >
         {OFFERS.map((offer, idx) => (
-          <div 
-            key={idx} 
-            className="slide-item" 
+          <div
+            key={idx}
+            className="slide-item"
             style={{ backgroundImage: `url(${offer.image})` }}
           >
             <div className="slide-overlay">
@@ -61,20 +67,28 @@ export default function HeroBanner() {
         ))}
       </div>
 
-      {/* Navigation Arrows */}
-      <button className="slider-arrow prev" onClick={prevSlide} aria-label="Previous slide">
+      {}
+      <button
+        className="slider-arrow prev"
+        onClick={prevSlide}
+        aria-label="Previous slide"
+      >
         <ChevronLeft size={24} />
       </button>
-      <button className="slider-arrow next" onClick={nextSlide} aria-label="Next slide">
+      <button
+        className="slider-arrow next"
+        onClick={nextSlide}
+        aria-label="Next slide"
+      >
         <ChevronRight size={24} />
       </button>
 
-      {/* Dots Indicator */}
+      {}
       <div className="slider-dots">
         {OFFERS.map((_, idx) => (
-          <button 
-            key={idx} 
-            className={`slider-dot ${idx === current ? 'active' : ''}`}
+          <button
+            key={idx}
+            className={`slider-dot ${idx === current ? "active" : ""}`}
             onClick={() => setCurrent(idx)}
             aria-label={`Go to slide ${idx + 1}`}
           />

@@ -19,7 +19,6 @@
   align-items: start;
 }
 
-/* Left Grid */
 .featured-grid-container {
   width: 100%;
 }
@@ -42,7 +41,6 @@
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
 }
 
-/* Right Preview Panel */
 .featured-preview-panel {
   position: sticky;
   top: 100px;
@@ -206,7 +204,6 @@
   cursor: not-allowed;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .featured-layout-wrapper {
     grid-template-columns: 1fr;

@@ -1,7 +1,9 @@
-/* Backdrop */
 .cart-backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 2000;
   opacity: 0;
@@ -14,7 +16,6 @@
   pointer-events: all;
 }
 
-/* Sidebar */
 .cart-sidebar {
   position: fixed;
   top: 0;
@@ -35,7 +36,6 @@
   transform: translateX(0);
 }
 
-/* Header */
 .cart-sidebar-header {
   display: flex;
   align-items: center;
@@ -69,7 +69,6 @@
   color: #000;
 }
 
-/* Empty State */
 .cart-empty {
   flex: 1;
   display: flex;
@@ -110,7 +109,6 @@
   background: var(--primary);
 }
 
-/* Items List */
 .cart-items-list {
   flex: 1;
   overflow-y: auto;
@@ -241,7 +239,6 @@
   color: #000;
 }
 
-/* Footer */
 .cart-sidebar-footer {
   padding: 20px 28px;
   border-top: 1px solid var(--gray-100);

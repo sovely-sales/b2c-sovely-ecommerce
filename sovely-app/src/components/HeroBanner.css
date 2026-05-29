@@ -23,8 +23,15 @@
 
 .slide-overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
   display: flex;
   align-items: center;
 }
@@ -79,7 +86,6 @@
   transform: translateY(-2px);
 }
 
-/* Arrow controls */
 .slider-arrow {
   position: absolute;
   top: 50%;
@@ -113,7 +119,6 @@
   right: 24px;
 }
 
-/* Dots indicator */
 .slider-dots {
   position: absolute;
   bottom: 24px;
