@@ -247,6 +247,37 @@
   }
 }
 
+@media (max-width: 600px) {
+  .pd-title {
+    font-size: 1.8rem;
+  }
+  .pd-main-img {
+    padding: 15px;
+  }
+  .pd-actions {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .pd-qty {
+    justify-content: center;
+    width: 100%;
+  }
+  .pd-cart-btn {
+    width: 100%;
+  }
+  .pd-trust {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 30px;
+  }
+  .trust-item {
+    flex-direction: row;
+    text-align: left;
+    gap: 16px;
+  }
+}
+
 /* Recommendations Section */
 .pd-recommendations {
   margin-top: 80px;

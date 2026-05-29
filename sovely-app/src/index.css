@@ -170,3 +170,15 @@ input, textarea, select { font-family: inherit; }
 .animate-shake {
   animation: shake 0.3s ease-in-out;
 }
+
+@media (max-width: 768px) {
+  .section {
+    padding: 40px 0;
+  }
+  .container {
+    padding: 0 16px;
+  }
+  .card {
+    padding: 20px;
+  }
+}

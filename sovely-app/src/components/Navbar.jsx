@@ -93,7 +93,7 @@ export default function Navbar() {
           </div>
 
           {/* Search */}
-          {user?.role !== 'admin' ? (
+          {user?.role !== 'admin' && (
             <div className="nav-search-section">
               <div className="search-bar">
                 <Search size={16} className="search-icon" />
@@ -110,25 +110,26 @@ export default function Navbar() {
                 )}
               </div>
             </div>
-          ) : (
-            <div className="nav-search-section" style={{ visibility: 'hidden' }}></div>
           )}
 
           {/* Actions */}
           <div className="nav-actions">
             {user?.role !== 'admin' ? (
               <>
-                <Link to="/wishlist" className="action-link-text">
-                  Wishlist
+                <Link to="/wishlist" className="action-link-text" title="Wishlist">
+                  <Heart size={20} className="nav-icon" />
+                  <span className="hide-on-mobile">Wishlist</span>
                 </Link>
                 
                 <div className="user-profile-wrap">
                   <button 
                     className="action-link-text user-btn-text"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    title={user ? user.name : 'Sign In'}
                   >
-                    {user ? user.name : 'Sign In'}
-                    <ChevronDown size={16} />
+                    <User size={20} className="nav-icon" />
+                    <span className="hide-on-mobile">{user ? user.name : 'Sign In'}</span>
+                    <ChevronDown size={16} className="hide-on-mobile" />
                   </button>
 
                   {showProfileMenu && (
@@ -157,23 +158,29 @@ export default function Navbar() {
                   )}
                 </div>
 
-                <button className="cart-link-text" onClick={() => setIsCartOpen(true)}>
-                  Cart
-                  <span className="cart-badge-square">{cartCount}</span>
+                <button className="cart-link-text" onClick={() => setIsCartOpen(true)} title="Shopping Cart">
+                  <div className="cart-icon-wrap">
+                    <ShoppingCart size={20} className="nav-icon" />
+                    <span className="cart-badge-square">{cartCount}</span>
+                  </div>
+                  <span className="hide-on-mobile">Cart</span>
                 </button>
               </>
             ) : (
               <>
-                <Link to="/admin" className="admin-pill">
-                  <LayoutDashboard size={18} /> Admin
+                <Link to="/admin" className="admin-pill" title="Admin Dashboard">
+                  <LayoutDashboard size={18} />
+                  <span className="hide-on-mobile">Admin</span>
                 </Link>
                 <div className="user-profile-wrap">
                   <button 
                     className="action-link-text user-btn-text"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    title={user.name}
                   >
-                    {user.name}
-                    <ChevronDown size={16} />
+                    <User size={20} className="nav-icon" />
+                    <span className="hide-on-mobile">{user.name}</span>
+                    <ChevronDown size={16} className="hide-on-mobile" />
                   </button>
 
                   {showProfileMenu && (
