@@ -54,12 +54,12 @@ export default function AllProducts() {
               name: p.title || p.name,
               category: categoryName,
               categoryId: rawCategory,
-              price: p.dropshipBasePrice || p.price || 0,
+              price: (p.dropshipBasePrice || p.price || 0) + 30,
               originalPrice:
-                p.suggestedRetailPrice ||
-                p.originalPrice ||
-                p.dropshipBasePrice ||
-                0,
+                (p.suggestedRetailPrice ||
+                  p.originalPrice ||
+                  p.dropshipBasePrice ||
+                  0) + 30,
               rating: p.averageRating || p.rating || 0,
               reviews: p.reviewCount || p.reviews || 0,
               badge:
@@ -124,12 +124,12 @@ export default function AllProducts() {
             name: p.title || p.name,
             category: categoryName,
             categoryId: rawCategory,
-            price: p.dropshipBasePrice || p.price || 0,
+            price: (p.dropshipBasePrice || p.price || 0) + 30,
             originalPrice:
-              p.suggestedRetailPrice ||
-              p.originalPrice ||
-              p.dropshipBasePrice ||
-              0,
+              (p.suggestedRetailPrice ||
+                p.originalPrice ||
+                p.dropshipBasePrice ||
+                0) + 30,
             rating: p.averageRating || p.rating || 0,
             reviews: p.reviewCount || p.reviews || 0,
             badge:

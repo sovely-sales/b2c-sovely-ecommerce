@@ -322,9 +322,124 @@
   box-shadow: var(--shadow-neo);
 }
 
+/* Nav Icon styles */
+.nav-icon {
+  color: var(--gray-800);
+  transition: var(--transition);
+}
+
+.action-link-text:hover .nav-icon,
+.cart-link-text:hover .nav-icon,
+.user-btn-text:hover .nav-icon {
+  color: var(--primary);
+}
+
+.cart-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-toggle-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.show-on-mobile-inline {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
-  .nav-search-section,
-  .hidden-mobile {
-    display: none;
+  .nav-search-section {
+    margin: 0 15px;
+  }
+  .nav-actions {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .show-on-mobile-inline {
+    display: inline-flex !important;
+  }
+
+  .search-toggle-btn {
+    display: inline-flex;
+  }
+
+  .cart-icon-wrap {
+    margin-right: 2px;
+  }
+
+  .cart-badge-square {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-bottom: 0;
+  }
+
+  .nav-categories-dropdown span {
+    display: none; /* Hide categories text on mobile, keep menu icon */
+  }
+
+  .nav-categories-dropdown {
+    padding: 8px;
+  }
+
+  .nav-categories-dropdown svg:last-child {
+    display: none !important; /* Hide categories dropdown chevron on mobile */
+  }
+
+  .nav-logo-text {
+    font-size: 1.25rem !important; /* Reduce logo size on mobile */
+  }
+
+  .nav-container {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 12px 16px;
+    gap: 12px 0;
+  }
+
+  .nav-left {
+    order: 1;
+    gap: 8px !important;
+  }
+
+  .nav-actions {
+    order: 2;
+    gap: 10px !important; /* Reduce gap between icons on mobile to prevent overflow */
+  }
+
+  .nav-search-section {
+    display: none !important; /* Hide search bar on mobile by default */
+  }
+
+  .nav-search-section.show-mobile {
+    order: 3;
+    display: block !important;
+    width: 100%;
+    max-width: 100%;
+    margin: 4px 0 0 0;
+  }
+
+  .main-navbar {
+    height: auto !important;
+  }
+
+  .main-navbar.scrolled {
+    height: auto !important;
   }
 }

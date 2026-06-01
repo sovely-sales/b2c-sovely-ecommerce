@@ -200,3 +200,51 @@
   color: var(--text-muted);
   font-weight: 600;
 }
+
+@media (max-width: 640px) {
+  .autorev-product-card {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .card-img-wrap {
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+
+  .card-add-btn {
+    right: 8px;
+    bottom: -8px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .card-price-badge {
+    font-size: 0.95rem;
+    padding: 3px 6px;
+  }
+
+  .card-original-price {
+    font-size: 0.8rem;
+  }
+
+  .card-discount-text {
+    font-size: 0.75rem;
+  }
+
+  .card-title {
+    font-size: 0.85rem;
+    height: 2.7em;
+  }
+
+  .card-size {
+    font-size: 0.75rem;
+  }
+
+  .card-rating-score,
+  .card-reviews-count {
+    font-size: 0.75rem;
+  }
+}

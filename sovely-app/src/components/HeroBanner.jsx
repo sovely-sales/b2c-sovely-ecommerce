@@ -44,6 +44,13 @@ export default function HeroBanner() {
     setCurrent((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
   };
 
+  const handleCtaClick = () => {
+    const productsSection = document.getElementById("all-products-section");
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <section className="hero-banner-slider" id="hero-section">
       <div
@@ -61,7 +68,9 @@ export default function HeroBanner() {
                 <div className="slide-content-box">
                   <span className="slide-tag">{offer.title}</span>
                   <h1 className="slide-title">{offer.subtitle}</h1>
-                  <button className="slide-cta">{offer.cta} →</button>
+                  <button className="slide-cta" onClick={handleCtaClick}>
+                    {offer.cta} →
+                  </button>
                 </div>
               </div>
             </div>

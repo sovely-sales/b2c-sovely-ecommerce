@@ -37,6 +37,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const navigate = useNavigate();
   const categoryRef = useRef(null);
 
@@ -119,8 +120,11 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Search */}
           {user?.role !== "admin" ? (
-            <div className="nav-search-section">
+            <div
+              className={`nav-search-section ${showMobileSearch ? "show-mobile" : ""}`}
+            >
               <div className="search-bar">
                 <Search size={16} className="search-icon" />
                 <input
@@ -158,17 +162,34 @@ export default function Navbar() {
 
             {user?.role !== "admin" ? (
               <>
-                <Link to="/wishlist" className="action-link-text hidden-mobile">
-                  Wishlist
+                <button
+                  className="action-link-text search-toggle-btn show-on-mobile-inline"
+                  onClick={() => setShowMobileSearch(!showMobileSearch)}
+                  title="Search"
+                >
+                  <Search size={20} className="nav-icon" />
+                </button>
+
+                <Link
+                  to="/wishlist"
+                  className="action-link-text"
+                  title="Wishlist"
+                >
+                  <Heart size={20} className="nav-icon" />
+                  <span className="hide-on-mobile">Wishlist</span>
                 </Link>
 
                 <div className="user-profile-wrap">
                   <button
                     className="action-link-text user-btn-text"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    title={user ? user.name : "Sign In"}
                   >
-                    {user ? user.name : "Sign In"}
-                    <ChevronDown size={16} />
+                    <User size={20} className="nav-icon" />
+                    <span className="hide-on-mobile">
+                      {user ? user.name : "Sign In"}
+                    </span>
+                    <ChevronDown size={16} className="hide-on-mobile" />
                   </button>
 
                   {showProfileMenu && (
@@ -223,10 +244,10 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-
                 <button
                   className="cart-btn-neo"
                   onClick={() => setIsCartOpen(true)}
+                  title="Shopping Cart"
                 >
                   <ShoppingCart size={18} />
                   <span className="cart-badge-neo">{cartCount}</span>
@@ -234,16 +255,23 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/admin" className="admin-pill">
-                  <LayoutDashboard size={18} /> Admin
+                <Link
+                  to="/admin"
+                  className="admin-pill"
+                  title="Admin Dashboard"
+                >
+                  <LayoutDashboard size={18} />
+                  <span className="hide-on-mobile">Admin</span>
                 </Link>
                 <div className="user-profile-wrap">
                   <button
                     className="action-link-text user-btn-text"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    title={user.name}
                   >
-                    {user.name}
-                    <ChevronDown size={16} />
+                    <User size={20} className="nav-icon" />
+                    <span className="hide-on-mobile">{user.name}</span>
+                    <ChevronDown size={16} className="hide-on-mobile" />
                   </button>
 
                   {showProfileMenu && (
