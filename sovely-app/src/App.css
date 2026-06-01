@@ -11,3 +11,9 @@ main {
 .spin {
   animation: spin 0.9s linear infinite;
 }
+
+@media (max-width: 768px) {
+  #root {
+    padding-bottom: 72px;
+  }
+}

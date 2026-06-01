@@ -1,0 +1,101 @@
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: var(--bg-card);
+  border-top: var(--border-thick);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 999;
+  padding: 8px 12px 10px 12px; /* Extra padding on bottom for iOS home indicator comfort */
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Glassmorphism support if CSS variables allow */
+@supports (backdrop-filter: blur(12px)) {
+  .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  [data-theme="dark"] .mobile-bottom-nav {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+  height: 100%;
+  transition: var(--transition);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item svg {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bottom-nav-item:active svg {
+  transform: scale(0.85);
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.bottom-nav-item.active svg {
+  transform: scale(1.1);
+  stroke: var(--primary);
+  fill: rgba(16, 185, 129, 0.1);
+}
+
+[data-theme="dark"] .bottom-nav-item.active svg {
+  fill: rgba(16, 185, 129, 0.2);
+}
+
+.bottom-nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 900;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-card);
+}
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import MobileBottomNav from "./components/MobileBottomNav";
 import CartSidebar from "./components/CartSidebar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -47,6 +48,7 @@ export default function App() {
     <BrowserRouter>
       <DataProvider>
         <Navbar />
+        <MobileBottomNav />
         <CartSidebar />
         <Routes>
           <Route path="/" element={<Home />} />

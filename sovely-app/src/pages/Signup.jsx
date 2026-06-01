@@ -92,7 +92,7 @@ export default function Signup() {
             Welcome to <span className="text-primary">Sovely</span>
           </h1>
           <p>
-            Join thousands of happy shoppers discovering the best deals on
+            Join thousands of happy shoppers such as Gagan discovering the best deals on
             electronics, fashion, and more.
           </p>
 
