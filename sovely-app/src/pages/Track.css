@@ -225,4 +225,31 @@
     flex-direction: row;
     gap: 20px;
   }
+  .order-summary-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Invoice Download Button */
+.btn-invoice-track {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: var(--transition);
+  cursor: pointer;
+  align-self: flex-start;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.btn-invoice-track:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
 }

@@ -1,19 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   MapPin,
   CreditCard,
   ChevronRight,
+  ShoppingBag,
   ShieldCheck,
   Plus,
   CheckCircle,
   Truck,
+  Phone,
+  Mail,
+  User,
   Zap,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import "./Checkout.css";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
 const RAZORPAY_KEY_ID =
   import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder";
 
@@ -43,8 +47,10 @@ export default function Checkout() {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("userToken");
+  const orderCompletedRef = useRef(false);
 
   useEffect(() => {
+    if (orderCompletedRef.current) return;
     if (cartItems.length === 0) {
       navigate("/cart");
       return;
@@ -209,14 +215,9 @@ export default function Checkout() {
       });
       const data = await res.json();
       if (data.success) {
+        orderCompletedRef.current = true;
         clearCart();
-        if (token) {
-          navigate("/orders");
-        } else {
-          navigate(`/track?orderId=${data.orderId}`, {
-            state: { orderId: data.orderId },
-          });
-        }
+        navigate(`/order-success?orderId=${data.orderId}`);
       } else {
         setOrderError(data.message || "Order failed.");
       }

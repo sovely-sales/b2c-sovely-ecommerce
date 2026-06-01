@@ -1,5 +1,6 @@
 import HeroBanner from "../components/HeroBanner";
 import CategoryStrip from "../components/CategoryStrip";
+import QuickTrack from "../components/QuickTrack";
 import DealBanners from "../components/DealBanners";
 import AllProducts from "../components/AllProducts";
 import PromoBanner from "../components/PromoBanner";
@@ -12,6 +13,7 @@ export default function Home() {
     <main id="home-page">
       <HeroBanner />
       <CategoryStrip />
+      <QuickTrack />
       <DealBanners />
       <AllProducts />
       <PromoBanner />

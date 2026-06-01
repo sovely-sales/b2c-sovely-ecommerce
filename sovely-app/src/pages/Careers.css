@@ -1,0 +1,137 @@
+.careers-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+.careers-header {
+  margin-bottom: 48px;
+}
+
+.careers-header h1 {
+  font-size: 2.8rem;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.careers-header .subtitle {
+  color: var(--text-muted);
+  font-weight: 600;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header-icon {
+  color: var(--primary);
+}
+
+.careers-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.intro-card {
+  padding: 30px;
+  background: var(--bg-card);
+}
+
+.intro-card h3 {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+}
+
+.card-icon {
+  color: var(--primary);
+}
+
+.section-title {
+  font-size: 1.8rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.positions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.position-card {
+  padding: 30px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: var(--transition);
+}
+
+.position-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+}
+
+.position-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.title-block h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.dept-tag {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.meta-block {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.position-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.apply-btn {
+  align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .position-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

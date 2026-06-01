@@ -16,12 +16,22 @@ import Track from "./pages/Track";
 import Admin from "./pages/Admin";
 import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
+import OrderSuccess from "./pages/OrderSuccess";
 import { DataProvider } from "./context/DataContext";
 import { Navigate } from "react-router-dom";
 import { useData } from "./context/DataContext";
 import "./App.css";
 import Wishlist from "./pages/Wishlist";
 import Search from "./pages/Search";
+import Seller from "./pages/Seller";
+import Returns from "./pages/Returns";
+import Shipping from "./pages/Shipping";
+import Faq from "./pages/Faq";
+import Careers from "./pages/Careers";
+import Press from "./pages/Press";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const { user } = useData();
@@ -83,69 +93,26 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          {}
-          <Route
-            path="*"
-            element={
-              <main
-                style={{
-                  minHeight: "60vh",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: 16,
-                }}
-              >
-                <h1
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "2rem",
-                    color: "var(--gray-700)",
-                  }}
-                >
-                  404 – Page Not Found
-                </h1>
-                <a
-                  href="/"
-                  style={{ color: "var(--primary)", fontWeight: 600 }}
-                >
-                  ← Back to Home
-                </a>
-              </main>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <main
-                style={{
-                  minHeight: "60vh",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: 16,
-                }}
-              >
-                <h1
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontSize: "2rem",
-                    color: "var(--gray-700)",
-                  }}
-                >
-                  404 – Page Not Found
-                </h1>
-                <a
-                  href="/"
-                  style={{ color: "var(--primary)", fontWeight: 600 }}
-                >
-                  ← Back to Home
-                </a>
-              </main>
-            }
-          />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          
+          {/* Bottom Nav / Footer Pages */}
+          <Route path="/seller" element={<Seller />} />
+          <Route path="/returns" element={<Returns />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/press" element={<Press />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/cookies" element={<Cookies />} />
+          
+          {/* 404 Fallback */}
+          <Route path="*" element={
+            <main style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+              <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--gray-700)' }}>404 – Page Not Found</h1>
+              <a href="/" style={{ color: 'var(--primary)', fontWeight: 600 }}>← Back to Home</a>
+            </main>
+          } />
         </Routes>
         <Footer />
       </DataProvider>

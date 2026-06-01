@@ -42,7 +42,7 @@ app.get("/api/categories", async (req, res) => {
 
 app.get("/api/products", async (req, res) => {
   try {
-    const { category, limit, skip, search, deals } = req.query;
+    const { category, limit, skip, search, deals, minPrice, maxPrice, sort } = req.query;
     let filter = {};
 
     if (category && category !== "All") {
@@ -90,7 +90,37 @@ app.get("/api/products", async (req, res) => {
       ];
     }
 
+    if (minPrice || maxPrice) {
+      const priceFilter = {};
+      if (minPrice) {
+        priceFilter.$gte = parseFloat(minPrice) - 30;
+      }
+      if (maxPrice) {
+        priceFilter.$lte = parseFloat(maxPrice) - 30;
+      }
+      filter.$and = filter.$and || [];
+      filter.$and.push({
+        $or: [
+          { dropshipBasePrice: priceFilter },
+          { price: priceFilter }
+        ]
+      });
+    }
+
     const query = Product.find(filter);
+
+    let sortObj = {};
+    if (sort === "priceAsc") {
+      sortObj = { dropshipBasePrice: 1, price: 1 };
+    } else if (sort === "priceDesc") {
+      sortObj = { dropshipBasePrice: -1, price: -1 };
+    } else if (sort === "popularity") {
+      sortObj = { rating: -1, reviews: -1, averageRating: -1, reviewCount: -1 };
+    } else {
+      sortObj = { createdAt: -1 };
+    }
+    query.sort(sortObj);
+
     const queryLimit = limit ? parseInt(limit) : 24;
     const querySkip = skip ? parseInt(skip) : 0;
 
@@ -171,11 +201,28 @@ app.post("/api/orders", authenticate("user"), async (req, res) => {
 
 app.get("/api/orders/track/:id", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    const id = req.params.id.trim();
+    let order = null;
+
+    // 1. Try exact ObjectId lookup
+    if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
+      order = await Order.findById(id);
+    }
+
+    // 2. If not found, try matching by partial ID (last N chars)
+    if (!order) {
+      const allOrders = await Order.find({}).sort({ createdAt: -1 }).limit(500);
+      order = allOrders.find(o => o._id.toString().endsWith(id) || o._id.toString().includes(id));
+    }
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found. Please check your Order ID and try again.' });
+    }
+
     res.json(order);
-  } catch {
-    res.status(400).json({ message: "Invalid Order ID" });
+  } catch (err) {
+    console.error('Track order error:', err);
+    res.status(400).json({ message: 'Could not look up that Order ID. Please verify and try again.' });
   }
 });
 

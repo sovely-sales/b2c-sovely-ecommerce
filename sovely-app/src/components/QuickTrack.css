@@ -1,0 +1,195 @@
+.quick-track-section {
+  padding: 50px 0;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #e0f9ea 100%);
+  border-top: 1px solid #d1fae5;
+  border-bottom: 1px solid #d1fae5;
+}
+
+.quick-track-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 40px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.05),
+              0 5px 15px -3px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quick-track-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 50px -20px rgba(0, 0, 0, 0.08),
+              0 0 60px 0 rgba(16, 185, 129, 0.05);
+}
+
+.quick-track-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+}
+
+.quick-track-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.quick-track-info .icon-badge {
+  width: 56px;
+  height: 56px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--primary);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 12px rgba(16, 185, 129, 0.1);
+}
+
+.quick-track-info .text-content h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gray-800, #1e293b);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.quick-track-info .text-content p {
+  font-size: 0.95rem;
+  color: var(--gray-500, #64748b);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.quick-track-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  max-width: 550px;
+  width: 100%;
+}
+
+.quick-track-input-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+.quick-track-input-wrapper .search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400, #94a3b8);
+  pointer-events: none;
+  transition: color 0.3s;
+}
+
+.quick-track-input-wrapper input {
+  width: 100%;
+  padding: 16px 20px 16px 48px;
+  border-radius: 14px;
+  border: 1.5px solid var(--gray-200, #e2e8f0);
+  background: white;
+  font-size: 0.95rem;
+  font-weight: 550;
+  color: var(--gray-800, #1e293b);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+}
+
+.quick-track-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1),
+              0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.quick-track-input-wrapper input:focus + .search-icon {
+  color: var(--primary);
+}
+
+.quick-track-form .track-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s ease;
+}
+
+.quick-track-form .track-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .quick-track-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 30px;
+    gap: 24px;
+  }
+  
+  .quick-track-form {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .quick-track-card {
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .quick-track-info {
+    gap: 16px;
+  }
+
+  .quick-track-info .icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  .quick-track-info .text-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .quick-track-info .text-content p {
+    font-size: 0.85rem;
+  }
+
+  .quick-track-form {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .quick-track-form .track-btn {
+    width: 100%;
+    padding: 14px;
+  }
+  
+  .quick-track-input-wrapper input {
+    padding: 14px 16px 14px 44px;
+  }
+}

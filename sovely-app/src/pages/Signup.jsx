@@ -13,7 +13,7 @@ import {
 import { useData } from "../context/DataContext";
 import "./Signup.css";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
 
 export default function Signup() {
   const [isLogin, setIsLogin] = useState(true);

@@ -8,10 +8,12 @@ import {
   Clock,
   ArrowRight,
   ShieldCheck,
+  Download,
 } from "lucide-react";
 import "./Track.css";
+import Invoice from "../components/Invoice";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
 
 export default function Track() {
   const [orderId, setOrderId] = useState("");
@@ -22,13 +24,25 @@ export default function Track() {
   const location = useLocation();
 
   const trackOrderById = async (id) => {
-    if (!id.trim()) return;
+    let cleanId = id.trim();
+    if (cleanId.startsWith('#')) {
+      cleanId = cleanId.substring(1).trim();
+    }
+    if (!cleanId) return;
+
     setLoading(true);
     setError("");
     setOrder(null);
 
     try {
-      const res = await fetch(`${API}/api/orders/track/${id.trim()}`);
+      const res = await fetch(`${API}/api/orders/track/${encodeURIComponent(cleanId)}`);
+      
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        setError('Invalid server response. Please check the ID or try again.');
+        return;
+      }
+
       const data = await res.json();
       if (res.ok) {
         setOrder(data);
@@ -115,6 +129,12 @@ export default function Track() {
                   ).toLocaleDateString()}
                 </span>
               </div>
+              <div className="info-item" style={{ justifyContent: 'center' }}>
+                <button onClick={() => window.print()} className="btn-invoice-track">
+                  <Download size={15} />
+                  <span>Download Invoice</span>
+                </button>
+              </div>
             </div>
 
             <div className="track-stepper">
@@ -167,6 +187,7 @@ export default function Track() {
               </p>
             </div>
           </div>
+          <Invoice order={order} />
         </div>
       )}
     </div>

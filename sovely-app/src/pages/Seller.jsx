@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import "./Seller.css";
 
-const API = "http://127.0.0.1:8014";
+const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
 
 export default function Seller() {
   const [token, setToken] = useState(

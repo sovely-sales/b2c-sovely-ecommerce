@@ -1,5 +1,5 @@
-import { useLocation, Link } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronDown, Filter, LayoutGrid, List } from "lucide-react";
 import { useData } from "../context/DataContext";
 import ProductCard from "../components/ProductCard";
@@ -9,6 +9,7 @@ const PAGE_SIZE = 24;
 
 export default function Products() {
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search],
@@ -21,6 +22,23 @@ export default function Products() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
+  // Interactive Dropdowns & Inputs state
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [sortOption, setSortOption] = useState("latest");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  const categoryRef = useRef(null);
+  const sortRef = useRef(null);
+
+  const sortLabels = {
+    latest: "Latest",
+    priceAsc: "Price: Low to High",
+    priceDesc: "Price: High to Low",
+    popularity: "Popularity",
+  };
+
   const categoryMap = useMemo(() => {
     const map = {};
     categories.forEach((c) => {
@@ -30,6 +48,23 @@ export default function Products() {
     return map;
   }, [categories]);
 
+  // Click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target)) {
+        setShowCategoryDropdown(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setShowSortDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Fetch products with active filters
   useEffect(() => {
     let active = true;
     const fetchProducts = async () => {
@@ -40,6 +75,9 @@ export default function Products() {
           limit: PAGE_SIZE,
           skip: 0,
           category: categoryFilter || "",
+          minPrice: minPrice || "",
+          maxPrice: maxPrice || "",
+          sort: sortOption || "latest",
         });
         const res = await fetch(
           `${API_URL}/api/products?${queryParams.toString()}`,
@@ -94,12 +132,19 @@ export default function Products() {
     };
 
     if (!contextLoading && categories.length > 0) {
-      fetchProducts();
+      // Debounce price input filtering by 300ms
+      const timer = setTimeout(() => {
+        fetchProducts();
+      }, 300);
+      return () => {
+        active = false;
+        clearTimeout(timer);
+      };
     }
     return () => {
       active = false;
     };
-  }, [categoryFilter, contextLoading, categories, categoryMap]);
+  }, [categoryFilter, minPrice, maxPrice, sortOption, contextLoading, categories, categoryMap]);
 
   const handleShowMore = async () => {
     const nextPage = page + 1;
@@ -109,6 +154,9 @@ export default function Products() {
         limit: PAGE_SIZE,
         skip: nextPage * PAGE_SIZE,
         category: categoryFilter || "",
+        minPrice: minPrice || "",
+        maxPrice: maxPrice || "",
+        sort: sortOption || "latest",
       });
       const res = await fetch(
         `${API_URL}/api/products?${queryParams.toString()}`,
@@ -159,6 +207,15 @@ export default function Products() {
     }
   };
 
+  const handleClearAll = () => {
+    setMinPrice("");
+    setMaxPrice("");
+    setSortOption("latest");
+    setShowCategoryDropdown(false);
+    setShowSortDropdown(false);
+    navigate("/products");
+  };
+
   if (loading && products.length === 0)
     return (
       <div className="products-page section container">Loading products...</div>
@@ -166,32 +223,84 @@ export default function Products() {
 
   return (
     <div className="products-page section container">
-      {}
-      <div className="b2b-filter-bar">
+      {/* Filter Bar */}
+      <div className="retail-filter-bar">
         <div className="filter-row top-row">
           <div className="filter-dropdowns">
-            <div className="custom-select active-select">
-              <span>{categoryFilter || "Hardware"}</span>
-              <ChevronDown size={14} />
-            </div>
-            <div className="custom-select">
-              <span>All Brands</span>
-              <ChevronDown size={14} />
-            </div>
-            <div className="custom-select">
-              <span>All Stock Levels</span>
-              <ChevronDown size={14} />
+            {/* Category Dropdown */}
+            <div className="dropdown-container" ref={categoryRef}>
+              <div
+                className={`custom-select ${categoryFilter ? "active-select" : ""}`}
+                onClick={() => {
+                  setShowCategoryDropdown(!showCategoryDropdown);
+                  setShowSortDropdown(false);
+                }}
+              >
+                <span>{categoryFilter || "All Categories"}</span>
+                <ChevronDown size={14} />
+              </div>
+              {showCategoryDropdown && (
+                <div className="dropdown-menu">
+                  <div
+                    className={`dropdown-item ${!categoryFilter ? "active" : ""}`}
+                    onClick={() => {
+                      navigate("/products");
+                      setShowCategoryDropdown(false);
+                    }}
+                  >
+                    All Categories
+                  </div>
+                  {categories.map((c) => (
+                    <div
+                      key={c.id || c._id}
+                      className={`dropdown-item ${categoryFilter === c.name ? "active" : ""}`}
+                      onClick={() => {
+                        navigate(`/products?category=${encodeURIComponent(c.name)}`);
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      {c.name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+
           <div className="filter-actions">
-            <button className="clear-btn">
+            <button className="clear-btn" onClick={handleClearAll}>
               <Filter size={14} /> Clear
             </button>
             <div className="sort-group">
               <span className="sort-label">SORT</span>
-              <div className="custom-select sort-select">
-                <span>Latest</span>
-                <ChevronDown size={14} />
+              {/* Sort Dropdown */}
+              <div className="dropdown-container" ref={sortRef}>
+                <div
+                  className="custom-select sort-select"
+                  onClick={() => {
+                    setShowSortDropdown(!showSortDropdown);
+                    setShowCategoryDropdown(false);
+                  }}
+                >
+                  <span>{sortLabels[sortOption]}</span>
+                  <ChevronDown size={14} />
+                </div>
+                {showSortDropdown && (
+                  <div className="dropdown-menu">
+                    {Object.entries(sortLabels).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className={`dropdown-item ${sortOption === key ? "active" : ""}`}
+                        onClick={() => {
+                          setSortOption(key);
+                          setShowSortDropdown(false);
+                        }}
+                      >
+                        {value}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div className="product-count">
@@ -209,22 +318,28 @@ export default function Products() {
             </div>
           </div>
         </div>
+
         <div className="filter-row bottom-row">
           <div className="input-group-inline">
-            <input type="text" placeholder="Min ₹" />
+            <input
+              type="number"
+              placeholder="Min ₹"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+            />
             <span className="separator">-</span>
-            <input type="text" placeholder="Max ₹" />
-          </div>
-          <div className="input-group-inline">
-            <input type="text" placeholder="Min Kg" />
-            <span className="separator">-</span>
-            <input type="text" placeholder="Max Kg" />
+            <input
+              type="number"
+              placeholder="Max ₹"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            />
           </div>
         </div>
       </div>
 
       {products.length === 0 ? (
-        <div className="empty-state">No products found in this category.</div>
+        <div className="empty-state">No products found matching filters.</div>
       ) : (
         <>
           <div className="products-grid-full">

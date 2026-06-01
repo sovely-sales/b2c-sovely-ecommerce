@@ -7,6 +7,7 @@ import {
   Heart,
   Menu,
   X,
+  Truck,
   MapPin,
   ChevronDown,
   Bell,
@@ -189,6 +190,11 @@ export default function Navbar() {
                   <span className="hide-on-mobile">Wishlist</span>
                 </Link>
 
+                <Link to="/track" className="action-link-text" title="Track Order">
+                  <Truck size={20} className="nav-icon" />
+                  <span className="hide-on-mobile">Track</span>
+                </Link>
+
                 <div className="user-profile-wrap">
                   <button
                     className="action-link-text user-btn-text"
@@ -228,7 +234,7 @@ export default function Navbar() {
                             onClick={() => {
                               logout();
                               setShowProfileMenu(false);
-                              navigate("/login");
+                              navigate("/");
                             }}
                             className="logout-item"
                           >
@@ -291,7 +297,7 @@ export default function Navbar() {
                         onClick={() => {
                           logout();
                           setShowProfileMenu(false);
-                          navigate("/login");
+                          navigate("/");
                         }}
                         className="logout-item"
                       >
