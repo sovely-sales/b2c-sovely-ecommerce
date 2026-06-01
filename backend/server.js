@@ -153,7 +153,7 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
-app.post("/api/orders", authenticate("user"), async (req, res) => {
+app.post("/api/orders", async (req, res) => {
   try {
     const { items, ...restBody } = req.body;
 
@@ -185,10 +185,26 @@ app.post("/api/orders", authenticate("user"), async (req, res) => {
     const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
     const finalTotal = calculatedSubtotal + deliveryFee;
 
+    // Optional user authentication to associate userId
+    const jwt = require("jsonwebtoken");
+    const JWT_SECRET = process.env.JWT_SECRET || "sovely_b2c_secret_2026";
+    let userId = null;
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        // Ignore invalid token
+      }
+    }
+
     const order = new Order({
       ...restBody,
       items,
       total: finalTotal,
+      userId,
     });
 
     const saved = await order.save();
@@ -527,7 +543,7 @@ app.get("/api/user/addresses", authenticate("user"), async (req, res) => {
   }
 });
 
-app.post("/api/razorpay/order", authenticate("user"), async (req, res) => {
+app.post("/api/razorpay/order", async (req, res) => {
   try {
     const { items } = req.body;
     if (!items || items.length === 0) {

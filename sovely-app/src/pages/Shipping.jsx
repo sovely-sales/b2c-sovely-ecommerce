@@ -47,9 +47,9 @@ export default function Shipping() {
 
           <div className="shipping-card glass">
             <Truck size={24} className="card-icon" />
-            <h3>5. Cash on Delivery (COD)</h3>
+            <h3>5. Secure Online Payments</h3>
             <p>
-              We support Cash on Delivery for orders up to ₹5,000. For security purposes, COD orders require a quick OTP phone verification during the checkout process.
+              To ensure safety and speed up delivery times, we support prepaid online transactions only (via Razorpay, supporting UPI, credit/debit cards, and net banking). Cash on Delivery (COD) is not accepted.
             </p>
           </div>
         </div>

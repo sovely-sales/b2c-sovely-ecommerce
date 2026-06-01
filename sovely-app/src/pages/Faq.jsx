@@ -9,7 +9,7 @@ const FAQS_DATA = [
   },
   {
     q: "What payment options do you support?",
-    a: "We support a wide range of secure payment options, including major Credit/Debit Cards, Netbanking, UPI (GPay, PhonePe, Paytm), and Cash on Delivery (COD) for eligible pincodes up to ₹5,000."
+    a: "We support a wide range of secure prepaid online payment options via Razorpay, including major Credit/Debit Cards, Netbanking, and UPI (GPay, PhonePe, Paytm, etc.). We do not support Cash on Delivery (COD)."
   },
   {
     q: "How can I download my invoice?",

@@ -413,37 +413,13 @@ export default function Checkout() {
               <h2>Payment Method</h2>
             </div>
             <div className="payment-options">
-              <label
-                className={`payment-option ${form.payment === "razorpay" ? "active" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  value="razorpay"
-                  checked={form.payment === "razorpay"}
-                  onChange={handleChange}
-                />
+              <div className="payment-option active" style={{ cursor: "default" }}>
                 <div className="payment-content">
                   <strong>Razorpay Secure</strong>
                   <span>Pay via Cards, UPI, or Net Banking</span>
                 </div>
                 <div className="payment-badge">Fast & Secure</div>
-              </label>
-              <label
-                className={`payment-option ${form.payment === "cod" ? "active" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  value="cod"
-                  checked={form.payment === "cod"}
-                  onChange={handleChange}
-                />
-                <div className="payment-content">
-                  <strong>Cash on Delivery</strong>
-                  <span>Pay when your order arrives</span>
-                </div>
-              </label>
+              </div>
             </div>
           </section>
 
