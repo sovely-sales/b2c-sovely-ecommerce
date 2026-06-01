@@ -11,16 +11,18 @@ import {
   User,
   LayoutDashboard,
   Settings,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
   Bell,
   Menu,
-  X,
-  CheckCircle,
-  Clock,
-  Truck,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./Admin.css";
 
 const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
@@ -101,6 +103,38 @@ export default function Admin() {
     navigate("/login");
     window.location.reload();
   };
+
+  const processChartData = () => {
+    const last7Days = [...Array(7)]
+      .map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      })
+      .reverse();
+
+    const dataMap = last7Days.reduce(
+      (acc, date) => ({ ...acc, [date]: { name: date, revenue: 0 } }),
+      {},
+    );
+
+    orders.forEach((o) => {
+      const dateStr = new Date(o.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      if (dataMap[dateStr]) {
+        dataMap[dateStr].revenue += o.total || 0;
+      }
+    });
+
+    return Object.values(dataMap);
+  };
+
+  const chartData = processChartData();
 
   const stats = {
     totalOrders: orders.length,
@@ -229,7 +263,78 @@ export default function Admin() {
                   </div>
                 </div>
 
+                {}
                 <div className="dashboard-sections">
+                  {}
+                  <div className="card chart-card">
+                    <div className="card-header">
+                      <h3>Revenue Overview (Last 7 Days)</h3>
+                    </div>
+                    <div className="chart-container">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                          <defs>
+                            <linearGradient
+                              id="colorRevenue"
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor="#10b981"
+                                stopOpacity={0.4}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor="#10b981"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            vertical={false}
+                            stroke="#e2e8f0"
+                          />
+                          <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#64748b", fontSize: 12 }}
+                            dy={10}
+                          />
+                          <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#64748b", fontSize: 12 }}
+                            tickFormatter={(value) => `₹${value}`}
+                            dx={-10}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              borderRadius: "4px",
+                              border: "3px solid #0f172a",
+                              boxShadow: "4px 4px 0px #0f172a",
+                              backgroundColor: "#ffffff",
+                            }}
+                            itemStyle={{ color: "#10b981", fontWeight: "900" }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="revenue"
+                            stroke="#10b981"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#colorRevenue)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {}
                   <div className="card recent-orders">
                     <div className="card-header">
                       <h3>Recent Orders</h3>
@@ -255,7 +360,9 @@ export default function Admin() {
                             <tr key={o._id}>
                               <td className="mono">#{o._id.slice(-6)}</td>
                               <td>{o.customerName}</td>
-                              <td>₹{o.total?.toLocaleString()}</td>
+                              <td>
+                                <strong>₹{o.total?.toLocaleString()}</strong>
+                              </td>
                               <td>
                                 <span
                                   className={`status-pill ${o.status?.toLowerCase()}`}
@@ -273,6 +380,7 @@ export default function Admin() {
               </div>
             )}
 
+            {}
             {activeTab === "orders" && (
               <div className="orders-view animate-fadeUp">
                 <div className="view-header">
@@ -354,6 +462,7 @@ export default function Admin() {
               </div>
             )}
 
+            {}
             {activeTab === "customers" && (
               <div className="customers-view animate-fadeUp">
                 <div className="view-header">

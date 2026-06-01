@@ -11,7 +11,7 @@
 }
 
 .promo-card {
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-sm);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -19,10 +19,13 @@
   position: relative;
   gap: 20px;
   transition: var(--transition);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo);
 }
+
 .promo-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-neo-lg);
 }
 
 .promo-card--main {
@@ -46,13 +49,15 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--white);
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo-hover);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
-  font-weight: 600;
-  backdrop-filter: blur(6px);
+  font-weight: 900;
+  text-transform: uppercase;
   width: fit-content;
 }
 
@@ -92,24 +97,28 @@
   gap: 4px;
 }
 .countdown-block {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
   padding: 4px 10px;
   text-align: center;
-  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-neo-hover);
 }
+
 .countdown-block span {
   display: block;
   font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--white);
+  font-weight: 900;
+  color: var(--text-main);
   font-family: var(--font-heading);
   line-height: 1;
 }
+
 .countdown-block small {
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  color: var(--text-muted);
   text-transform: uppercase;
+  font-weight: 800;
 }
 .countdown-sep {
   font-weight: 800;
@@ -121,9 +130,10 @@
   flex-shrink: 0;
   width: 180px;
   height: 180px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo);
   overflow: hidden;
-  box-shadow: var(--shadow-xl);
 }
 .promo-visual img {
   width: 100%;

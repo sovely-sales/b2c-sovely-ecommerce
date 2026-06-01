@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Check, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useData } from "../context/DataContext";
+import { Check, Star, Heart } from "lucide-react";
 import "./ProductCard.css";
 
 const extractProductSize = (name) => {
@@ -29,7 +29,6 @@ const cleanProductName = (name) => {
 };
 
 export default function ProductCard({ product }) {
-  const { addToCart, setIsCartOpen } = useData();
   const [added, setAdded] = useState(false);
 
   const handleQuickAdd = (e) => {
@@ -57,6 +56,7 @@ export default function ProductCard({ product }) {
     : "3.8k";
   const productSize = extractProductSize(product.name);
   const displayName = cleanProductName(product.name);
+  const { addToCart, setIsCartOpen, wishlist, toggleWishlist } = useData();
 
   return (
     <Link
@@ -66,7 +66,22 @@ export default function ProductCard({ product }) {
     >
       <div className="card-img-wrap">
         <img src={product.image} alt={product.name} loading="lazy" />
-
+        {}
+        <button
+          className="card-wishlist-btn"
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist(product.id);
+          }}
+        >
+          <Heart
+            size={18}
+            fill={wishlist.includes(String(product.id)) ? "#ef4444" : "none"}
+            color={
+              wishlist.includes(String(product.id)) ? "#ef4444" : "#64748b"
+            }
+          />
+        </button>
         <button
           className={`card-add-btn ${added ? "added" : ""}`}
           onClick={handleQuickAdd}

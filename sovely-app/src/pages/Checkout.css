@@ -181,7 +181,6 @@
   cursor: pointer;
 }
 
-/* Payment Options */
 .payment-options {
   display: flex;
   flex-direction: column;
@@ -356,4 +355,100 @@
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+
+.address-card {
+  padding: 20px;
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+.address-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+}
+
+.address-card.selected {
+  background: var(--primary);
+  border-color: #000;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+}
+.address-card.selected p,
+.address-card.selected strong,
+.address-card.selected .card-phone {
+  color: #000 !important;
+}
+
+.add-new-card {
+  border: var(--border-thick);
+  background: var(--bg-main);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+.add-new-card:hover {
+  background: var(--primary);
+  color: #000;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 20px;
+  box-shadow: var(--shadow-neo-hover);
+}
+
+.payment-option:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+}
+
+.payment-option.active {
+  background: var(--text-main);
+  color: var(--bg-main);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-neo);
+}
+
+.payment-option.active .payment-content strong {
+  color: var(--bg-main);
+}
+.payment-option.active .payment-content span {
+  color: var(--text-muted);
+}
+
+.summary-card-checkout {
+  padding: 32px;
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-neo-lg);
+  position: sticky;
+  top: 120px;
+}
+
+.place-order-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.15rem;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-neo-lg);
+  margin-top: 16px;
+}
+.place-order-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
 }

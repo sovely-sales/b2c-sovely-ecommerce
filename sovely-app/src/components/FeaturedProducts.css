@@ -34,7 +34,7 @@
   cursor: pointer;
   transition: var(--transition);
   border-radius: var(--radius-sm);
-  border: 4px solid transparent; /* Invisible border to prevent layout shift */
+  border: 4px solid transparent;
 }
 
 .grid-item-wrap.active {
@@ -43,7 +43,6 @@
   box-shadow: var(--shadow-neo);
 }
 
-/* Right Preview Panel */
 .featured-preview-panel {
   position: sticky;
   top: 120px;
@@ -89,7 +88,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 32px;
-  background: #ffffff; /* Explicit white */
+  background: #ffffff;
   border: var(--border-thick);
   border-radius: var(--radius-sm);
 }

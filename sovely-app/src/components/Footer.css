@@ -16,11 +16,6 @@
   height: 48px;
   width: auto;
   margin-bottom: 16px;
-  /* Logo filter trick: only invert if in dark mode */
-  filter: brightness(0) invert(0);
-}
-[data-theme="dark"] .footer-logo img {
-  filter: brightness(0) invert(1);
 }
 
 .footer-tagline {

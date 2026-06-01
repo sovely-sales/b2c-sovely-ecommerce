@@ -38,6 +38,7 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
   const categoryRef = useRef(null);
 
@@ -66,6 +67,14 @@ export default function Navbar() {
     const productsSection = document.getElementById("all-products-section");
     if (productsSection) {
       productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`);
+      setShowMobileSearch(false);
     }
   };
 
@@ -120,28 +129,29 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Search */}
+          {}
           {user?.role !== "admin" ? (
             <div
               className={`nav-search-section ${showMobileSearch ? "show-mobile" : ""}`}
             >
-              <div className="search-bar">
+              <form className="search-bar" onSubmit={handleSearchSubmit}>
                 <Search size={16} className="search-icon" />
                 <input
                   type="text"
                   placeholder="Search products..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                 />
-                {searchFilter && (
+                {searchInput && (
                   <button
+                    type="button"
                     className="search-clear"
-                    onClick={() => setSearchFilter("")}
+                    onClick={() => setSearchInput("")}
                   >
                     <X size={14} />
                   </button>
                 )}
-              </div>
+              </form>
             </div>
           ) : (
             <div
@@ -151,7 +161,7 @@ export default function Navbar() {
           )}
 
           <div className="nav-actions">
-            {/* Theme Toggle Button */}
+            {}
             <button
               className="theme-toggle-btn"
               onClick={toggleTheme}

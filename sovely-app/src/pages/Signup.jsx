@@ -26,10 +26,19 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // FIX: Extract 'user' and 'login' before the useEffect!
+  const { user, login } = useData();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { login } = useData();
+  useEffect(() => {
+    if (user) {
+      // Go back to previous page (like cart/checkout) or home
+      const from = location.state?.from || "/";
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -238,13 +247,6 @@ export default function Signup() {
               </button>
             </form>
           )}
-
-          <div className="auth-footer">
-            <p>
-              Protected by <strong>Sovely Shield</strong>{" "}
-              <ShieldCheck size={14} />
-            </p>
-          </div>
         </div>
       </div>
     </div>

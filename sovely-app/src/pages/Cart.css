@@ -240,7 +240,6 @@
   border-color: var(--primary);
 }
 
-/* Empty State */
 .cart-empty-state {
   display: flex;
   justify-content: center;

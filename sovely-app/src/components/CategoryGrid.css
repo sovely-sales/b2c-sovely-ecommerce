@@ -63,7 +63,7 @@
   height: 140px;
   overflow: hidden;
   border-bottom: var(--border-thick);
-  background: #ffffff; /* Force white so product images don't look muddy */
+  background: #ffffff;
 }
 
 .category-img {
@@ -77,7 +77,6 @@
   transform: scale(1.05);
 }
 
-/* Removed the faded overlay for a harsher, cleaner look */
 .category-overlay {
   display: none;
 }

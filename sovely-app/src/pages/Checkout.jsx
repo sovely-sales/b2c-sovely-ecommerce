@@ -4,14 +4,11 @@ import {
   MapPin,
   CreditCard,
   ChevronRight,
-  ShoppingBag,
   ShieldCheck,
   Plus,
   CheckCircle,
   Truck,
-  Phone,
-  Mail,
-  User,
+  Zap,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import "./Checkout.css";
@@ -21,20 +18,24 @@ const RAZORPAY_KEY_ID =
   import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder";
 
 export default function Checkout() {
-  const { cartItems, cartTotal, cartSubtotal, cartDelivery, clearCart } =
+  const { cartItems, cartTotal, cartSubtotal, cartDelivery, clearCart, user } =
     useData();
+
   const [savedAddresses, setSavedAddresses] = useState([]);
+  const [lastOrder, setLastOrder] = useState(null);
   const [selectedAddrId, setSelectedAddrId] = useState(null);
+
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    firstName: user?.name?.split(" ")[0] || "",
+    lastName: user?.name?.split(" ").slice(1).join(" ") || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     address: "",
     city: "",
     postalCode: "",
     payment: "razorpay",
   });
+
   const [saveAddress, setSaveAddress] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -49,22 +50,30 @@ export default function Checkout() {
       return;
     }
     if (token) {
-      fetchSavedAddresses();
+      fetchUserData();
     }
   }, [token, cartItems, navigate]);
 
-  const fetchSavedAddresses = async () => {
+  const fetchUserData = async () => {
     try {
-      const res = await fetch(`${API}/api/user/addresses`, {
+      const addrRes = await fetch(`${API}/api/user/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setSavedAddresses(data);
-        if (data.length > 0) setShowNewForm(false);
+      const addrData = await addrRes.json();
+      if (Array.isArray(addrData)) {
+        setSavedAddresses(addrData);
+        if (addrData.length > 0) setShowNewForm(false);
+      }
+
+      const orderRes = await fetch(`${API}/api/user/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const orderData = await orderRes.json();
+      if (Array.isArray(orderData) && orderData.length > 0) {
+        setLastOrder(orderData[0]);
       }
     } catch (err) {
-      console.error("Failed to fetch addresses");
+      console.error("Failed to fetch user checkout data");
     }
   };
 
@@ -72,13 +81,14 @@ export default function Checkout() {
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const selectAddress = (addr) => {
-    setSelectedAddrId(addr._id);
+    setSelectedAddrId(addr._id || addr.id);
     setForm({
       ...form,
-      firstName: addr.firstName || "",
-      lastName: addr.lastName || "",
-      email: addr.email || form.email,
-      phone: addr.phone || "",
+      firstName: addr.firstName || user?.name?.split(" ")[0] || "",
+      lastName:
+        addr.lastName || user?.name?.split(" ").slice(1).join(" ") || "",
+      email: addr.email || user?.email || form.email,
+      phone: addr.phone || user?.phone || "",
       address: addr.address,
       city: addr.city,
       postalCode: addr.postalCode,
@@ -86,12 +96,34 @@ export default function Checkout() {
     setShowNewForm(false);
   };
 
+  // 3. ADDED: Elegant Quick Fill handler
+  const handleQuickFillFromLastOrder = () => {
+    if (!lastOrder) return;
+
+    // Attempt to split the name from the last order, or fallback to current user profile
+    const nameParts = lastOrder.customerName
+      ? lastOrder.customerName.split(" ")
+      : user?.name?.split(" ") || ["", ""];
+
+    setForm({
+      ...form,
+      firstName: nameParts[0] || "",
+      lastName: nameParts.slice(1).join(" ") || "",
+      email: lastOrder.email || user?.email || "",
+      phone: lastOrder.phone || user?.phone || "",
+      address: lastOrder.address || "",
+      city: lastOrder.city || "",
+      postalCode: lastOrder.postalCode || "",
+    });
+    setSelectedAddrId(null);
+    setShowNewForm(true);
+  };
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     setPlacing(true);
     setOrderError("");
 
-    // 1. Save address if new and requested
     if (saveAddress && showNewForm && token) {
       try {
         await fetch(`${API}/api/user/address`, {
@@ -113,10 +145,11 @@ export default function Checkout() {
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
+
         const orderRes = await fetch(`${API}/api/razorpay/order`, {
           method: "POST",
           headers,
-          body: JSON.stringify({ amount: cartTotal }),
+          body: JSON.stringify({ items: cartItems }),
         });
         const orderData = await orderRes.json();
 
@@ -141,7 +174,7 @@ export default function Checkout() {
         const rzp = new window.Razorpay(options);
         rzp.open();
       } catch (err) {
-        setOrderError("Payment failed to initialize.");
+        setOrderError("Payment failed to initialize. Check your Razorpay Key.");
         setPlacing(false);
       }
     } else {
@@ -213,47 +246,73 @@ export default function Checkout() {
           className="checkout-main animate-fadeUp"
           style={{ animationDelay: "0.1s" }}
         >
-          {}
           <section className="checkout-section glass">
             <div className="section-title">
               <MapPin size={22} />
               <h2>Shipping Address</h2>
             </div>
 
-            <div className="address-selection-grid">
-              {savedAddresses.map((addr) => (
-                <div
-                  key={addr._id}
-                  className={`address-card ${selectedAddrId === addr._id ? "selected" : ""}`}
-                  onClick={() => selectAddress(addr)}
-                >
-                  <div className="card-check">
-                    <CheckCircle size={18} />
-                  </div>
-                  <strong>
-                    {addr.firstName} {addr.lastName}
-                  </strong>
-                  <p>{addr.address}</p>
-                  <p>
-                    {addr.city}, {addr.postalCode}
-                  </p>
-                  <p className="card-phone">{addr.phone}</p>
-                </div>
-              ))}
+            {}
+            {savedAddresses.length > 0 && (
               <div
-                className={`address-card add-new-card ${showNewForm ? "selected" : ""}`}
-                onClick={() => {
-                  setShowNewForm(true);
-                  setSelectedAddrId(null);
-                }}
+                className="address-selection-grid"
+                style={{ marginBottom: "20px" }}
               >
-                <Plus size={24} />
-                <span>Add New Address</span>
+                {savedAddresses.map((addr) => (
+                  <div
+                    key={addr._id || addr.address}
+                    className={`address-card ${selectedAddrId === (addr._id || addr.id) ? "selected" : ""}`}
+                    onClick={() => selectAddress(addr)}
+                  >
+                    <div className="card-check">
+                      <CheckCircle size={18} />
+                    </div>
+                    <strong>
+                      {addr.firstName} {addr.lastName}
+                    </strong>
+                    <p>{addr.address}</p>
+                    <p>
+                      {addr.city}, {addr.postalCode}
+                    </p>
+                    <p className="card-phone">{addr.phone}</p>
+                  </div>
+                ))}
+                <div
+                  className={`address-card add-new-card ${showNewForm ? "selected" : ""}`}
+                  onClick={() => {
+                    setShowNewForm(true);
+                    setSelectedAddrId(null);
+                  }}
+                >
+                  <Plus size={24} />
+                  <span>Add New Address</span>
+                </div>
               </div>
-            </div>
+            )}
 
+            {}
             {showNewForm && (
               <div className="new-address-form animate-slideDown">
+                {}
+                {lastOrder && (
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleQuickFillFromLastOrder}
+                    style={{
+                      marginBottom: "20px",
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center",
+                      width: "100%",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Zap size={18} color="#f59e0b" />
+                    Autofill from my last order
+                  </button>
+                )}
+
                 <div className="form-row">
                   <div className="input-group">
                     <label>First Name</label>
@@ -325,7 +384,16 @@ export default function Checkout() {
                   </div>
                 </div>
                 {token && (
-                  <label className="save-check">
+                  <label
+                    className="save-check"
+                    style={{
+                      marginTop: "16px",
+                      display: "flex",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontWeight: "600",
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={saveAddress}
@@ -338,7 +406,6 @@ export default function Checkout() {
             )}
           </section>
 
-          {}
           <section className="checkout-section glass">
             <div className="section-title">
               <CreditCard size={22} />
@@ -384,7 +451,6 @@ export default function Checkout() {
           )}
         </div>
 
-        {}
         <aside
           className="checkout-sidebar animate-fadeUp"
           style={{ animationDelay: "0.2s" }}

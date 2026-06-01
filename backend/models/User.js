@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     password: { type: String, required: true },
     role: { type: String, default: "user" },
+    wishlist: [{ type: String }],
     savedAddresses: [
       {
         firstName: String,

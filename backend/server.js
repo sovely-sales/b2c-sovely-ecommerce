@@ -66,8 +66,21 @@ app.get("/api/products", async (req, res) => {
     }
 
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), "i");
-      filter.$or = [{ name: searchRegex }, { title: searchRegex }];
+      const safeSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const terms = safeSearch.split(/\s+/);
+
+      const allWordsRegex = new RegExp(
+        terms.map((t) => `(?=.*${t})`).join(""),
+        "i",
+      );
+
+      const typoRegex = new RegExp(safeSearch.split("").join(".*?"), "i");
+
+      filter.$or = [{ name: allWordsRegex }, { title: allWordsRegex }];
+
+      if (safeSearch.length < 20) {
+        filter.$or.push({ name: typoRegex }, { title: typoRegex });
+      }
     }
 
     if (deals === "true") {
@@ -110,9 +123,44 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
-app.post("/api/orders", async (req, res) => {
+app.post("/api/orders", authenticate("user"), async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const { items, ...restBody } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    let calculatedSubtotal = 0;
+    const mongoose = require("mongoose");
+
+    for (let item of items) {
+      let query = mongoose.Types.ObjectId.isValid(item.id)
+        ? {
+            $or: [
+              { _id: item.id },
+              { id: isNaN(item.id) ? -1 : parseInt(item.id) },
+            ],
+          }
+        : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
+
+      const product = await Product.findOne(query);
+      if (product) {
+        const itemPrice =
+          (product.dropshipBasePrice || product.price || 0) + 30;
+        calculatedSubtotal += itemPrice * item.quantity;
+      }
+    }
+
+    const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
+    const finalTotal = calculatedSubtotal + deliveryFee;
+
+    const order = new Order({
+      ...restBody,
+      items,
+      total: finalTotal,
+    });
+
     const saved = await order.save();
     res.status(201).json({ success: true, orderId: saved._id });
   } catch (error) {
@@ -336,6 +384,93 @@ app.post("/api/user/address", authenticate("user"), async (req, res) => {
   }
 });
 
+app.get("/api/user/wishlist", authenticate("user"), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    res.json(user.wishlist || []);
+  } catch {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+app.post(
+  "/api/user/wishlist/toggle",
+  authenticate("user"),
+  async (req, res) => {
+    try {
+      const { productId } = req.body;
+      const user = await User.findById(req.user.id);
+
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      if (!user.wishlist) user.wishlist = [];
+
+      const stringId = String(productId);
+      const index = user.wishlist.indexOf(stringId);
+
+      if (index === -1) {
+        user.wishlist.push(stringId);
+      } else {
+        user.wishlist.splice(index, 1);
+      }
+
+      await user.save();
+      res.json({ success: true, wishlist: user.wishlist });
+    } catch (err) {
+      console.error("Wishlist toggle error:", err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  },
+);
+
+app.post(
+  "/api/products/:id/reviews",
+  authenticate("user"),
+  async (req, res) => {
+    try {
+      const { rating, comment } = req.body;
+      const { id } = req.params;
+      const mongoose = require("mongoose");
+
+      let query = mongoose.Types.ObjectId.isValid(id)
+        ? { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] }
+        : { id: isNaN(id) ? -1 : parseInt(id) };
+
+      const product = await Product.findOne(query);
+      if (!product)
+        return res.status(404).json({ message: "Product not found" });
+
+      const alreadyReviewed = product.reviewsList.find(
+        (r) => r.userId.toString() === req.user.id.toString(),
+      );
+
+      if (alreadyReviewed) {
+        return res.status(400).json({ message: "Product already reviewed" });
+      }
+
+      const review = {
+        userId: req.user.id,
+        userName: req.user.name,
+        rating: Number(rating),
+        comment,
+      };
+
+      product.reviewsList.push(review);
+      product.reviews = product.reviewsList.length;
+
+      product.rating =
+        product.reviewsList.reduce((acc, item) => item.rating + acc, 0) /
+        product.reviewsList.length;
+
+      await product.save();
+      res.status(201).json({ success: true, message: "Review added", product });
+    } catch (error) {
+      console.error("Review error:", error);
+      res.status(500).json({ message: "Server Error" });
+    }
+  },
+);
+
 app.get("/api/user/addresses", authenticate("user"), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -345,16 +480,45 @@ app.get("/api/user/addresses", authenticate("user"), async (req, res) => {
   }
 });
 
-app.post("/api/razorpay/order", async (req, res) => {
+app.post("/api/razorpay/order", authenticate("user"), async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { items } = req.body;
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    let calculatedSubtotal = 0;
+    const mongoose = require("mongoose");
+
+    for (let item of items) {
+      let query = mongoose.Types.ObjectId.isValid(item.id)
+        ? {
+            $or: [
+              { _id: item.id },
+              { id: isNaN(item.id) ? -1 : parseInt(item.id) },
+            ],
+          }
+        : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
+
+      const product = await Product.findOne(query);
+      if (product) {
+        const itemPrice =
+          (product.dropshipBasePrice || product.price || 0) + 30;
+        calculatedSubtotal += itemPrice * item.quantity;
+      }
+    }
+
+    const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
+    const finalTotal = calculatedSubtotal + deliveryFee;
+
     const options = {
-      amount: Math.round(amount * 100),
+      amount: Math.round(finalTotal * 100),
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
+
     const order = await razorpay.orders.create(options);
-    res.json({ success: true, order });
+    res.json({ success: true, order, finalTotal });
   } catch (err) {
     console.error("Razorpay Order Error:", err);
     res.status(500).json({ message: "Could not create Razorpay order" });

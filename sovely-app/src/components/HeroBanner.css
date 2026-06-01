@@ -28,7 +28,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.2); /* Slight darkening of image only */
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
 }
@@ -137,7 +137,7 @@
 .slider-dot {
   width: 16px;
   height: 16px;
-  border-radius: 0; /* Square brutalist dots */
+  border-radius: 0;
   background: var(--bg-card);
   border: var(--border-thick);
   padding: 0;

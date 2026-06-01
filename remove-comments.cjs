@@ -36,8 +36,20 @@ function cleanFile(filePath) {
         try {
             const originalCode = fs.readFileSync(filePath, 'utf8');
             
-            // Strip comments safely using AST logic
-            const cleanCode = strip(originalCode);
+            // --- THE FIX: MASKING ---
+            // Temporarily replace '//' in URLs so the stripper ignores them
+            let safeCode = originalCode
+                .replace(/(https?:)\/\//gi, '$1__SAFE_SLASH_SLASH__') // Masks http:// and https://
+                .replace(/(wss?:)\/\//gi, '$1__SAFE_SLASH_SLASH__')   // Masks ws:// and wss:// (WebSockets)
+                .replace(/=(["'])\/\//g, '=$1__SAFE_SLASH_SLASH__')   // Masks protocol-relative src="//domain.com"
+                .replace(/url\(\s*["']?\/\//gi, 'url(__SAFE_SLASH_SLASH__'); // Masks url(//...) in CSS
+
+            // Strip comments safely from the masked code
+            let cleanCode = strip(safeCode);
+            
+            // --- THE FIX: UNMASKING ---
+            // Put the URLs back exactly how they were
+            cleanCode = cleanCode.replace(/__SAFE_SLASH_SLASH__/g, '//');
             
             // Only write back if something actually changed
             if (originalCode !== cleanCode) {
@@ -51,6 +63,6 @@ function cleanFile(filePath) {
 }
 
 console.log('🚀 Starting robust comment removal...');
-// Start from current directory (or change to './src' to be extra safe)
+// Start from current directory
 walkDir(__dirname, cleanFile);
 console.log('🎉 Comment purge complete!');

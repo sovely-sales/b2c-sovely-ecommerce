@@ -6,7 +6,11 @@ export function DataProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => {
+    const savedCart = localStorage.getItem("cartItems");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+  const [wishlist, setWishlist] = useState([]);
   const [user, setUser] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchFilter, setSearchFilter] = useState("");
@@ -15,7 +19,6 @@ export function DataProvider({ children }) {
   // Theme State
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
-  // Apply Theme to Document
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
@@ -25,7 +28,6 @@ export function DataProvider({ children }) {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // Initialize Auth
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
     if (savedUser) {
@@ -83,8 +85,59 @@ export function DataProvider({ children }) {
   const cartTotal = cartSubtotal + cartDelivery;
 
   useEffect(() => {
+    if (user && user.role !== "admin") {
+      const fetchWishlist = async () => {
+        const token = localStorage.getItem("userToken");
+        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+        try {
+          const res = await fetch(`${API_URL}/api/user/wishlist`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setWishlist(data);
+          }
+        } catch (err) {
+          console.error("Failed to load wishlist");
+        }
+      };
+      fetchWishlist();
+    } else {
+      setWishlist([]);
+    }
+  }, [user]);
+
+  const toggleWishlist = async (productId) => {
+    if (!user) return;
+
+    const stringId = String(productId);
+
+    setWishlist((prev) =>
+      prev.includes(stringId)
+        ? prev.filter((id) => id !== stringId)
+        : [...prev, stringId],
+    );
+
+    const token = localStorage.getItem("userToken");
+    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+
+    try {
+      await fetch(`${API_URL}/api/user/wishlist/toggle`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: stringId }),
+      });
+    } catch (err) {
+      console.error("Wishlist sync failed");
+    }
+  };
+
+  useEffect(() => {
     const fetchData = async () => {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8014";
+      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
       try {
         const [productsRes, categoriesRes] = await Promise.all([
           fetch(`${API_URL}/api/products?limit=12`),
@@ -278,6 +331,10 @@ export function DataProvider({ children }) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
   return (
     <DataContext.Provider
       value={{
@@ -292,6 +349,8 @@ export function DataProvider({ children }) {
         cartSubtotal,
         cartDelivery,
         cartTotal,
+        wishlist,
+        toggleWishlist,
         user,
         login,
         logout,
@@ -301,8 +360,8 @@ export function DataProvider({ children }) {
         setSearchFilter,
         isCartOpen,
         setIsCartOpen,
-        theme, // Added Theme
-        toggleTheme, // Added Toggle function
+        theme,
+        toggleTheme,
       }}
     >
       {children}
