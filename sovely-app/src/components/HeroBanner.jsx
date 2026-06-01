@@ -57,17 +57,18 @@ export default function HeroBanner() {
             style={{ backgroundImage: `url(${offer.image})` }}
           >
             <div className="slide-overlay">
-              <div className="slide-content container">
-                <span className="slide-tag">{offer.title}</span>
-                <h1 className="slide-title">{offer.subtitle}</h1>
-                <button className="slide-cta">{offer.cta} →</button>
+              <div className="container">
+                <div className="slide-content-box">
+                  <span className="slide-tag">{offer.title}</span>
+                  <h1 className="slide-title">{offer.subtitle}</h1>
+                  <button className="slide-cta">{offer.cta} →</button>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {}
       <button
         className="slider-arrow prev"
         onClick={prevSlide}
@@ -83,7 +84,6 @@ export default function HeroBanner() {
         <ChevronRight size={24} />
       </button>
 
-      {}
       <div className="slider-dots">
         {OFFERS.map((_, idx) => (
           <button

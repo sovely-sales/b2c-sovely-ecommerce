@@ -12,6 +12,19 @@ export function DataProvider({ children }) {
   const [searchFilter, setSearchFilter] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Theme State
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+  // Apply Theme to Document
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
   // Initialize Auth
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
@@ -288,6 +301,8 @@ export function DataProvider({ children }) {
         setSearchFilter,
         isCartOpen,
         setIsCartOpen,
+        theme, // Added Theme
+        toggleTheme, // Added Toggle function
       }}
     >
       {children}

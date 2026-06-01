@@ -6,21 +6,15 @@ import "./ProductCard.css";
 
 const extractProductSize = (name) => {
   if (!name) return "1 pc";
-
   const parenMatch = name.match(
     /\(([^)]*(?:pc|pcs|kg|g|ml|l|ltr|basket|unit|units|pack|packs|gm|gms|oz)[^)]*)\)/i,
   );
-  if (parenMatch) {
-    return parenMatch[1].trim();
-  }
+  if (parenMatch) return parenMatch[1].trim();
 
   const endMatch = name.match(
     /(?:\b|\s)(\d+\s*(?:pc|pcs|kg|g|ml|l|ltr|basket|unit|units|pack|packs|gm|gms|oz)\b)/i,
   );
-  if (endMatch) {
-    return endMatch[1].trim();
-  }
-
+  if (endMatch) return endMatch[1].trim();
   return "1 pc";
 };
 
@@ -70,11 +64,9 @@ export default function ProductCard({ product }) {
       className="autorev-product-card"
       id={`product-card-${product.id}`}
     >
-      {}
       <div className="card-img-wrap">
         <img src={product.image} alt={product.name} loading="lazy" />
 
-        {}
         <button
           className={`card-add-btn ${added ? "added" : ""}`}
           onClick={handleQuickAdd}
@@ -91,9 +83,7 @@ export default function ProductCard({ product }) {
         </button>
       </div>
 
-      {}
       <div className="card-info-wrap">
-        {}
         <div className="card-price-row">
           <div className="card-price-badge">₹{formattedPrice}</div>
           {formattedOriginalPrice && discountAmount > 0 && (
@@ -103,7 +93,6 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {}
         {discountAmount > 0 && (
           <div className="card-discount-row">
             <span className="card-discount-text">₹{discountAmount} OFF</span>
@@ -111,15 +100,12 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        {}
         <h3 className="card-title" title={product.name}>
           {displayName}
         </h3>
 
-        {}
         <div className="card-size">{productSize}</div>
 
-        {}
         <div className="card-rating-row">
           <div className="card-rating-badge">
             <Star size={14} className="card-star-icon" />

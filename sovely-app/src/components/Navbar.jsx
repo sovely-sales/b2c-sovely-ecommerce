@@ -12,6 +12,8 @@ import {
   Bell,
   LogOut,
   LayoutDashboard,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import sovelyLogo from "../assets/sovely-logo.png";
@@ -29,6 +31,8 @@ export default function Navbar() {
     setSearchFilter,
     isCartOpen,
     setIsCartOpen,
+    theme,
+    toggleTheme,
   } = useData();
   const [scrolled, setScrolled] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -68,10 +72,14 @@ export default function Navbar() {
     <>
       <header className={`main-navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-container">
-          {}
           <div className="nav-left">
             <Link to="/" className="nav-logo">
-              <img src={sovelyLogo} alt="Sovely" height="40" />
+              <img
+                src={sovelyLogo}
+                alt="Sovely"
+                height="40"
+                className="nav-logo-img"
+              />
             </Link>
             <div className="nav-categories-wrap" ref={categoryRef}>
               <button
@@ -89,7 +97,7 @@ export default function Navbar() {
               </button>
 
               {showCategoryMenu && (
-                <div className="category-dropdown-menu glass animate-fadeUp">
+                <div className="category-dropdown-menu animate-fadeUp">
                   <button
                     className={`cat-item ${selectedCategory === "All" ? "active" : ""}`}
                     onClick={() => handleCategorySelect("All")}
@@ -111,7 +119,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {}
           {user?.role !== "admin" ? (
             <div className="nav-search-section">
               <div className="search-bar">
@@ -139,11 +146,19 @@ export default function Navbar() {
             ></div>
           )}
 
-          {}
           <div className="nav-actions">
+            {/* Theme Toggle Button */}
+            <button
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
             {user?.role !== "admin" ? (
               <>
-                <Link to="/wishlist" className="action-link-text">
+                <Link to="/wishlist" className="action-link-text hidden-mobile">
                   Wishlist
                 </Link>
 
@@ -157,7 +172,7 @@ export default function Navbar() {
                   </button>
 
                   {showProfileMenu && (
-                    <div className="profile-dropdown glass animate-fadeUp">
+                    <div className="profile-dropdown animate-fadeUp">
                       {user ? (
                         <>
                           <div className="dropdown-user-info">
@@ -210,11 +225,11 @@ export default function Navbar() {
                 </div>
 
                 <button
-                  className="cart-link-text"
+                  className="cart-btn-neo"
                   onClick={() => setIsCartOpen(true)}
                 >
-                  Cart
-                  <span className="cart-badge-square">{cartCount}</span>
+                  <ShoppingCart size={18} />
+                  <span className="cart-badge-neo">{cartCount}</span>
                 </button>
               </>
             ) : (
@@ -232,7 +247,7 @@ export default function Navbar() {
                   </button>
 
                   {showProfileMenu && (
-                    <div className="profile-dropdown glass animate-fadeUp">
+                    <div className="profile-dropdown animate-fadeUp">
                       <div className="dropdown-divider"></div>
                       <button
                         onClick={() => {

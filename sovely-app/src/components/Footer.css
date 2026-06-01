@@ -1,6 +1,8 @@
 .footer {
-  background: var(--gray-900);
-  color: var(--gray-300);
+  background: var(--footer-bg);
+  color: var(--text-main);
+  border-top: var(--border-thick);
+  margin-top: 40px;
 }
 
 .footer-main {
@@ -14,13 +16,16 @@
   height: 48px;
   width: auto;
   margin-bottom: 16px;
+  /* Logo filter trick: only invert if in dark mode */
+  filter: brightness(0) invert(0);
+}
+[data-theme="dark"] .footer-logo img {
   filter: brightness(0) invert(1);
-  opacity: 0.9;
 }
 
 .footer-tagline {
   font-size: 0.875rem;
-  color: var(--gray-400);
+  color: var(--text-muted);
   line-height: 1.7;
   margin-bottom: 20px;
 }
@@ -37,38 +42,42 @@
   align-items: center;
   gap: 8px;
   font-size: 0.82rem;
-  color: var(--gray-400);
+  color: var(--text-main);
+  font-weight: 500;
 }
 
 .footer-socials {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .social-btn {
-  width: 36px;
-  height: 36px;
-  background: var(--gray-800);
+  width: 40px;
+  height: 40px;
+  background: var(--bg-card);
+  border: var(--border-thick);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gray-400);
+  color: var(--text-main);
+  box-shadow: var(--shadow-neo);
   transition: var(--transition);
 }
 
 .social-btn:hover {
   background: var(--primary);
-  color: var(--white);
-  transform: translateY(-2px);
+  color: #000;
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .footer-col-title {
   font-family: var(--font-heading);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--white);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-main);
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -85,19 +94,21 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.85rem;
-  color: var(--gray-400);
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
   transition: var(--transition);
 }
 
 .footer-link:hover {
   color: var(--primary);
-  gap: 10px;
+  transform: translateX(4px);
 }
 
 .footer-app-desc {
-  font-size: 0.82rem;
-  color: var(--gray-500);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
   margin-bottom: 14px;
   margin-top: -10px;
 }
@@ -106,37 +117,42 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--gray-800);
-  border: 1px solid var(--gray-700);
+  background: var(--bg-card);
+  border: var(--border-thick);
   border-radius: var(--radius-sm);
   padding: 10px 16px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   transition: var(--transition);
-  color: var(--white);
+  color: var(--text-main);
+  box-shadow: var(--shadow-neo);
 }
 
 .app-store-btn:hover {
-  border-color: var(--primary);
-  background: var(--gray-700);
+  background: var(--primary);
+  color: #000;
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .app-icon {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
 }
 
 .app-store-btn small {
   display: block;
-  font-size: 0.68rem;
-  color: var(--gray-500);
-}
-
-.app-store-btn p {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
+.app-store-btn p {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .footer-bottom {
-  border-top: 1px solid var(--gray-800);
+  border-top: var(--border-thick);
+  background: var(--bg-card);
 }
 
 .footer-bottom-inner {
@@ -149,8 +165,9 @@
 }
 
 .footer-copy {
-  font-size: 0.8rem;
-  color: var(--gray-500);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .footer-bottom-links {
@@ -159,8 +176,9 @@
 }
 
 .footer-bottom-links a {
-  font-size: 0.8rem;
-  color: var(--gray-500);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
   transition: var(--transition);
 }
 
@@ -175,13 +193,14 @@
 }
 
 .payment-chip {
-  background: var(--gray-800);
-  border: 1px solid var(--gray-700);
-  color: var(--gray-400);
-  font-size: 0.72rem;
-  font-weight: 600;
+  background: var(--bg-main);
+  border: var(--border-thin);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 800;
   padding: 4px 10px;
   border-radius: var(--radius-sm);
+  text-transform: uppercase;
 }
 
 @media (max-width: 1100px) {

@@ -1,54 +1,52 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
+  /* Brand Colors (Constant across themes) */
   --primary: #10b981;
   --primary-dark: #059669;
   --primary-light: #d1fae5;
   --secondary: #0ea5e9;
   --accent: #f59e0b;
 
-  --bg-main: #f1f5f9;
+  /* LIGHT THEME (Default) */
+  --bg-main: #f4f4f0; /* Slightly off-white for better contrast */
   --bg-card: #ffffff;
-  --bg-sidebar: #0f172a;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: #0f172a; /* Hard black border */
+  --shadow-color: #0f172a;
+  --input-bg: #ffffff;
+  --footer-bg: #e2e8f0;
 
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-on-dark: #f8fafc;
+  /* Neo-Brutalist Structural Variables */
+  --border-thick: 3px solid var(--border-color);
+  --border-thin: 1.5px solid var(--border-color);
+  --shadow-neo: 4px 4px 0px var(--shadow-color);
+  --shadow-neo-hover: 2px 2px 0px var(--shadow-color);
+  --shadow-neo-lg: 8px 8px 0px var(--shadow-color);
 
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-blur: 16px;
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:
-    0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg:
-    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
-
-  --header-height: 80px;
-  --sidebar-width: 280px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 32px;
+  --radius-sm: 4px;
+  --radius-md: 8px; /* Kept slightly rounded for intuitive feel */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --container-max: 1240px;
 
   --font-main: "Inter", sans-serif;
   --font-heading: "Outfit", sans-serif;
 
-  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* DARK THEME OVERRIDES */
+[data-theme="dark"] {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #f8fafc; /* Hard white border */
+  --shadow-color: #10b981; /* Neon green shadow for pop in dark mode */
+  --input-bg: #0f172a;
+  --footer-bg: #1e293b;
 }
 
 * {
@@ -64,6 +62,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 h1,
@@ -74,7 +75,7 @@ h5,
 h6 {
   font-family: var(--font-heading);
   font-weight: 800;
-  color: var(--gray-900);
+  color: var(--text-main);
   line-height: 1.2;
 }
 
@@ -83,6 +84,7 @@ a {
   color: inherit;
   transition: var(--transition);
 }
+
 button {
   cursor: pointer;
   border: none;
@@ -90,10 +92,14 @@ button {
   font-family: inherit;
   transition: var(--transition);
 }
+
 input,
 textarea,
 select {
   font-family: inherit;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: var(--border-thin);
 }
 
 .container {
@@ -107,60 +113,74 @@ select {
   padding: 80px 0;
 }
 
+/* Replacing Glassmorphism with Neo-Brutalism */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-lg);
+  background: var(--bg-card);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo);
+  border-radius: var(--radius-md);
 }
 
 .card {
   background: var(--bg-card);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 32px;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--gray-100);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo);
+  transition: var(--transition);
 }
 
+.card:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+/* Base Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 12px 28px;
-  border-radius: 50px;
-  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
   font-size: 0.95rem;
   gap: 10px;
+  border: var(--border-thick);
   transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary {
   background: var(--primary);
-  color: white;
-  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+  color: #000; /* High contrast against green */
+  box-shadow: var(--shadow-neo);
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
+  background: var(--primary-light);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
 .btn-outline {
-  border: 2px solid var(--gray-200);
-  color: var(--gray-700);
+  background: var(--bg-card);
+  color: var(--text-main);
+  box-shadow: var(--shadow-neo);
 }
 
 .btn-outline:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: var(--primary-light);
+  background: var(--primary);
+  color: #000;
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
 }
 
+/* Animations adapted for structural feel */
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -169,22 +189,7 @@ select {
 }
 
 .animate-fadeUp {
-  animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeUp 0.4s ease-out forwards;
 }
 
 @keyframes shake {
@@ -193,10 +198,10 @@ select {
     transform: translateX(0);
   }
   25% {
-    transform: translateX(-5px);
+    transform: translateX(-4px);
   }
   75% {
-    transform: translateX(5px);
+    transform: translateX(4px);
   }
 }
 
