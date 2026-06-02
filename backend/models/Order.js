@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema(
     items: [
       {
         id: String,
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
         name: String,
         price: Number,
         quantity: Number,
@@ -21,7 +22,11 @@ const orderSchema = new mongoose.Schema(
     total: { type: Number, required: true },
     paymentMethod: { type: String, default: "razorpay" },
     paymentId: { type: String },
-    status: { type: String, default: "Pending" },
+    status: {
+      type: String,
+      default: "Pending",
+      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
+    },
   },
   { timestamps: true, collection: "b2c_orders" },
 );

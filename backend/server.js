@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const Razorpay = require("razorpay");
 require("dotenv").config({ path: "../.env" });
 
 const Product = require("./models/Product");
@@ -9,7 +11,11 @@ const Order = require("./models/Order");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
 const { signToken, authenticate } = require("./middleware/auth");
-const Razorpay = require("razorpay");
+
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined.");
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 8014;
@@ -19,7 +25,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || "secret_placeholder",
 });
 
-app.use(cors());
+app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -32,6 +38,36 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const calculateCartTotal = async (items) => {
+  let calculatedSubtotal = 0;
+
+  for (let item of items) {
+    let query = mongoose.Types.ObjectId.isValid(item.id)
+      ? {
+          $or: [
+            { _id: item.id },
+            { id: isNaN(item.id) ? -1 : parseInt(item.id) },
+          ],
+        }
+      : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
+
+    const product = await Product.findOne(query);
+    if (product) {
+      const itemPrice = (product.dropshipBasePrice || product.price || 0) + 30;
+      calculatedSubtotal += itemPrice * item.quantity;
+    }
+  }
+
+  const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
+  return {
+    calculatedSubtotal,
+    deliveryFee,
+    finalTotal: calculatedSubtotal + deliveryFee,
+  };
+};
+
 app.get("/api/categories", async (req, res) => {
   try {
     res.json(await Category.find({}));
@@ -42,16 +78,15 @@ app.get("/api/categories", async (req, res) => {
 
 app.get("/api/products", async (req, res) => {
   try {
-    const { category, limit, skip, search, deals, minPrice, maxPrice, sort } = req.query;
+    const { category, limit, skip, search, deals, minPrice, maxPrice, sort } =
+      req.query;
     let filter = {};
 
     if (category && category !== "All") {
-      const Category = require("./models/Category");
-      const mongoose = require("mongoose");
-
+      const safeCategory = escapeRegex(category.trim());
       const categoryDoc = await Category.findOne({
         $or: [
-          { name: { $regex: new RegExp("^" + category + "$", "i") } },
+          { name: { $regex: new RegExp("^" + safeCategory + "$", "i") } },
           { id: category },
         ],
       });
@@ -66,14 +101,13 @@ app.get("/api/products", async (req, res) => {
     }
 
     if (search && search.trim()) {
-      const safeSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const safeSearch = escapeRegex(search.trim());
       const terms = safeSearch.split(/\s+/);
 
       const allWordsRegex = new RegExp(
         terms.map((t) => `(?=.*${t})`).join(""),
         "i",
       );
-
       const typoRegex = new RegExp(safeSearch.split("").join(".*?"), "i");
 
       filter.$or = [{ name: allWordsRegex }, { title: allWordsRegex }];
@@ -100,10 +134,7 @@ app.get("/api/products", async (req, res) => {
       }
       filter.$and = filter.$and || [];
       filter.$and.push({
-        $or: [
-          { dropshipBasePrice: priceFilter },
-          { price: priceFilter }
-        ]
+        $or: [{ dropshipBasePrice: priceFilter }, { price: priceFilter }],
       });
     }
 
@@ -121,8 +152,8 @@ app.get("/api/products", async (req, res) => {
     }
     query.sort(sortObj);
 
-    const queryLimit = limit ? parseInt(limit) : 24;
-    const querySkip = skip ? parseInt(skip) : 0;
+    const queryLimit = Math.max(1, parseInt(limit) || 24);
+    const querySkip = Math.max(0, parseInt(skip) || 0);
 
     query.skip(querySkip).limit(queryLimit);
 
@@ -137,7 +168,6 @@ app.get("/api/products", async (req, res) => {
 app.get("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const mongoose = require("mongoose");
     let query = {};
     if (mongoose.Types.ObjectId.isValid(id)) {
       query = { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] };
@@ -161,39 +191,14 @@ app.post("/api/orders", async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    let calculatedSubtotal = 0;
-    const mongoose = require("mongoose");
+    const { finalTotal } = await calculateCartTotal(items);
 
-    for (let item of items) {
-      let query = mongoose.Types.ObjectId.isValid(item.id)
-        ? {
-            $or: [
-              { _id: item.id },
-              { id: isNaN(item.id) ? -1 : parseInt(item.id) },
-            ],
-          }
-        : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
-
-      const product = await Product.findOne(query);
-      if (product) {
-        const itemPrice =
-          (product.dropshipBasePrice || product.price || 0) + 30;
-        calculatedSubtotal += itemPrice * item.quantity;
-      }
-    }
-
-    const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
-    const finalTotal = calculatedSubtotal + deliveryFee;
-
-    // Optional user authentication to associate userId
-    const jwt = require("jsonwebtoken");
-    const JWT_SECRET = process.env.JWT_SECRET || "sovely_b2c_secret_2026";
     let userId = null;
     const authHeader = req.headers.authorization || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
     if (token) {
       try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.id;
       } catch (err) {
         // Ignore invalid token
@@ -220,25 +225,29 @@ app.get("/api/orders/track/:id", async (req, res) => {
     const id = req.params.id.trim();
     let order = null;
 
-    // 1. Try exact ObjectId lookup
     if (mongoose.Types.ObjectId.isValid(id) && id.length === 24) {
       order = await Order.findById(id);
     }
 
-    // 2. If not found, try matching by partial ID (last N chars)
     if (!order) {
       const allOrders = await Order.find({}).sort({ createdAt: -1 }).limit(500);
-      order = allOrders.find(o => o._id.toString().endsWith(id) || o._id.toString().includes(id));
+      order = allOrders.find(
+        (o) => o._id.toString().endsWith(id) || o._id.toString().includes(id),
+      );
     }
 
     if (!order) {
-      return res.status(404).json({ message: 'Order not found. Please check your Order ID and try again.' });
+      return res.status(404).json({
+        message: "Order not found. Please check your Order ID and try again.",
+      });
     }
 
     res.json(order);
   } catch (err) {
-    console.error('Track order error:', err);
-    res.status(400).json({ message: 'Could not look up that Order ID. Please verify and try again.' });
+    console.error("Track order error:", err);
+    res.status(400).json({
+      message: "Could not look up that Order ID. Please verify and try again.",
+    });
   }
 });
 
@@ -346,57 +355,45 @@ app.post("/api/register", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("Login attempt for:", email);
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
     const lowerEmail = email.toLowerCase();
 
     let admin = await Admin.findOne({ email: lowerEmail });
-    if (admin) {
-      console.log("Admin found, checking password...");
-      const match = await admin.comparePassword(password);
-      console.log("Password match:", match);
-      if (match) {
-        const token = signToken({
-          id: admin._id,
-          email: admin.email,
-          role: "admin",
-          name: admin.name,
-        });
-        return res.json({
-          success: true,
-          token,
-          name: admin.name,
-          email: admin.email,
-          role: "admin",
-        });
-      }
+    if (admin && (await admin.comparePassword(password))) {
+      const token = signToken({
+        id: admin._id,
+        email: admin.email,
+        role: "admin",
+        name: admin.name,
+      });
+      return res.json({
+        success: true,
+        token,
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
+      });
     }
 
     let user = await User.findOne({ email: lowerEmail });
-    if (user) {
-      console.log("User found, checking password...");
-      const match = await user.comparePassword(password);
-      console.log("Password match:", match);
-      if (match) {
-        const token = signToken({
-          id: user._id,
-          email: user.email,
-          role: "user",
-          name: user.name,
-        });
-        return res.json({
-          success: true,
-          token,
-          name: user.name,
-          email: user.email,
-          role: "user",
-        });
-      }
+    if (user && (await user.comparePassword(password))) {
+      const token = signToken({
+        id: user._id,
+        email: user.email,
+        role: "user",
+        name: user.name,
+      });
+      return res.json({
+        success: true,
+        token,
+        name: user.name,
+        email: user.email,
+        role: "user",
+      });
     }
 
-    console.log("No match found for:", email);
     return res
       .status(401)
       .json({ success: false, message: "Invalid credentials" });
@@ -426,6 +423,7 @@ app.get("/api/user/orders", authenticate("user"), async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
 app.post("/api/user/address", authenticate("user"), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -465,7 +463,6 @@ app.post(
       const user = await User.findById(req.user.id);
 
       if (!user) return res.status(404).json({ message: "User not found" });
-
       if (!user.wishlist) user.wishlist = [];
 
       const stringId = String(productId);
@@ -493,7 +490,6 @@ app.post(
     try {
       const { rating, comment } = req.body;
       const { id } = req.params;
-      const mongoose = require("mongoose");
 
       let query = mongoose.Types.ObjectId.isValid(id)
         ? { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] }
@@ -520,7 +516,6 @@ app.post(
 
       product.reviewsList.push(review);
       product.reviews = product.reviewsList.length;
-
       product.rating =
         product.reviewsList.reduce((acc, item) => item.rating + acc, 0) /
         product.reviewsList.length;
@@ -550,29 +545,7 @@ app.post("/api/razorpay/order", async (req, res) => {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    let calculatedSubtotal = 0;
-    const mongoose = require("mongoose");
-
-    for (let item of items) {
-      let query = mongoose.Types.ObjectId.isValid(item.id)
-        ? {
-            $or: [
-              { _id: item.id },
-              { id: isNaN(item.id) ? -1 : parseInt(item.id) },
-            ],
-          }
-        : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
-
-      const product = await Product.findOne(query);
-      if (product) {
-        const itemPrice =
-          (product.dropshipBasePrice || product.price || 0) + 30;
-        calculatedSubtotal += itemPrice * item.quantity;
-      }
-    }
-
-    const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
-    const finalTotal = calculatedSubtotal + deliveryFee;
+    const { finalTotal } = await calculateCartTotal(items);
 
     const options = {
       amount: Math.round(finalTotal * 100),

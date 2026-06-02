@@ -7,7 +7,7 @@ const categorySchema = new mongoose.Schema(
     icon: { type: String, required: true },
     color: { type: String, required: true },
     bg: { type: String, required: true },
-    count: { type: String, required: true },
+    count: { type: Number, required: true },
     image: { type: String, required: true },
   },
   { timestamps: true },

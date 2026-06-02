@@ -1,5 +1,13 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "sovely_b2c_secret_2026";
+
+if (!process.env.JWT_SECRET) {
+  console.error(
+    "FATAL ERROR: JWT_SECRET is not defined in environment variables.",
+  );
+  process.exit(1);
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function signToken(payload, expiresIn = "7d") {
   return jwt.sign(payload, JWT_SECRET, { expiresIn });

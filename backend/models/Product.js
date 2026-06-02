@@ -18,9 +18,11 @@ const productSchema = new mongoose.Schema(
   {
     id: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
-    category: { type: String, required: true },
+    category: { type: String, required: true, index: true },
     price: { type: Number, required: true },
     originalPrice: { type: Number, required: true },
+    dropshipBasePrice: { type: Number },
+    suggestedRetailPrice: { type: Number },
     rating: { type: Number, default: 0 },
     reviews: { type: Number, default: 0 },
     reviewsList: [reviewSchema],
