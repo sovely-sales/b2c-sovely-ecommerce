@@ -314,7 +314,7 @@ export default function Navbar() {
 
       <div className="nav-secondary-banner">
         <div className="container">
-          <p>NO HANDLING FEES - FREE SHIPPING ON ORDERS OVER ₹499*</p>
+          <p>NO HANDLING FEES - FREE SHIPPING ON ORDERS OVER ₹999*</p>
         </div>
       </div>
     </>

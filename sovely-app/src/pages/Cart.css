@@ -285,6 +285,116 @@
   line-height: 1.6;
 }
 
+/* Coupon Styles */
+.coupon-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: var(--border-thick);
+}
+
+.coupon-input-group {
+  display: flex;
+  align-items: stretch;
+  background: var(--input-bg);
+  border: var(--border-thick);
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow: var(--shadow-neo);
+  transition: all 0.3s ease;
+}
+
+.coupon-input-group:focus-within {
+  box-shadow: var(--shadow-neo-hover);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.coupon-input-group input {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--text-main);
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.coupon-input-group input::placeholder {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.coupon-input-group .apply-btn {
+  border: none;
+  border-left: var(--border-thick);
+  background: var(--primary);
+  color: #000;
+  padding: 0 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.coupon-input-group .apply-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.coupon-input-group .apply-btn:disabled {
+  background: var(--border-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.coupon-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.applied-coupon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary);
+  color: #000;
+  padding: 14px 20px;
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  box-shadow: var(--shadow-neo);
+  animation: fadeUp 0.4s ease-out;
+}
+
+.coupon-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remove-coupon-btn {
+  background: transparent;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.remove-coupon-btn:hover {
+  transform: rotate(90deg) scale(1.1);
+}
+
 @media (max-width: 1024px) {
   .cart-grid {
     grid-template-columns: 1fr;

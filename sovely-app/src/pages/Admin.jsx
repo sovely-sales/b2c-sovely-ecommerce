@@ -21,6 +21,8 @@ import {
   CheckCircle,
   Clock,
   Truck,
+  Tag,
+  Trash2,
 } from "lucide-react";
 import {
   AreaChart,
@@ -32,6 +34,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./Admin.css";
+
+import { useData } from "../context/DataContext";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
 
@@ -50,6 +54,11 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  
+  // Coupon State
+  const { availableCoupons: coupons, addCoupon, toggleCoupon: handleToggleCoupon, deleteCoupon: handleDeleteCoupon } = useData();
+  const [newCoupon, setNewCoupon] = useState({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -111,6 +120,34 @@ export default function Admin() {
     removeToken();
     navigate("/");
     window.location.reload();
+  };
+
+  const handleCreateCoupon = (e) => {
+    e.preventDefault();
+    if (!newCoupon.code || !newCoupon.code.trim()) {
+      alert("Please enter a Coupon Code.");
+      return;
+    }
+    if (!newCoupon.discountPercent) {
+      alert("Please enter a Discount Percentage.");
+      return;
+    }
+    
+    // Check if code already exists
+    if (coupons.some(c => c.code === newCoupon.code.toUpperCase())) {
+      alert("Coupon code already exists!");
+      return;
+    }
+
+    const payload = {
+      code: newCoupon.code.toUpperCase(),
+      discountPercent: Number(newCoupon.discountPercent),
+    };
+    if (newCoupon.expirationDate) payload.expirationDate = newCoupon.expirationDate;
+    if (newCoupon.usageLimit) payload.usageLimit = Number(newCoupon.usageLimit);
+
+    addCoupon(payload);
+    setNewCoupon({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
   };
 
   const processChartData = () => {
@@ -184,7 +221,16 @@ export default function Admin() {
             className={activeTab === "customers" ? "active" : ""}
             onClick={() => setActiveTab("customers")}
           >
-            <Users size={20} /> <span>Customers</span>
+            <Users size={20} />
+            {sidebarOpen && <span>Customers</span>}
+          </button>
+          
+          <button
+            className={activeTab === "coupons" ? "active" : ""}
+            onClick={() => setActiveTab("coupons")}
+          >
+            <Tag size={20} />
+            {sidebarOpen && <span>Coupons</span>}
           </button>
           <div className="nav-divider"></div>
           <button
@@ -593,6 +639,81 @@ export default function Admin() {
                 </div>
               </div>
             )}
+            
+            {activeTab === "coupons" && (
+              <div className="coupons-view animate-fadeUp">
+                <div className="view-header">
+                  <h3>Coupon Management</h3>
+                </div>
+                
+                <div className="card" style={{ marginBottom: "20px" }}>
+                  <form onSubmit={handleCreateCoupon} className="coupon-form" style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
+                    <div className="input-group">
+                      <label>Coupon Code</label>
+                      <input type="text" placeholder="e.g. SAVE20" value={newCoupon.code} onChange={e => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})} />
+                    </div>
+                    <div className="input-group">
+                      <label>Discount %</label>
+                      <input type="number" min="1" max="100" placeholder="e.g. 15" value={newCoupon.discountPercent} onChange={e => setNewCoupon({...newCoupon, discountPercent: e.target.value})} />
+                    </div>
+                    <div className="input-group">
+                      <label>Usage Limit (Optional)</label>
+                      <input type="number" min="1" placeholder="e.g. 100" value={newCoupon.usageLimit} onChange={e => setNewCoupon({...newCoupon, usageLimit: e.target.value})} />
+                    </div>
+                    <div className="input-group">
+                      <label>Expiration (Optional)</label>
+                      <input type="date" value={newCoupon.expirationDate} onChange={e => setNewCoupon({...newCoupon, expirationDate: e.target.value})} />
+                    </div>
+                    <button type="submit" className="btn btn-primary" style={{ padding: "12px 24px" }}>Add Coupon</button>
+                  </form>
+                </div>
+                
+                <div className="card">
+                  <div className="table-responsive">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Code</th>
+                          <th>Discount</th>
+                          <th>Usage</th>
+                          <th>Expires</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {coupons.length === 0 && (
+                          <tr><td colSpan="6" style={{textAlign: "center"}}>No coupons found</td></tr>
+                        )}
+                        {coupons.map((coupon) => (
+                          <tr key={coupon._id}>
+                            <td><strong>{coupon.code}</strong></td>
+                            <td>{coupon.discountPercent}%</td>
+                            <td>{coupon.timesUsed} / {coupon.usageLimit || '∞'}</td>
+                            <td>{coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleDateString() : 'Never'}</td>
+                            <td>
+                              <button 
+                                onClick={() => handleToggleCoupon(coupon._id)} 
+                                className={`badge-${coupon.isActive ? 'green' : 'gray'}`}
+                                style={{ border: 'none', cursor: 'pointer' }}
+                              >
+                                {coupon.isActive ? 'Active' : 'Inactive'}
+                              </button>
+                            </td>
+                            <td>
+                              <button onClick={() => handleDeleteCoupon(coupon._id)} className="btn-icon" style={{color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                                <Trash2 size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+            
           </div>
         </main>
       </div>

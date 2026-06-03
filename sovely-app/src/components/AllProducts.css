@@ -143,8 +143,8 @@
 
 @media (max-width: 640px) {
   .all-products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
   .products-section-header {
     flex-direction: column;

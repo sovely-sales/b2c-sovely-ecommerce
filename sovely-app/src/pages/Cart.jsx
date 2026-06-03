@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   ShoppingBag,
@@ -7,6 +8,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Truck,
+  Tag,
+  X
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import "./Cart.css";
@@ -19,8 +22,16 @@ export default function Cart() {
     cartSubtotal,
     cartDelivery,
     cartTotal,
+    coupon,
+    setCoupon,
+    setCouponPercent,
+    couponDiscount,
+    availableCoupons,
   } = useData();
   const navigate = useNavigate();
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const formatPrice = (n) =>
     new Intl.NumberFormat("en-IN", {
@@ -28,6 +39,41 @@ export default function Cart() {
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(n);
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) return;
+    setCouponError("");
+    
+    const matchedCoupon = availableCoupons.find(c => c.code === couponInput.toUpperCase());
+    
+    if (!matchedCoupon) {
+      setCouponError("Invalid coupon code");
+      return;
+    }
+    if (!matchedCoupon.isActive) {
+      setCouponError("Coupon is inactive");
+      return;
+    }
+    if (matchedCoupon.expirationDate && new Date() > new Date(matchedCoupon.expirationDate)) {
+      setCouponError("Coupon has expired");
+      return;
+    }
+    if (matchedCoupon.usageLimit && matchedCoupon.timesUsed >= matchedCoupon.usageLimit) {
+      setCouponError("Coupon usage limit reached");
+      return;
+    }
+
+    setCoupon(matchedCoupon.code);
+    setCouponPercent(matchedCoupon.discountPercent);
+    setCouponError("");
+  };
+
+  const handleRemoveCoupon = () => {
+    setCoupon(null);
+    setCouponPercent(0);
+    setCouponInput("");
+    setCouponError("");
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -90,7 +136,7 @@ export default function Cart() {
 
                 <div className="item-actions">
                   <div className="qty-picker">
-                    {}
+                    {/* Decrease quantity */}
                     <button
                       onClick={() => updateQuantity(item.id, -1)}
                       disabled={item.quantity <= 1}
@@ -99,7 +145,7 @@ export default function Cart() {
                     </button>
                     <span>{item.quantity}</span>
 
-                    {}
+                    {/* Increase quantity */}
                     <button onClick={() => updateQuantity(item.id, 1)}>
                       <Plus size={16} />
                     </button>
@@ -120,6 +166,41 @@ export default function Cart() {
           <div className="summary-card glass">
             <h3>Order Summary</h3>
 
+            {/* Coupon Section */}
+            <div className="coupon-section">
+              {coupon ? (
+                <div className="applied-coupon">
+                  <div className="coupon-success">
+                    <Tag size={16} />
+                    <span>Coupon <strong>{coupon}</strong> applied!</span>
+                  </div>
+                  <button onClick={handleRemoveCoupon} className="remove-coupon-btn">
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div className="coupon-action-group" style={{ display: "flex", gap: "12px" }}>
+                  <input
+                    type="text"
+                    className="coupon-input-standalone"
+                    placeholder="Enter coupon"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                    style={{ flex: 1, padding: "12px 16px", border: "2px solid var(--border-color)", borderRadius: "8px", background: "transparent", color: "var(--text-main)", outline: "none", fontWeight: "700" }}
+                  />
+                  <button 
+                    onClick={handleApplyCoupon} 
+                    className="btn btn-primary"
+                    disabled={couponLoading || !couponInput.trim()}
+                    style={{ padding: "0 24px", whiteSpace: "nowrap" }}
+                  >
+                    {couponLoading ? "..." : "Apply"}
+                  </button>
+                </div>
+              )}
+              {couponError && <p className="coupon-error">{couponError}</p>}
+            </div>
+
             <div className="summary-rows">
               <div className="summary-row">
                 <span>Subtotal</span>
@@ -131,10 +212,12 @@ export default function Cart() {
                   {cartDelivery === 0 ? "FREE" : formatPrice(cartDelivery)}
                 </span>
               </div>
-              <div className="summary-row promo-row">
-                <span>Platform Discount</span>
-                <span className="discount-text">- {formatPrice(0)}</span>
-              </div>
+              {couponDiscount > 0 && (
+                <div className="summary-row promo-row">
+                  <span>Coupon Discount</span>
+                  <span className="discount-text">- {formatPrice(couponDiscount)}</span>
+                </div>
+              )}
               <div className="divider"></div>
               <div className="summary-row total-row">
                 <span>Total</span>

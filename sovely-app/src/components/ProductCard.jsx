@@ -121,13 +121,6 @@ export default function ProductCard({ product }) {
 
         <div className="card-size">{productSize}</div>
 
-        <div className="card-rating-row">
-          <div className="card-rating-badge">
-            <Star size={14} className="card-star-icon" />
-            <span className="card-rating-score">{rating.toFixed(1)}</span>
-          </div>
-          <span className="card-reviews-count">({reviewsCount})</span>
-        </div>
       </div>
     </Link>
   );

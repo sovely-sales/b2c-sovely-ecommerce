@@ -165,11 +165,11 @@ export default function OrderSuccess() {
             <div className="subcard-content">
               <div className="price-row">
                 <span>Subtotal</span>
-                <span>{formatPrice(order.total - (order.total >= 499 ? 0 : 50))}</span>
+                <span>{formatPrice(order.total - (order.total >= 999 ? 0 : 50))}</span>
               </div>
               <div className="price-row">
                 <span>Delivery</span>
-                <span>{order.total >= 499 ? 'FREE' : formatPrice(50)}</span>
+                <span>{order.total >= 999 ? 'FREE' : formatPrice(50)}</span>
               </div>
               <div className="divider"></div>
               <div className="price-row grand-total">

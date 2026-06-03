@@ -5,7 +5,7 @@ const BADGES = [
   {
     icon: <Truck size={22} />,
     title: "Free Shipping",
-    desc: "On orders above ₹499",
+    desc: "On orders above ₹999",
   },
   {
     icon: <RotateCcw size={22} />,

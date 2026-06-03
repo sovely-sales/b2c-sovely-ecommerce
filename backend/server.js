@@ -10,6 +10,7 @@ const Category = require("./models/Category");
 const Order = require("./models/Order");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
+const Coupon = require("./models/Coupon");
 const { signToken, authenticate } = require("./middleware/auth");
 
 if (!process.env.JWT_SECRET) {

@@ -32,7 +32,7 @@ export default function ProductDetail() {
   const [commentInput, setCommentInput] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [productReviews, setProductReviews] = useState([]);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const found = products.find((p) => p.id.toString() === id);
@@ -127,53 +127,6 @@ export default function ProductDetail() {
       maximumFractionDigits: 0,
     }).format(n);
 
-  const submitReview = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setSubmitError("You must be logged in to leave a review.");
-      return;
-    }
-    setIsSubmitting(true);
-    setSubmitError("");
-
-    // RESTORED: Fixed the stripped http://
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
-    const token = localStorage.getItem("userToken");
-
-    try {
-      const res = await fetch(`${API_URL}/api/products/${product.id}/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ rating: ratingInput, comment: commentInput }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setProductReviews(data.product.reviewsList);
-        setCommentInput("");
-        setRatingInput(5);
-        // Update local rating state to reflect new average
-        setProduct((prev) => ({
-          ...prev,
-          rating: data.product.rating,
-          reviews: data.product.reviews,
-        }));
-      } else {
-        setSubmitError(data.message || "Failed to submit review");
-      }
-    } catch (err) {
-      setSubmitError("Server error.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
-
   if (loading)
     return (
       <div className="section container">
@@ -209,7 +162,6 @@ export default function ProductDetail() {
   return (
     <div className="product-detail-page section container">
       <div className="pd-grid">
-        {}
         <div className="pd-image-section">
           <div className="pd-main-img-wrap">
             <img
@@ -246,27 +198,9 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {}
         <div className="pd-info-section">
           <p className="pd-category">{product.category}</p>
           <h1 className="pd-title">{product.name}</h1>
-
-          <div className="pd-rating">
-            <div className="stars">
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star
-                  key={i}
-                  size={18}
-                  fill={i < Math.floor(product.rating) ? "#eab308" : "none"}
-                  stroke={
-                    i < Math.floor(product.rating) ? "#eab308" : "#d1d5db"
-                  }
-                />
-              ))}
-            </div>
-            <span className="pd-rating-val">{product.rating.toFixed(1)}</span>
-            <span className="pd-reviews">({product.reviews} reviews)</span>
-          </div>
 
           <div className="pd-price-row">
             <span className="pd-price">{formatPrice(product.price)}</span>
@@ -338,101 +272,6 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {}
-      <div className="pd-reviews-section">
-        <h2 className="reviews-title">Customer Reviews</h2>
-
-        <div className="reviews-grid">
-          <div className="review-form-container">
-            <h3>Write a Review</h3>
-            {user ? (
-              <form onSubmit={submitReview} className="review-form">
-                <div className="rating-select">
-                  <label>Rating</label>
-                  <div className="star-rating-input">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={24}
-                        fill={star <= ratingInput ? "#eab308" : "none"}
-                        stroke={star <= ratingInput ? "#eab308" : "#d1d5db"}
-                        onClick={() => setRatingInput(star)}
-                        style={{ cursor: "pointer" }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="comment-input">
-                  <label>Your Review</label>
-                  <textarea
-                    rows="4"
-                    value={commentInput}
-                    onChange={(e) => setCommentInput(e.target.value)}
-                    placeholder="What did you think about this product?"
-                    required
-                  ></textarea>
-                </div>
-
-                {submitError && <p className="review-error">{submitError}</p>}
-
-                <button
-                  type="submit"
-                  className="btn btn-primary submit-review-btn"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit Review"}
-                </button>
-              </form>
-            ) : (
-              <div className="login-prompt">
-                <p>
-                  Please{" "}
-                  <Link
-                    to="/login"
-                    style={{ color: "var(--primary)", fontWeight: "bold" }}
-                  >
-                    Sign In
-                  </Link>{" "}
-                  to write a review.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="reviews-list">
-            {productReviews.length === 0 ? (
-              <div className="no-reviews">
-                <p>No reviews yet. Be the first to review this product!</p>
-              </div>
-            ) : (
-              productReviews.map((review, index) => (
-                <div key={index} className="review-card">
-                  <div className="review-header">
-                    <strong>{review.userName}</strong>
-                    <span className="review-date">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="review-stars">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        fill={i < review.rating ? "#eab308" : "none"}
-                        stroke={i < review.rating ? "#eab308" : "#d1d5db"}
-                      />
-                    ))}
-                  </div>
-                  <p className="review-text">{review.comment}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {}
       {recommendations.length > 0 && (
         <div className="pd-recommendations">
           <h2 className="recommendations-title">You May Also Like</h2>

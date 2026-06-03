@@ -77,12 +77,50 @@ export function DataProvider({ children }) {
     });
   };
 
+  const [coupon, setCoupon] = useState(null);
+  const [couponPercent, setCouponPercent] = useState(0);
+
+  // Simple frontend-only coupon management (bypasses backend API)
+  const [availableCoupons, setAvailableCoupons] = useState(() => {
+    const saved = localStorage.getItem("sovely_coupons");
+    if (saved) return JSON.parse(saved);
+    return [
+      { _id: "1", code: "SAVE10", discountPercent: 10, isActive: true, timesUsed: 0, usageLimit: null, expirationDate: null },
+      { _id: "2", code: "WELCOME20", discountPercent: 20, isActive: true, timesUsed: 0, usageLimit: null, expirationDate: null }
+    ];
+  });
+
+  const saveCoupons = (newCoupons) => {
+    setAvailableCoupons(newCoupons);
+    localStorage.setItem("sovely_coupons", JSON.stringify(newCoupons));
+  };
+
+  const addCoupon = (newCoupon) => {
+    const couponToSave = {
+      ...newCoupon,
+      _id: Date.now().toString(),
+      isActive: true,
+      timesUsed: 0
+    };
+    saveCoupons([couponToSave, ...availableCoupons]);
+  };
+
+  const toggleCoupon = (id) => {
+    saveCoupons(availableCoupons.map(c => c._id === id ? { ...c, isActive: !c.isActive } : c));
+  };
+
+  const deleteCoupon = (id) => {
+    saveCoupons(availableCoupons.filter(c => c._id !== id));
+  };
+
   const cartSubtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
-  const cartDelivery = cartSubtotal > 499 ? 0 : 50;
-  const cartTotal = cartSubtotal + cartDelivery;
+  
+  const couponDiscount = coupon && couponPercent > 0 ? Math.round(cartSubtotal * (couponPercent / 100)) : 0;
+  const cartDelivery = cartSubtotal > 999 ? 0 : 50;
+  const cartTotal = cartSubtotal - couponDiscount + cartDelivery;
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -348,6 +386,14 @@ export function DataProvider({ children }) {
         clearCart,
         cartSubtotal,
         cartDelivery,
+        couponDiscount,
+        coupon,
+        setCoupon,
+        setCouponPercent,
+        availableCoupons,
+        addCoupon,
+        toggleCoupon,
+        deleteCoupon,
         cartTotal,
         wishlist,
         toggleWishlist,

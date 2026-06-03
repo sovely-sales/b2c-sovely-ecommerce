@@ -7,7 +7,7 @@ const OFFERS = [
     image:
       "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80",
     title: "SUPER SAVER DEALS",
-    subtitle: "FREE SHIPPING ON ORDERS OVER ₹499*",
+    subtitle: "FREE SHIPPING ON ORDERS OVER ₹999*",
     cta: "SHOP NOW",
   },
   {

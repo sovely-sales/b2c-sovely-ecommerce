@@ -21,7 +21,7 @@ const FAQS_DATA = [
   },
   {
     q: "Are there any shipping charges?",
-    a: "Shipping is absolutely FREE for all orders above ₹499. For orders equal to or below ₹499, a flat shipping and handling charge of ₹50 is applied automatically during checkout."
+    a: "Shipping is absolutely FREE for all orders above ₹999. For orders equal to or below ₹999, a flat shipping and handling charge of ₹50 is applied automatically during checkout."
   },
   {
     q: "Can I sell my products on Sovely?",

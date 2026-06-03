@@ -402,10 +402,12 @@
   }
 
   .nav-container {
-    flex-wrap: wrap;
-    height: auto;
-    padding: 12px 16px;
-    gap: 12px 0;
+    flex-wrap: nowrap;
+    height: 100%;
+    padding: 0 16px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
   }
 
   .nav-left {
@@ -416,6 +418,22 @@
   .nav-actions {
     order: 2;
     gap: 10px !important;
+  }
+
+  .nav-categories-wrap {
+    display: none !important;
+  }
+
+  .nav-actions a.action-link-text {
+    display: none !important;
+  }
+
+  .nav-actions .user-profile-wrap {
+    display: none !important;
+  }
+
+  .admin-pill {
+    display: none !important;
   }
 
   .nav-search-section {
@@ -431,11 +449,11 @@
   }
 
   .main-navbar {
-    height: auto !important;
+    height: 70px !important;
   }
 
   .main-navbar.scrolled {
-    height: auto !important;
+    height: 70px !important;
   }
 }
 .cat-item {
