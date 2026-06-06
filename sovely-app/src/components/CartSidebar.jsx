@@ -8,9 +8,7 @@ export default function CartSidebar() {
     cartItems,
     updateQuantity,
     removeFromCart,
-    cartSubtotal,
-    cartDelivery,
-    cartTotal,
+    cartTotal = 0,
     isCartOpen,
     setIsCartOpen,
   } = useData();
@@ -19,26 +17,27 @@ export default function CartSidebar() {
 
   return (
     <>
-      {}
       <div
         className={`cart-backdrop ${isCartOpen ? "open" : ""}`}
         onClick={() => setIsCartOpen(false)}
+        aria-hidden="true"
       />
 
-      {}
-      <aside className={`cart-sidebar ${isCartOpen ? "open" : ""}`}>
-        {}
+      <aside
+        className={`cart-sidebar ${isCartOpen ? "open" : ""}`}
+        aria-label="Shopping Cart"
+      >
         <div className="cart-sidebar-header">
           <h2>Your cart ({itemCount})</h2>
           <button
             className="cart-close-btn"
             onClick={() => setIsCartOpen(false)}
+            aria-label="Close cart"
           >
             <X size={20} />
           </button>
         </div>
 
-        {}
         {cartItems.length === 0 ? (
           <div className="cart-empty">
             <ShoppingBag size={48} strokeWidth={1} />
@@ -65,6 +64,7 @@ export default function CartSidebar() {
                       <button
                         className="cart-item-remove"
                         onClick={() => removeFromCart(item.id)}
+                        aria-label={`Remove ${item.name} from cart`}
                       >
                         <X size={14} />
                       </button>
@@ -74,11 +74,17 @@ export default function CartSidebar() {
                         <button
                           onClick={() => updateQuantity(item.id, -1)}
                           disabled={item.quantity <= 1}
+                          aria-label="Decrease quantity"
                         >
                           <Minus size={12} />
                         </button>
-                        <span>{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, 1)}>
+                        <span aria-label={`Quantity ${item.quantity}`}>
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, 1)}
+                          aria-label="Increase quantity"
+                        >
                           <Plus size={12} />
                         </button>
                       </div>
@@ -91,7 +97,6 @@ export default function CartSidebar() {
               ))}
             </div>
 
-            {}
             <div className="cart-sidebar-footer">
               <div className="cart-totals">
                 <div className="cart-total-row">

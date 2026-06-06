@@ -467,61 +467,101 @@ export default function Admin() {
                           const isExpanded = expandedOrderId === order._id;
                           return (
                             <React.Fragment key={order._id}>
-                              <tr 
-                                className={`order-row-main ${isExpanded ? 'is-expanded' : ''}`}
-                                onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
-                                style={{ cursor: 'pointer' }}
+                              <tr
+                                className={`order-row-main ${isExpanded ? "is-expanded" : ""}`}
+                                onClick={() =>
+                                  setExpandedOrderId(
+                                    isExpanded ? null : order._id,
+                                  )
+                                }
+                                style={{ cursor: "pointer" }}
                               >
                                 <td className="mono">#{order._id.slice(-8)}</td>
                                 <td>
                                   <div className="td-customer-info">
-                                    <span className="customer-name">{order.customerName}</span>
-                                    <span className="customer-email">{order.email}</span>
-                                    <span className="customer-phone">{order.phone}</span>
+                                    <span className="customer-name">
+                                      {order.customerName}
+                                    </span>
+                                    <span className="customer-email">
+                                      {order.email}
+                                    </span>
+                                    <span className="customer-phone">
+                                      {order.phone}
+                                    </span>
                                   </div>
                                 </td>
-                                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                                <td><strong className="text-primary">₹{order.total?.toLocaleString()}</strong></td>
                                 <td>
-                                  <span className={`status-pill ${order.status?.toLowerCase()}`}>
+                                  {new Date(
+                                    order.createdAt,
+                                  ).toLocaleDateString()}
+                                </td>
+                                <td>
+                                  <strong className="text-primary">
+                                    ₹{order.total?.toLocaleString()}
+                                  </strong>
+                                </td>
+                                <td>
+                                  <span
+                                    className={`status-pill ${order.status?.toLowerCase()}`}
+                                  >
                                     {order.status}
                                   </span>
                                 </td>
                                 <td>
                                   <div onClick={(e) => e.stopPropagation()}>
-                                    <select 
+                                    <select
                                       className="status-select"
                                       value={order.status}
-                                      onChange={(e) => handleUpdateStatus(order._id, e.target.value)}
+                                      onChange={(e) =>
+                                        handleUpdateStatus(
+                                          order._id,
+                                          e.target.value,
+                                        )
+                                      }
                                     >
                                       <option value="Pending">Pending</option>
-                                      <option value="Processing">Processing</option>
+                                      <option value="Processing">
+                                        Processing
+                                      </option>
                                       <option value="Shipped">Shipped</option>
-                                      <option value="Delivered">Delivered</option>
-                                      <option value="Cancelled">Cancelled</option>
+                                      <option value="Delivered">
+                                        Delivered
+                                      </option>
+                                      <option value="Cancelled">
+                                        Cancelled
+                                      </option>
                                     </select>
                                   </div>
                                 </td>
                                 <td>
-                                  <button 
+                                  <button
                                     className="btn-details-toggle"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setExpandedOrderId(isExpanded ? null : order._id);
+                                      setExpandedOrderId(
+                                        isExpanded ? null : order._id,
+                                      );
                                     }}
                                   >
-                                    <span className="btn-text">{isExpanded ? 'Hide' : 'View'}</span>
-                                    <ChevronDown size={14} className={`toggle-icon ${isExpanded ? 'rotated' : ''}`} />
+                                    <span className="btn-text">
+                                      {isExpanded ? "Hide" : "View"}
+                                    </span>
+                                    <ChevronDown
+                                      size={14}
+                                      className={`toggle-icon ${isExpanded ? "rotated" : ""}`}
+                                    />
                                   </button>
                                 </td>
                               </tr>
                               {isExpanded && (
-                                <tr className="order-details-row" onClick={(e) => e.stopPropagation()}>
+                                <tr
+                                  className="order-details-row"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <td colSpan="7">
                                     <div className="order-details-expanded animate-slideDown">
                                       <div className="details-grid">
-                                        
-                                        {/* Products ordered details */}
+                                        {}
                                         <div className="details-block products-list-block">
                                           <h4>Products Ordered</h4>
                                           <div className="products-table-wrap">
@@ -536,44 +576,95 @@ export default function Admin() {
                                                 </tr>
                                               </thead>
                                               <tbody>
-                                                {order.items?.map((item, index) => (
-                                                  <tr key={index}>
-                                                    <td>
-                                                      <img src={item.image} alt={item.name} className="admin-product-thumb" />
-                                                    </td>
-                                                    <td className="product-title-cell">{item.name}</td>
-                                                    <td>₹{item.price?.toLocaleString()}</td>
-                                                    <td>{item.quantity}</td>
-                                                    <td><strong>₹{(item.price * item.quantity)?.toLocaleString()}</strong></td>
-                                                  </tr>
-                                                ))}
+                                                {order.items?.map(
+                                                  (item, index) => (
+                                                    <tr key={index}>
+                                                      <td>
+                                                        <img
+                                                          src={item.image}
+                                                          alt={item.name}
+                                                          className="admin-product-thumb"
+                                                        />
+                                                      </td>
+                                                      <td className="product-title-cell">
+                                                        {item.name}
+                                                      </td>
+                                                      <td>
+                                                        ₹
+                                                        {item.price?.toLocaleString()}
+                                                      </td>
+                                                      <td>{item.quantity}</td>
+                                                      <td>
+                                                        <strong>
+                                                          ₹
+                                                          {(
+                                                            item.price *
+                                                            item.quantity
+                                                          )?.toLocaleString()}
+                                                        </strong>
+                                                      </td>
+                                                    </tr>
+                                                  ),
+                                                )}
                                               </tbody>
                                             </table>
                                           </div>
                                         </div>
 
-                                        {/* Shipping and Payment details */}
+                                        {}
                                         <div className="details-block info-sidebar-block">
                                           <div className="info-section">
                                             <h4>Shipping Address</h4>
                                             <div className="info-content">
-                                              <p><strong>Name:</strong> {order.customerName}</p>
-                                              <p><strong>Address:</strong> {order.address}</p>
-                                              <p><strong>City & Pincode:</strong> {order.city} - {order.postalCode}</p>
-                                              <p><strong>Phone:</strong> {order.phone || 'N/A'}</p>
-                                              <p><strong>Email:</strong> {order.email}</p>
+                                              <p>
+                                                <strong>Name:</strong>{" "}
+                                                {order.customerName}
+                                              </p>
+                                              <p>
+                                                <strong>Address:</strong>{" "}
+                                                {order.address}
+                                              </p>
+                                              <p>
+                                                <strong>City & Pincode:</strong>{" "}
+                                                {order.city} -{" "}
+                                                {order.postalCode}
+                                              </p>
+                                              <p>
+                                                <strong>Phone:</strong>{" "}
+                                                {order.phone || "N/A"}
+                                              </p>
+                                              <p>
+                                                <strong>Email:</strong>{" "}
+                                                {order.email}
+                                              </p>
                                             </div>
                                           </div>
                                           <div className="info-section payment-section-info">
                                             <h4>Payment Information</h4>
                                             <div className="info-content">
-                                              <p><strong>Method:</strong> {order.paymentMethod === 'razorpay' ? 'Razorpay Secure' : 'Cash on Delivery (COD)'}</p>
-                                              <p><strong>Payment ID:</strong> <code className="admin-mono-text">{order.paymentId || 'N/A'}</code></p>
-                                              <p><strong>Total Amount:</strong> <strong className="text-primary-dark">₹{order.total?.toLocaleString()}</strong></p>
+                                              <p>
+                                                <strong>Method:</strong>{" "}
+                                                {order.paymentMethod ===
+                                                "razorpay"
+                                                  ? "Razorpay Secure"
+                                                  : "Cash on Delivery (COD)"}
+                                              </p>
+                                              <p>
+                                                <strong>Payment ID:</strong>{" "}
+                                                <code className="admin-mono-text">
+                                                  {order.paymentId || "N/A"}
+                                                </code>
+                                              </p>
+                                              <p>
+                                                <strong>Total Amount:</strong>{" "}
+                                                <strong className="text-primary-dark">
+                                                  ₹
+                                                  {order.total?.toLocaleString()}
+                                                </strong>
+                                              </p>
                                             </div>
                                           </div>
                                         </div>
-
                                       </div>
                                     </div>
                                   </td>

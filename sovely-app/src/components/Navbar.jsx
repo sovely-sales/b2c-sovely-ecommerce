@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   ShoppingCart,
@@ -8,9 +8,7 @@ import {
   Menu,
   X,
   Truck,
-  MapPin,
   ChevronDown,
-  Bell,
   LogOut,
   LayoutDashboard,
   Sun,
@@ -28,8 +26,6 @@ export default function Navbar() {
     categories,
     selectedCategory,
     setSelectedCategory,
-    searchFilter,
-    setSearchFilter,
     isCartOpen,
     setIsCartOpen,
     theme,
@@ -41,6 +37,7 @@ export default function Navbar() {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const categoryRef = useRef(null);
 
   useEffect(() => {
@@ -65,9 +62,21 @@ export default function Navbar() {
     setSelectedCategory(categoryName);
     setShowCategoryMenu(false);
 
-    const productsSection = document.getElementById("all-products-section");
-    if (productsSection) {
-      productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (location.pathname !== "/") {
+      navigate("/");
+
+      setTimeout(() => {
+        const productsSection = document.getElementById("all-products-section");
+        if (productsSection)
+          productsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+      }, 100);
+    } else {
+      const productsSection = document.getElementById("all-products-section");
+      if (productsSection)
+        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -84,7 +93,7 @@ export default function Navbar() {
       <header className={`main-navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-container">
           <div className="nav-left">
-            <Link to="/" className="nav-logo">
+            <Link to="/" className="nav-logo" aria-label="Sovely Home">
               <img
                 src={sovelyLogo}
                 alt="Sovely"
@@ -96,6 +105,7 @@ export default function Navbar() {
               <button
                 className="nav-categories-dropdown"
                 onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+                aria-expanded={showCategoryMenu}
               >
                 <Menu size={20} />
                 <span>
@@ -130,7 +140,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {}
           {user?.role !== "admin" ? (
             <div
               className={`nav-search-section ${showMobileSearch ? "show-mobile" : ""}`}
@@ -142,12 +151,14 @@ export default function Navbar() {
                   placeholder="Search products..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
+                  aria-label="Search products"
                 />
                 {searchInput && (
                   <button
                     type="button"
                     className="search-clear"
                     onClick={() => setSearchInput("")}
+                    aria-label="Clear search"
                   >
                     <X size={14} />
                   </button>
@@ -162,7 +173,6 @@ export default function Navbar() {
           )}
 
           <div className="nav-actions">
-            {}
             <button
               className="theme-toggle-btn"
               onClick={toggleTheme}
@@ -177,6 +187,7 @@ export default function Navbar() {
                   className="action-link-text search-toggle-btn show-on-mobile-inline"
                   onClick={() => setShowMobileSearch(!showMobileSearch)}
                   title="Search"
+                  aria-label="Toggle Mobile Search"
                 >
                   <Search size={20} className="nav-icon" />
                 </button>
@@ -190,7 +201,11 @@ export default function Navbar() {
                   <span className="hide-on-mobile">Wishlist</span>
                 </Link>
 
-                <Link to="/track" className="action-link-text" title="Track Order">
+                <Link
+                  to="/track"
+                  className="action-link-text"
+                  title="Track Order"
+                >
                   <Truck size={20} className="nav-icon" />
                   <span className="hide-on-mobile">Track</span>
                 </Link>
@@ -200,6 +215,8 @@ export default function Navbar() {
                     className="action-link-text user-btn-text"
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
                     title={user ? user.name : "Sign In"}
+                    aria-haspopup="true"
+                    aria-expanded={showProfileMenu}
                   >
                     <User size={20} className="nav-icon" />
                     <span className="hide-on-mobile">
@@ -264,6 +281,7 @@ export default function Navbar() {
                   className="cart-btn-neo"
                   onClick={() => setIsCartOpen(true)}
                   title="Shopping Cart"
+                  aria-label={`Open cart with ${cartCount} items`}
                 >
                   <ShoppingCart size={18} />
                   <span className="cart-badge-neo">{cartCount}</span>
@@ -312,11 +330,13 @@ export default function Navbar() {
         </div>
       </header>
 
-      <div className="nav-secondary-banner">
-        <div className="container">
-          <p>NO HANDLING FEES - FREE SHIPPING ON ORDERS OVER ₹999*</p>
+{location.pathname === "/" && (
+        <div className="nav-secondary-banner">
+          <div className="container">
+            <p>NO HANDLING FEES - FREE SHIPPING ON ORDERS OVER ₹999*</p>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

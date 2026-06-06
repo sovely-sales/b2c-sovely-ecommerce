@@ -89,8 +89,8 @@ export default function App() {
             }
           />
           <Route path="/order-success" element={<OrderSuccess />} />
-          
-          {/* Bottom Nav / Footer Pages */}
+
+          {}
           <Route path="/seller" element={<Seller />} />
           <Route path="/returns" element={<Returns />} />
           <Route path="/shipping" element={<Shipping />} />
@@ -100,14 +100,39 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
-          
-          {/* 404 Fallback */}
-          <Route path="*" element={
-            <main style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
-              <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', color: 'var(--gray-700)' }}>404 – Page Not Found</h1>
-              <a href="/" style={{ color: 'var(--primary)', fontWeight: 600 }}>← Back to Home</a>
-            </main>
-          } />
+
+          {}
+          <Route
+            path="*"
+            element={
+              <main
+                style={{
+                  minHeight: "60vh",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: 16,
+                }}
+              >
+                <h1
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "2rem",
+                    color: "var(--gray-700)",
+                  }}
+                >
+                  404 – Page Not Found
+                </h1>
+                <a
+                  href="/"
+                  style={{ color: "var(--primary)", fontWeight: 600 }}
+                >
+                  ← Back to Home
+                </a>
+              </main>
+            }
+          />
         </Routes>
         <Footer />
       </DataProvider>

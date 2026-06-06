@@ -10,22 +10,19 @@
   align-items: center;
   justify-content: space-around;
   z-index: 999;
-  padding: 8px 12px 10px 12px; /* Extra padding on bottom for iOS home indicator comfort */
+  padding: 8px 12px 10px 12px;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Glassmorphism support if CSS variables allow */
 @supports (backdrop-filter: blur(12px)) {
   .mobile-bottom-nav {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
-  
+
   [data-theme="dark"] .mobile-bottom-nav {
     background: rgba(30, 41, 59, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 }
 
@@ -96,6 +93,6 @@
 
 @media (min-width: 769px) {
   .mobile-bottom-nav {
-    display: none !important;
+    display: none;
   }
 }

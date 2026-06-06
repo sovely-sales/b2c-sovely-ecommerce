@@ -1,4 +1,4 @@
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { ChevronDown, Filter, LayoutGrid, List } from "lucide-react";
 import { useData } from "../context/DataContext";
@@ -22,7 +22,6 @@ export default function Products() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  // Interactive Dropdowns & Inputs state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOption, setSortOption] = useState("latest");
@@ -48,7 +47,12 @@ export default function Products() {
     return map;
   }, [categories]);
 
-  // Click outside to close dropdowns
+  useEffect(() => {
+    document.title = categoryFilter
+      ? `${categoryFilter} Products | Sovely`
+      : "All Products | Sovely";
+  }, [categoryFilter]);
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (categoryRef.current && !categoryRef.current.contains(e.target)) {
@@ -59,19 +63,18 @@ export default function Products() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch products with active filters
   useEffect(() => {
     let active = true;
+    let timer;
+
     const fetchProducts = async () => {
       setLoading(true);
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8014";
+      const API_URL = import.meta.env.VITE_API_URL;
       try {
-        const queryParams = new URLSearchParams({
+        const params = new URLSearchParams({
           limit: PAGE_SIZE,
           skip: 0,
           category: categoryFilter || "",
@@ -79,9 +82,8 @@ export default function Products() {
           maxPrice: maxPrice || "",
           sort: sortOption || "latest",
         });
-        const res = await fetch(
-          `${API_URL}/api/products?${queryParams.toString()}`,
-        );
+
+        const res = await fetch(`${API_URL}/api/products?${params.toString()}`);
         if (res.ok && active) {
           const data = await res.json();
           const mapped = data.map((p) => {
@@ -132,25 +134,30 @@ export default function Products() {
     };
 
     if (!contextLoading && categories.length > 0) {
-      // Debounce price input filtering by 300ms
-      const timer = setTimeout(() => {
-        fetchProducts();
+      timer = setTimeout(() => {
+        if (active) fetchProducts();
       }, 300);
-      return () => {
-        active = false;
-        clearTimeout(timer);
-      };
     }
+
     return () => {
       active = false;
+      if (timer) clearTimeout(timer);
     };
-  }, [categoryFilter, minPrice, maxPrice, sortOption, contextLoading, categories, categoryMap]);
+  }, [
+    categoryFilter,
+    minPrice,
+    maxPrice,
+    sortOption,
+    contextLoading,
+    categories,
+    categoryMap,
+  ]);
 
   const handleShowMore = async () => {
     const nextPage = page + 1;
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8014";
+    const API_URL = import.meta.env.VITE_API_URL;
     try {
-      const queryParams = new URLSearchParams({
+      const params = new URLSearchParams({
         limit: PAGE_SIZE,
         skip: nextPage * PAGE_SIZE,
         category: categoryFilter || "",
@@ -158,11 +165,10 @@ export default function Products() {
         maxPrice: maxPrice || "",
         sort: sortOption || "latest",
       });
-      const res = await fetch(
-        `${API_URL}/api/products?${queryParams.toString()}`,
-      );
+      const res = await fetch(`${API_URL}/api/products?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
+
         const mapped = data.map((p) => {
           const rawCategory = String(p.categoryId || p.category || "");
           const categoryName =
@@ -203,7 +209,7 @@ export default function Products() {
         setHasMore(data.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error("Error fetching more products page:", error);
+      console.error("Error fetching more products:", error);
     }
   };
 
@@ -216,18 +222,12 @@ export default function Products() {
     navigate("/products");
   };
 
-  if (loading && products.length === 0)
-    return (
-      <div className="products-page section container">Loading products...</div>
-    );
-
   return (
     <div className="products-page section container">
-      {/* Filter Bar */}
       <div className="retail-filter-bar">
+        {}
         <div className="filter-row top-row">
           <div className="filter-dropdowns">
-            {/* Category Dropdown */}
             <div className="dropdown-container" ref={categoryRef}>
               <div
                 className={`custom-select ${categoryFilter ? "active-select" : ""}`}
@@ -255,7 +255,9 @@ export default function Products() {
                       key={c.id || c._id}
                       className={`dropdown-item ${categoryFilter === c.name ? "active" : ""}`}
                       onClick={() => {
-                        navigate(`/products?category=${encodeURIComponent(c.name)}`);
+                        navigate(
+                          `/products?category=${encodeURIComponent(c.name)}`,
+                        );
                         setShowCategoryDropdown(false);
                       }}
                     >
@@ -273,7 +275,6 @@ export default function Products() {
             </button>
             <div className="sort-group">
               <span className="sort-label">SORT</span>
-              {/* Sort Dropdown */}
               <div className="dropdown-container" ref={sortRef}>
                 <div
                   className="custom-select sort-select"
@@ -309,10 +310,10 @@ export default function Products() {
               Products
             </div>
             <div className="view-toggle">
-              <button className="view-btn active">
+              <button className="view-btn active" aria-label="Grid View">
                 <LayoutGrid size={16} />
               </button>
-              <button className="view-btn">
+              <button className="view-btn" aria-label="List View">
                 <List size={16} />
               </button>
             </div>
@@ -326,6 +327,7 @@ export default function Products() {
               placeholder="Min ₹"
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
+              aria-label="Minimum Price"
             />
             <span className="separator">-</span>
             <input
@@ -333,12 +335,24 @@ export default function Products() {
               placeholder="Max ₹"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
+              aria-label="Maximum Price"
             />
           </div>
         </div>
       </div>
 
-      {products.length === 0 ? (
+      {loading && products.length === 0 ? (
+        <div
+          style={{
+            minHeight: "60vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          Loading products...
+        </div>
+      ) : products.length === 0 ? (
         <div className="empty-state">No products found matching filters.</div>
       ) : (
         <>

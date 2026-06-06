@@ -1,7 +1,7 @@
 .category-strip {
-  background: white;
+  background: var(--bg-main); /* Fixed: Was hardcoded 'white' */
   padding: 32px 0 24px;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: var(--border-thick);
 }
 
 .strip-scroll {
@@ -42,7 +42,7 @@
   box-shadow: var(--shadow-neo);
   transition: var(--transition);
   overflow: hidden;
-  background: var(--bg-card) !important;
+  background: var(--bg-card) !important; /* Forces theme-aware background */
 }
 
 .strip-item:hover {

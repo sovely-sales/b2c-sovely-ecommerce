@@ -24,10 +24,7 @@
 
 .slide-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -119,7 +116,6 @@
 .slider-arrow.prev {
   left: 24px;
 }
-
 .slider-arrow.next {
   right: 24px;
 }
@@ -161,8 +157,5 @@
   .slide-content-box {
     padding: 24px;
     margin: 0 16px;
-  }
-  .slide-title {
-    font-size: 2rem;
   }
 }

@@ -1,15 +1,8 @@
-/* ==========================================================================
-   Screen Styles (Hidden by default on standard web page display)
-   ========================================================================== */
 .printable-invoice {
   display: none;
 }
 
-/* ==========================================================================
-   Print Styles (Triggered only when printing / saving as PDF)
-   ========================================================================== */
 @media print {
-  /* 1. Hide all visual sibling components and page scaffolding */
   .main-navbar,
   .nav-secondary-banner,
   footer,
@@ -32,8 +25,12 @@
     padding: 0 !important;
   }
 
-  /* 2. Reset body, page container, and root element margins to prevent empty offsets */
-  html, body, #root, .order-success-page, .track-page, .track-results {
+  html,
+  body,
+  #root,
+  .order-success-page,
+  .track-page,
+  .track-results {
     display: block !important;
     overflow: visible !important;
     margin: 0 !important;
@@ -48,7 +45,7 @@
   body {
     color: #1e293b !important;
     font-size: 11px !important;
-    font-family: 'Inter', sans-serif !important;
+    font-family: "Inter", sans-serif !important;
     line-height: 1.4 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -59,7 +56,6 @@
     margin: 1.2cm 1.5cm;
   }
 
-  /* 3. Explicitly display and style the Invoice block */
   .printable-invoice {
     display: block !important;
     visibility: visible !important;
@@ -76,7 +72,6 @@
     visibility: visible !important;
   }
 
-  /* HEADER BLOCK */
   .invoice-header-row {
     display: flex !important;
     flex-direction: row !important;
@@ -107,11 +102,11 @@
     font-size: 20px !important;
     font-weight: 900 !important;
     color: #22c55e !important;
-    font-family: 'Outfit', sans-serif !important;
+    font-family: "Outfit", sans-serif !important;
   }
 
   .logo-brand {
-    font-family: 'Outfit', sans-serif !important;
+    font-family: "Outfit", sans-serif !important;
     font-size: 22px !important;
     font-weight: 900 !important;
     color: #1e293b !important;
@@ -123,7 +118,7 @@
   }
 
   .invoice-title-block h1 {
-    font-family: 'Outfit', sans-serif !important;
+    font-family: "Outfit", sans-serif !important;
     color: #4f46e5 !important;
     font-size: 26px !important;
     font-weight: 800 !important;
@@ -137,7 +132,6 @@
     font-weight: 600 !important;
   }
 
-  /* DIVIDER */
   .invoice-divider {
     height: 1.5px !important;
     background: #e2e8f0 !important;
@@ -149,7 +143,6 @@
     margin-top: 10px !important;
   }
 
-  /* METADATA BLOCK */
   .invoice-meta-row {
     display: flex !important;
     flex-direction: row !important;
@@ -223,7 +216,6 @@
     font-weight: 800 !important;
   }
 
-  /* ADDRESSES SECTION */
   .invoice-addresses-row {
     display: flex !important;
     flex-direction: row !important;
@@ -248,7 +240,6 @@
     color: #475569 !important;
   }
 
-  /* TABLE SECTION */
   .invoice-items-table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -287,7 +278,6 @@
     color: #0f172a !important;
   }
 
-  /* SUMMARY ROW */
   .invoice-summary-row {
     display: flex !important;
     flex-direction: row !important;
@@ -406,7 +396,6 @@
     color: #334155 !important;
   }
 
-  /* FOOTER NOTE */
   .invoice-footer-note {
     margin-top: 40px !important;
     text-align: center !important;

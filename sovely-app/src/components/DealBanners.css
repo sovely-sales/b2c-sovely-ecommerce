@@ -1,6 +1,6 @@
 .deal-banners-section {
   padding: 0 0 40px;
-  background: white;
+  background: var(--bg-main);
 }
 
 .deal-banners-grid {
@@ -22,10 +22,6 @@
   overflow: hidden;
   border: var(--border-thick);
   box-shadow: var(--shadow-neo);
-}
-
-.deal-banner-card::after {
-  display: none;
 }
 
 .deal-banner-card:hover {
@@ -54,14 +50,14 @@
 
 .deal-subtitle {
   font-size: 0.8rem;
-  font-weight: 600;
-  opacity: 0.9;
+  font-weight: 700;
+  opacity: 0.95;
 }
 
 .deal-desc {
   font-size: 0.7rem;
-  opacity: 0.7;
-  font-weight: 500;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
 @media (max-width: 1024px) {
@@ -77,5 +73,20 @@
   }
   .deal-banner-card {
     padding: 16px 14px;
+    gap: 10px;
+  }
+  .deal-text h3 {
+    font-size: 0.85rem;
+  }
+  .deal-subtitle {
+    font-size: 0.75rem;
+  }
+  .deal-icon-wrap {
+    width: 32px;
+    height: 32px;
+  }
+  .deal-icon-wrap svg {
+    width: 16px;
+    height: 16px;
   }
 }

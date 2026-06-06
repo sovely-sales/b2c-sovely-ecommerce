@@ -1,22 +1,19 @@
 {
-  "name": "sovely-b2c",
+  "name": "sovely-workspace",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
+  "description": "Root workspace for Sovely B2C Application",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "lucide-react": "^0.378.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
-    "strip-comments": "^2.0.1"
+    "install:all": "npm install && cd backend && npm install && cd ../sovely-app && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd sovely-app && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "cd sovely-app && npm run build"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.2.0"
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "strip-comments": "^2.0.1"
   }
 }

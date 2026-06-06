@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 
 const DataContext = createContext();
 
@@ -15,18 +22,18 @@ export function DataProvider({ children }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchFilter, setSearchFilter] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Theme State
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  }, []);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("userData");
@@ -35,21 +42,21 @@ export function DataProvider({ children }) {
     }
   }, []);
 
-  const login = (userData, token) => {
+  const login = useCallback((userData, token) => {
     const storageKey = userData.role === "admin" ? "adminToken" : "userToken";
     localStorage.setItem(storageKey, token);
     localStorage.setItem("userData", JSON.stringify(userData));
     setUser(userData);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("userToken");
     localStorage.removeItem("userData");
     setUser(null);
-  };
+  }, []);
 
-  const updateQuantity = (id, delta) => {
+  const updateQuantity = useCallback((id, delta) => {
     setCartItems((items) =>
       items.map((item) =>
         item.id === id
@@ -57,15 +64,15 @@ export function DataProvider({ children }) {
           : item,
       ),
     );
-  };
+  }, []);
 
-  const removeFromCart = (id) => {
+  const removeFromCart = useCallback((id) => {
     setCartItems((items) => items.filter((item) => item.id !== id));
-  };
+  }, []);
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = useCallback(() => setCartItems([]), []);
 
-  const addToCart = (product) => {
+  const addToCart = useCallback((product) => {
     setCartItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
@@ -75,9 +82,17 @@ export function DataProvider({ children }) {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-  };
+  }, []);
 
-  const [coupon, setCoupon] = useState(null);
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const cartSubtotal = useMemo(() => {
+    return cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  }, [cartItems]);
+
+const [coupon, setCoupon] = useState(null);
   const [couponPercent, setCouponPercent] = useState(0);
 
   // Simple frontend-only coupon management (bypasses backend API)
@@ -126,7 +141,6 @@ export function DataProvider({ children }) {
     if (user && user.role !== "admin") {
       const fetchWishlist = async () => {
         const token = localStorage.getItem("userToken");
-        const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
         try {
           const res = await fetch(`${API_URL}/api/user/wishlist`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -143,39 +157,54 @@ export function DataProvider({ children }) {
     } else {
       setWishlist([]);
     }
-  }, [user]);
+  }, [user, API_URL]);
 
-  const toggleWishlist = async (productId) => {
-    if (!user) return;
+  const toggleWishlist = useCallback(
+    async (productId) => {
+      if (!user) return;
 
-    const stringId = String(productId);
+      const stringId = String(productId);
 
-    setWishlist((prev) =>
-      prev.includes(stringId)
-        ? prev.filter((id) => id !== stringId)
-        : [...prev, stringId],
-    );
+      setWishlist((prev) =>
+        prev.includes(stringId)
+          ? prev.filter((id) => id !== stringId)
+          : [...prev, stringId],
+      );
 
-    const token = localStorage.getItem("userToken");
-    const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+      const token = localStorage.getItem("userToken");
 
-    try {
-      await fetch(`${API_URL}/api/user/wishlist/toggle`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId: stringId }),
-      });
-    } catch (err) {
-      console.error("Wishlist sync failed");
-    }
-  };
+      try {
+        const res = await fetch(`${API_URL}/api/user/wishlist/toggle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ productId: stringId }),
+        });
+
+        if (!res.ok) {
+          setWishlist((prev) =>
+            prev.includes(stringId)
+              ? prev.filter((id) => id !== stringId)
+              : [...prev, stringId],
+          );
+        }
+      } catch (err) {
+        console.error("Wishlist sync failed");
+
+        setWishlist((prev) =>
+          prev.includes(stringId)
+            ? prev.filter((id) => id !== stringId)
+            : [...prev, stringId],
+        );
+      }
+    },
+    [user, API_URL],
+  );
 
   useEffect(() => {
     const fetchData = async () => {
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
       try {
         const [productsRes, categoriesRes] = await Promise.all([
           fetch(`${API_URL}/api/products?limit=12`),
@@ -241,42 +270,36 @@ export function DataProvider({ children }) {
 
           const getCategoryImage = (name) => {
             const lower = (name || "").toLowerCase();
-            if (lower.includes("sport") || lower.includes("fitness")) {
+            if (lower.includes("sport") || lower.includes("fitness"))
               return "/sports.png";
-            }
-            if (lower.includes("garden") || lower.includes("outdoor")) {
+            if (lower.includes("garden") || lower.includes("outdoor"))
               return "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("electronic") ||
               lower.includes("phone") ||
               lower.includes("tech") ||
               lower.includes("gadget") ||
               lower.includes("mobile")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("fashion") ||
               lower.includes("apparel") ||
               lower.includes("cloth") ||
               lower.includes("dress") ||
               lower.includes("wear")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=400&fit=crop";
-            }
-            if (lower.includes("kitchen") || lower.includes("appliance")) {
+            if (lower.includes("kitchen") || lower.includes("appliance"))
               return "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("home") ||
               lower.includes("decor") ||
               lower.includes("furnit") ||
               lower.includes("table") ||
               lower.includes("bath")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("beauty") ||
               lower.includes("personal") ||
@@ -284,61 +307,52 @@ export function DataProvider({ children }) {
               lower.includes("cosmetic") ||
               lower.includes("health") ||
               lower.includes("care")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("bag") ||
               lower.includes("wallet") ||
               lower.includes("luggage") ||
               lower.includes("travel") ||
               lower.includes("suitcase")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("car") ||
               lower.includes("motorbike") ||
               lower.includes("vehicle") ||
               lower.includes("auto")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("tool") ||
               lower.includes("hardware") ||
               lower.includes("improve")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("stationery") ||
               lower.includes("book") ||
               lower.includes("office") ||
               lower.includes("pen")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("baby") ||
               lower.includes("kids") ||
               lower.includes("child")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=400&fit=crop";
-            }
-            if (lower.includes("gift") || lower.includes("present")) {
+            if (lower.includes("gift") || lower.includes("present"))
               return "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400&h=400&fit=crop";
-            }
             if (
               lower.includes("chocolate") ||
               lower.includes("sweet") ||
               lower.includes("candy")
-            ) {
+            )
               return "https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=400&fit=crop";
-            }
-            if (lower.includes("rakhi") || lower.includes("festiv")) {
+            if (lower.includes("rakhi") || lower.includes("festiv"))
               return "https://images.unsplash.com/photo-1626125345510-4603468eedfb?w=400&h=400&fit=crop";
-            }
             return "https://images.unsplash.com/photo-1472851294608-062f824d296e?w=400&h=400&fit=crop";
           };
 
@@ -367,25 +381,64 @@ export function DataProvider({ children }) {
     };
 
     fetchData();
-  }, []);
+  }, [API_URL]);
 
-  useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+  const contextValue = useMemo(
+    () => ({
+      products,
+      categories,
+      loading,
+      cartItems,
+      updateQuantity,
+      removeFromCart,
+      addToCart,
+      clearCart,
+      cartSubtotal,
+      cartDelivery,
+      cartTotal,
+      wishlist,
+      toggleWishlist,
+      user,
+      login,
+      logout,
+      selectedCategory,
+      setSelectedCategory,
+      searchFilter,
+      setSearchFilter,
+      isCartOpen,
+      setIsCartOpen,
+      theme,
+      toggleTheme,
+    }),
+    [
+      products,
+      categories,
+      loading,
+      cartItems,
+      cartSubtotal,
+      cartDelivery,
+      cartTotal,
+      wishlist,
+      user,
+      selectedCategory,
+      searchFilter,
+      isCartOpen,
+      theme,
+      updateQuantity,
+      removeFromCart,
+      addToCart,
+      clearCart,
+      toggleWishlist,
+      login,
+      logout,
+      toggleTheme,
+    ],
+  );
 
   return (
-    <DataContext.Provider
+<DataContext.Provider
       value={{
-        products,
-        categories,
-        loading,
-        cartItems,
-        updateQuantity,
-        removeFromCart,
-        addToCart,
-        clearCart,
-        cartSubtotal,
-        cartDelivery,
+        ...contextValue, // Retaining the memoized values from remote
         couponDiscount,
         coupon,
         setCoupon,
@@ -394,20 +447,6 @@ export function DataProvider({ children }) {
         addCoupon,
         toggleCoupon,
         deleteCoupon,
-        cartTotal,
-        wishlist,
-        toggleWishlist,
-        user,
-        login,
-        logout,
-        selectedCategory,
-        setSelectedCategory,
-        searchFilter,
-        setSearchFilter,
-        isCartOpen,
-        setIsCartOpen,
-        theme,
-        toggleTheme,
       }}
     >
       {children}

@@ -62,14 +62,16 @@ export default function Search() {
   return (
     <div
       className="section container animate-fadeUp"
-      style={{ minHeight: "70vh", paddingTop: "40px" }}
+      style={{ minHeight: "70vh" }}
     >
       <div style={{ marginBottom: "40px" }}>
         <h1
           style={{
             fontFamily: "var(--font-heading)",
             fontSize: "2.5rem",
-            marginBottom: "10px",
+            textTransform: "uppercase",
+            fontWeight: "900",
+            marginBottom: "8px",
           }}
         >
           Search Results
@@ -105,17 +107,35 @@ export default function Search() {
           style={{
             textAlign: "center",
             padding: "80px 20px",
-            borderRadius: "var(--radius-lg)",
+            maxWidth: "600px",
+            margin: "0 auto",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
           <SearchIcon
             size={64}
-            style={{ color: "var(--gray-300)", marginBottom: "20px" }}
+            style={{ color: "var(--text-muted)", marginBottom: "24px" }}
           />
-          <h2 style={{ fontSize: "2rem", marginBottom: "16px" }}>
+          <h2
+            style={{
+              fontSize: "2rem",
+              textTransform: "uppercase",
+              fontWeight: "900",
+              marginBottom: "16px",
+            }}
+          >
             No products found
           </h2>
-          <p style={{ color: "var(--text-muted)", marginBottom: "30px" }}>
+          <p
+            style={{
+              color: "var(--text-muted)",
+              fontWeight: "600",
+              marginBottom: "32px",
+              fontSize: "1.1rem",
+            }}
+          >
             We couldn't find anything matching "{query}". Try checking your
             spelling or using more general terms.
           </p>
@@ -124,7 +144,7 @@ export default function Search() {
           </Link>
         </div>
       ) : (
-        <div className="products-grid">
+        <div className="all-products-grid">
           {results.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

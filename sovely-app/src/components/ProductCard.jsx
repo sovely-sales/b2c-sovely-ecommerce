@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useData } from "../context/DataContext";
 import { Check, Star, Heart } from "lucide-react";
@@ -30,14 +30,44 @@ const cleanProductName = (name) => {
 
 export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
+  const timerRef = useRef(null);
+  const { addToCart, setIsCartOpen, wishlist, toggleWishlist } = useData();
+
+  // Prevent memory leaks if component unmounts before timeout finishes
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  // Memoize heavy regex operations so they don't run on every cart update
+  const displayName = useMemo(
+    () => cleanProductName(product.name),
+    [product.name],
+  );
+  const productSize = useMemo(
+    () => extractProductSize(product.name),
+    [product.name],
+  );
 
   const handleQuickAdd = (e) => {
     e.preventDefault();
+    e.stopPropagation(); // Stop navigation to product page
+
     if (product.stock === 0) return;
+
     addToCart(product);
     setIsCartOpen(true);
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product.id);
   };
 
   const isSoldOut = product.stock === 0;
@@ -54,9 +84,6 @@ export default function ProductCard({ product }) {
   const reviewsCount = product.reviews
     ? new Intl.NumberFormat("en-IN").format(product.reviews)
     : "3.8k";
-  const productSize = extractProductSize(product.name);
-  const displayName = cleanProductName(product.name);
-  const { addToCart, setIsCartOpen, wishlist, toggleWishlist } = useData();
 
   return (
     <Link
@@ -66,13 +93,11 @@ export default function ProductCard({ product }) {
     >
       <div className="card-img-wrap">
         <img src={product.image} alt={product.name} loading="lazy" />
-        {}
+
         <button
           className="card-wishlist-btn"
-          onClick={(e) => {
-            e.preventDefault();
-            toggleWishlist(product.id);
-          }}
+          aria-label="Toggle Wishlist"
+          onClick={handleWishlistToggle}
         >
           <Heart
             size={18}
@@ -82,10 +107,12 @@ export default function ProductCard({ product }) {
             }
           />
         </button>
+
         <button
           className={`card-add-btn ${added ? "added" : ""}`}
           onClick={handleQuickAdd}
           disabled={isSoldOut}
+          aria-label={added ? "Added to cart" : "Add to cart"}
         >
           {added ? (
             <>

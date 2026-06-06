@@ -173,6 +173,9 @@
 
 .qty-arrows button {
   color: var(--text-main);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 .qty-arrows button:hover {
   color: var(--primary);
@@ -191,6 +194,8 @@
   transition: var(--transition);
   letter-spacing: 1px;
   box-shadow: var(--shadow-neo);
+  padding: 12px;
+  text-align: center;
 }
 
 .preview-add-btn:hover {
@@ -234,5 +239,8 @@
   }
   .preview-actions {
     flex-direction: column;
+  }
+  .qty-selector-autorev {
+    justify-content: center;
   }
 }

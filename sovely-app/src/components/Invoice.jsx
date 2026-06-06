@@ -1,32 +1,60 @@
-import React from 'react';
-import './Invoice.css';
+import React from "react";
+import "./Invoice.css";
 
-// Helper to convert number to English words (for invoice Grand Total)
 function numberToWords(num) {
-  if (num === 0) return 'Zero';
-  
+  if (num === 0) return "Zero";
+
   const a = [
-    '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
-    'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
   ];
-  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-  
+  const b = [
+    "",
+    "",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
+  ];
+
   const makeGroup = (n) => {
-    let word = '';
+    let word = "";
     const h = Math.floor(n / 100);
     const t = n % 100;
-    
+
     if (h > 0) {
-      word += a[h] + ' Hundred ';
+      word += a[h] + " Hundred ";
     }
-    
+
     if (t > 0) {
       if (t < 20) {
         word += a[t];
       } else {
         const tens = Math.floor(t / 10);
         const ones = t % 10;
-        word += b[tens] + (ones > 0 ? ' ' + a[ones] : '');
+        word += b[tens] + (ones > 0 ? " " + a[ones] : "");
       }
     }
     return word.trim();
@@ -34,14 +62,13 @@ function numberToWords(num) {
 
   const integerPart = Math.floor(num);
   const decimalPart = Math.round((num - integerPart) * 100);
-  
+
   let temp = integerPart;
   let groupIdx = 0;
   let wordsArr = [];
-  
-  const g = ['', 'Thousand', 'Lakh', 'Crore']; // Indian system scale
-  
-  // Custom grouping for Indian numbering system (first group of 3, then groups of 2)
+
+  const g = ["", "Thousand", "Lakh", "Crore"];
+
   let groups = [];
   if (temp > 0) {
     groups.push(temp % 1000);
@@ -55,14 +82,14 @@ function numberToWords(num) {
   for (let i = 0; i < groups.length; i++) {
     const groupVal = groups[i];
     if (groupVal > 0) {
-      const groupWord = makeGroup(groupVal) + (g[i] ? ' ' + g[i] : '');
+      const groupWord = makeGroup(groupVal) + (g[i] ? " " + g[i] : "");
       wordsArr.unshift(groupWord.trim());
     }
   }
-  
-  let result = wordsArr.join(' ');
+
+  let result = wordsArr.join(" ");
   if (decimalPart > 0) {
-    result += ' and Paise ' + makeGroup(decimalPart);
+    result += " and Paise " + makeGroup(decimalPart);
   }
   return result.trim();
 }
@@ -71,29 +98,25 @@ export default function Invoice({ order }) {
   if (!order) return null;
 
   // Format order date
-  const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric'
+  const orderDate = new Date(order.createdAt).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
   });
 
-  // Calculate items sum
-  const itemsSum = order.items?.reduce((sum, item) => sum + (item.price * item.quantity), 0) || 0;
+  const itemsSum =
+    order.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) ||
+    0;
   const shippingCharge = Math.max(0, order.total - itemsSum);
 
-  // Math variables for GST calculations (assuming 18% inclusive GST)
-  // GST split: 9% CGST + 9% SGST
   let taxableSubtotal = 0;
   let totalTaxAmt = 0;
 
-  // Compile list of invoice rows
   const invoiceRows = [];
 
-  // 1. Add order items
   order.items?.forEach((item, index) => {
     const totalInclusive = item.price * item.quantity;
-    
-    // Tax calculations (inclusive)
+
     const baseRate = parseFloat((item.price / 1.18).toFixed(2));
     const taxableVal = parseFloat((baseRate * item.quantity).toFixed(2));
     const taxAmt = parseFloat((taxableVal * 0.18).toFixed(2));
@@ -104,36 +127,34 @@ export default function Invoice({ order }) {
     invoiceRows.push({
       sNo: index + 1,
       description: item.name,
-      hsn: item.hsnCode || '39239090', // fallback HSN
+      hsn: item.hsnCode || "39239090",
       qty: item.quantity,
       baseRate: baseRate,
-      taxPercent: '18%',
+      taxPercent: "18%",
       taxAmt: taxAmt,
-      total: totalInclusive
+      total: totalInclusive,
     });
   });
 
-  // 2. Add shipping/delivery charge if applicable
   if (shippingCharge > 0) {
     const shippingBaseRate = parseFloat((shippingCharge / 1.18).toFixed(2));
     const shippingTaxAmt = parseFloat((shippingBaseRate * 0.18).toFixed(2));
-    
+
     taxableSubtotal += shippingBaseRate;
     totalTaxAmt += shippingTaxAmt;
 
     invoiceRows.push({
       sNo: invoiceRows.length + 1,
-      description: 'Freight & Packaging Services (Shipping)',
-      hsn: '996813',
+      description: "Freight & Packaging Services (Shipping)",
+      hsn: "996813",
       qty: 1,
       baseRate: shippingBaseRate,
-      taxPercent: '18%',
+      taxPercent: "18%",
       taxAmt: shippingTaxAmt,
-      total: shippingCharge
+      total: shippingCharge,
     });
   }
 
-  // Final totals rounded to 2 decimal places
   taxableSubtotal = parseFloat(taxableSubtotal.toFixed(2));
   const cgstAmount = parseFloat((totalTaxAmt / 2).toFixed(2));
   const sgstAmount = parseFloat((totalTaxAmt / 2).toFixed(2));
@@ -141,15 +162,19 @@ export default function Invoice({ order }) {
 
   const amountInWordsStr = `Rupees ${numberToWords(finalGrandTotal)} Only`;
 
-  // Determine terms and details
-  const isPaid = order.paymentMethod === 'razorpay' || order.status === 'Delivered';
-  const statusLabel = isPaid ? 'PAID' : 'UNPAID';
-  const paymentTerms = order.paymentMethod === 'razorpay' ? 'PREPAID' : 'CASH ON DELIVERY';
-  const settlementInfo = order.paymentMethod === 'razorpay' ? 'Razorpay Gateway Secure' : 'Cash on Delivery';
+  const isPaid =
+    order.paymentMethod === "razorpay" || order.status === "Delivered";
+  const statusLabel = isPaid ? "PAID" : "UNPAID";
+  const paymentTerms =
+    order.paymentMethod === "razorpay" ? "PREPAID" : "CASH ON DELIVERY";
+  const settlementInfo =
+    order.paymentMethod === "razorpay"
+      ? "Razorpay Gateway Secure"
+      : "Cash on Delivery";
 
   return (
     <div className="printable-invoice">
-      {/* Invoice Header */}
+      {}
       <div className="invoice-header-row">
         <div className="invoice-logo-block">
           <div className="invoice-logo-circle">
@@ -165,7 +190,7 @@ export default function Invoice({ order }) {
 
       <div className="invoice-divider"></div>
 
-      {/* Corporate details and Invoice Metadata */}
+      {}
       <div className="invoice-meta-row">
         <div className="meta-col issued-by">
           <span className="section-label">Issued By:</span>
@@ -173,13 +198,18 @@ export default function Invoice({ order }) {
           <p>123 Commerce St., Indiranagar</p>
           <p>Bengaluru, Karnataka, 560038</p>
           <p>State Code: 29</p>
-          <p className="gstin-highlight"><strong>GSTIN:</strong> 29DTGPS4598H2ZR</p>
+          <p className="gstin-highlight">
+            <strong>GSTIN:</strong> 29DTGPS4598H2ZR
+          </p>
         </div>
 
         <div className="meta-col invoice-details-box">
           <div className="detail-line">
             <span>Invoice No:</span>
-            <strong>INV/25-26/{order._id ? order._id.slice(-5).toUpperCase() : '00000'}</strong>
+            <strong>
+              INV/25-26/
+              {order._id ? order._id.slice(-5).toUpperCase() : "00000"}
+            </strong>
           </div>
           <div className="detail-line">
             <span>Date:</span>
@@ -187,36 +217,44 @@ export default function Invoice({ order }) {
           </div>
           <div className="detail-line">
             <span>Order Ref:</span>
-            <strong>Sov-{order._id ? order._id.slice(-8) : '00000000'}</strong>
+            <strong>Sov-{order._id ? order._id.slice(-8) : "00000000"}</strong>
           </div>
           <div className="detail-line">
             <span>Status:</span>
-            <strong className={`status-text ${statusLabel.toLowerCase()}`}>{statusLabel}</strong>
+            <strong className={`status-text ${statusLabel.toLowerCase()}`}>
+              {statusLabel}
+            </strong>
           </div>
         </div>
       </div>
 
       <div className="invoice-divider mt-2"></div>
 
-      {/* Bill To vs Ship To */}
+      {}
       <div className="invoice-addresses-row">
         <div className="address-col">
           <span className="section-label">Billed To:</span>
           <h3>{order.customerName}</h3>
           <p>{order.address}</p>
-          <p>{order.city} - {order.postalCode}</p>
+          <p>
+            {order.city} - {order.postalCode}
+          </p>
           <p>State Code: 29</p>
-          <p><strong>GSTIN:</strong> N/A</p>
+          <p>
+            <strong>GSTIN:</strong> N/A
+          </p>
         </div>
         <div className="address-col">
           <span className="section-label">Shipped To:</span>
           <h3>{order.customerName}</h3>
           <p>{order.address}</p>
-          <p>{order.city} - {order.postalCode}</p>
+          <p>
+            {order.city} - {order.postalCode}
+          </p>
         </div>
       </div>
 
-      {/* Table of items */}
+      {}
       <table className="invoice-items-table">
         <thead>
           <tr>
@@ -246,9 +284,9 @@ export default function Invoice({ order }) {
         </tbody>
       </table>
 
-      {/* Bottom Summary Section */}
+      {}
       <div className="invoice-summary-row">
-        {/* Left Side: Transaction Details */}
+        {}
         <div className="summary-left-box">
           <h3>Transaction Details:</h3>
           <div className="transaction-line">
@@ -257,7 +295,9 @@ export default function Invoice({ order }) {
           </div>
           <div className="transaction-line">
             <span>Status:</span>
-            <span className={`status-pill-small ${statusLabel.toLowerCase()}`}>{statusLabel}</span>
+            <span className={`status-pill-small ${statusLabel.toLowerCase()}`}>
+              {statusLabel}
+            </span>
           </div>
           <div className="transaction-line">
             <span>Settlement:</span>
@@ -265,7 +305,7 @@ export default function Invoice({ order }) {
           </div>
         </div>
 
-        {/* Right Side: Totals Block */}
+        {}
         <div className="summary-right-box">
           <div className="total-detail-line">
             <span>Subtotal (Taxable):</span>
@@ -283,7 +323,7 @@ export default function Invoice({ order }) {
             <span>Grand Total:</span>
             <strong>Rs. {finalGrandTotal.toFixed(2)}</strong>
           </div>
-          
+
           <div className="amt-in-words">
             <span>Amount in Words:</span>
             <p>{amountInWordsStr}</p>
@@ -292,8 +332,13 @@ export default function Invoice({ order }) {
       </div>
 
       <div className="invoice-footer-note">
-        <p>This is a computer-generated tax invoice and does not require a physical signature.</p>
-        <p>Thank you for shopping with <strong>SOVELY</strong>!</p>
+        <p>
+          This is a computer-generated tax invoice and does not require a
+          physical signature.
+        </p>
+        <p>
+          Thank you for shopping with <strong>SOVELY</strong>!
+        </p>
       </div>
     </div>
   );

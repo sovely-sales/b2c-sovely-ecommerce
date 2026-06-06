@@ -1,6 +1,3 @@
-.orders-page {
-}
-
 .orders-header {
   margin-bottom: 48px;
   text-align: center;
@@ -9,11 +6,15 @@
 .orders-header h1 {
   font-size: 2.5rem;
   margin-bottom: 8px;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
 .orders-header p {
   color: var(--text-muted);
   font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .orders-list {
@@ -29,26 +30,37 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
+  border: var(--border-thick);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-neo-lg);
+}
+
+.empty-orders h3 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .order-card {
   padding: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  background: var(--bg-card);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-neo);
   transition: var(--transition);
 }
 
 .order-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-neo-lg);
 }
 
 .order-card-header {
   padding: 24px;
-  background: var(--gray-50);
-  border-bottom: 1px solid var(--gray-100);
+  background: var(--bg-main);
+  border-bottom: var(--border-thick);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,15 +79,15 @@
 
 .order-id-block .label {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  color: var(--gray-400);
+  color: var(--text-muted);
   letter-spacing: 0.5px;
 }
 
 .order-id-block .value {
-  font-weight: 800;
-  color: var(--gray-800);
+  font-weight: 900;
+  color: var(--text-main);
   font-family: var(--font-heading);
 }
 
@@ -85,7 +97,18 @@
   gap: 8px;
   color: var(--text-muted);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 700;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  border: var(--border-thin);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .order-items {
@@ -105,8 +128,9 @@
   width: 64px;
   height: 64px;
   object-fit: cover;
-  border-radius: var(--radius-md);
-  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  border: var(--border-thin);
+  background: #fff;
 }
 
 .item-info {
@@ -117,23 +141,25 @@
 
 .item-info strong {
   font-size: 0.95rem;
-  color: var(--gray-800);
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .item-info span {
   font-size: 0.85rem;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
 .item-price {
-  font-weight: 700;
-  color: var(--gray-900);
+  font-weight: 900;
+  color: var(--text-main);
 }
 
 .order-card-footer {
   padding: 20px 24px;
-  background: var(--white);
-  border-top: 1px solid var(--gray-100);
+  background: var(--bg-main);
+  border-top: var(--border-thick);
   display: flex;
   align-items: center;
   gap: 32px;
@@ -144,8 +170,8 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--gray-500);
+  font-weight: 700;
+  color: var(--text-muted);
   flex: 1;
 }
 
@@ -157,14 +183,15 @@
 
 .order-total-block .label {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gray-400);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .total-value {
   font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--primary);
+  font-weight: 900;
+  color: var(--text-main);
   font-family: var(--font-heading);
 }
 
@@ -193,5 +220,9 @@
   }
   .order-total-block {
     text-align: left;
+  }
+  .order-main-info {
+    flex-direction: column;
+    gap: 16px;
   }
 }

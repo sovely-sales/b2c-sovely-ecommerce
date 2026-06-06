@@ -36,7 +36,7 @@
   justify-content: center;
   text-align: center;
   padding: 80px 20px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   border: var(--border-thick);
   background: var(--bg-card);
   box-shadow: var(--shadow-neo-lg);
@@ -45,9 +45,9 @@
 }
 
 .empty-icon {
-  color: var(--gray-300);
+  color: var(--text-muted);
   margin-bottom: 24px;
-  fill: var(--gray-200);
+  fill: var(--bg-main);
 }
 
 .wishlist-empty h2 {
@@ -55,13 +55,14 @@
   font-weight: 900;
   margin-bottom: 16px;
   color: var(--text-main);
+  text-transform: uppercase;
 }
 
 .wishlist-empty p {
   font-size: 1.1rem;
   color: var(--text-muted);
   margin-bottom: 32px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .wishlist-empty .btn {
@@ -79,5 +80,8 @@
   .wishlist-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
+  }
+  .wishlist-empty {
+    padding: 60px 20px;
   }
 }

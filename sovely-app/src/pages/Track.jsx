@@ -25,7 +25,7 @@ export default function Track() {
 
   const trackOrderById = async (id) => {
     let cleanId = id.trim();
-    if (cleanId.startsWith('#')) {
+    if (cleanId.startsWith("#")) {
       cleanId = cleanId.substring(1).trim();
     }
     if (!cleanId) return;
@@ -35,11 +35,13 @@ export default function Track() {
     setOrder(null);
 
     try {
-      const res = await fetch(`${API}/api/orders/track/${encodeURIComponent(cleanId)}`);
-      
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        setError('Invalid server response. Please check the ID or try again.');
+      const res = await fetch(
+        `${API}/api/orders/track/${encodeURIComponent(cleanId)}`,
+      );
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        setError("Invalid server response. Please check the ID or try again.");
         return;
       }
 
@@ -129,8 +131,11 @@ export default function Track() {
                   ).toLocaleDateString()}
                 </span>
               </div>
-              <div className="info-item" style={{ justifyContent: 'center' }}>
-                <button onClick={() => window.print()} className="btn-invoice-track">
+              <div className="info-item" style={{ justifyContent: "center" }}>
+                <button
+                  onClick={() => window.print()}
+                  className="btn-invoice-track"
+                >
                   <Download size={15} />
                   <span>Download Invoice</span>
                 </button>

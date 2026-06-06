@@ -413,7 +413,10 @@ export default function Checkout() {
               <h2>Payment Method</h2>
             </div>
             <div className="payment-options">
-              <div className="payment-option active" style={{ cursor: "default" }}>
+              <div
+                className="payment-option active"
+                style={{ cursor: "default" }}
+              >
                 <div className="payment-content">
                   <strong>Razorpay Secure</strong>
                   <span>Pay via Cards, UPI, or Net Banking</span>

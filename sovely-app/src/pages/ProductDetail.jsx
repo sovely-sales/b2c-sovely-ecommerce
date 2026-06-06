@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ShoppingCart,
@@ -34,24 +34,40 @@ export default function ProductDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const timerRef = useRef(null);
+
+  // Clean up timer on unmount
   useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Reset state when ID changes
+    setLoading(true);
+    setQuantity(1);
+
     const found = products.find((p) => p.id.toString() === id);
     if (found) {
       setProduct(found);
       setActiveImage(found.image);
+      setProductReviews(found.reviewsList || []);
+      document.title = `${found.name} | Sovely`;
       setLoading(false);
       return;
     }
 
     const fetchProduct = async () => {
-      setLoading(true);
-      // RESTORED: Fixed the stripped http://
-      const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8014";
+      const API_URL = import.meta.env.VITE_API_URL;
 
       try {
         const res = await fetch(`${API_URL}/api/products/${id}`);
         if (res.ok) {
           const p = await res.json();
+          // ... (Your identical mapping logic)
           const categoryMap = {};
           categories.forEach((c) => {
             categoryMap[String(c.id || c._id)] = c.name;
@@ -66,7 +82,7 @@ export default function ProductDetail() {
               : p.image ||
                 "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
 
-          setProduct({
+          const mappedProduct = {
             id: p._id || p.id,
             name: p.title || p.name,
             category: categoryName,
@@ -91,9 +107,12 @@ export default function ProductDetail() {
                   ? [{ url: p.image }]
                   : [],
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
-          });
+          };
+
+          setProduct(mappedProduct);
           setProductReviews(p.reviewsList || []);
           setActiveImage(activeImg);
+          document.title = `${mappedProduct.name} | Sovely`;
         }
       } catch (error) {
         console.error("Error fetching product detail:", error);
@@ -117,7 +136,8 @@ export default function ProductDetail() {
       addToCart(product);
     }
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setAdded(false), 2000);
   };
 
   const formatPrice = (n) =>
@@ -127,15 +147,73 @@ export default function ProductDetail() {
       maximumFractionDigits: 0,
     }).format(n);
 
+const submitReview = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      setSubmitError("You must be logged in to leave a review.");
+      return;
+    }
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    const API_URL = import.meta.env.VITE_API_URL;
+    const token = localStorage.getItem("userToken");
+
+    try {
+      const res = await fetch(`${API_URL}/api/products/${product.id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rating: ratingInput, comment: commentInput }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setProductReviews(data.product.reviewsList);
+        setCommentInput("");
+        setRatingInput(5);
+        setProduct((prev) => ({
+          ...prev,
+          rating: data.product.rating,
+          reviews: data.product.reviews,
+        }));
+      } else {
+        setSubmitError(data.message || "Failed to submit review");
+      }
+    } catch (err) {
+      setSubmitError("Server error.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   if (loading)
     return (
-      <div className="section container">
+      <div
+        className="section container"
+        style={{
+          minHeight: "80vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div className="empty-state">Loading product details...</div>
       </div>
     );
+
   if (!product)
     return (
-      <div className="section container">
+      <div
+        className="section container"
+        style={{
+          minHeight: "80vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div className="empty-state">
           Product not found. <Link to="/products">Back to products</Link>
         </div>
@@ -161,6 +239,7 @@ export default function ProductDetail() {
 
   return (
     <div className="product-detail-page section container">
+      {}
       <div className="pd-grid">
         <div className="pd-image-section">
           <div className="pd-main-img-wrap">
@@ -187,6 +266,7 @@ export default function ProductDetail() {
                   className={`pd-thumb-wrap ${activeImage === img.url ? "active" : ""}`}
                   onClick={() => setActiveImage(img.url)}
                   type="button"
+                  aria-label={`View image ${idx + 1}`}
                 >
                   <img
                     src={img.url}
@@ -220,16 +300,25 @@ export default function ProductDetail() {
 
           <div className="pd-actions">
             <div className="pd-qty">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                aria-label="Decrease quantity"
+              >
                 -
               </button>
-              <span>{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)}>+</button>
+              <span aria-label="Quantity">{quantity}</span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
             </div>
             <div className="pd-btn-group">
               <button
                 className={`btn btn-primary pd-cart-btn ${added ? "added" : ""}`}
                 onClick={handleAddToCart}
+                aria-live="polite"
               >
                 <ShoppingCart size={18} style={{ marginRight: "8px" }} />
                 {added ? "Added to Cart!" : "Add to Cart"}
@@ -237,6 +326,7 @@ export default function ProductDetail() {
               <button
                 className={`btn btn-outline pd-wishlist-btn ${wishlist.includes(String(product.id)) ? "active" : ""}`}
                 onClick={() => toggleWishlist(product.id)}
+                aria-label="Toggle wishlist"
               >
                 <Heart
                   size={18}
@@ -253,6 +343,7 @@ export default function ProductDetail() {
             </div>
           </div>
 
+          {}
           <div className="pd-trust">
             <div className="trust-item">
               <Truck size={20} />
@@ -272,6 +363,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
+<div className="pd-reviews-section">{}</div>
       {recommendations.length > 0 && (
         <div className="pd-recommendations">
           <h2 className="recommendations-title">You May Also Like</h2>

@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Truck, ArrowRight } from 'lucide-react';
-import './QuickTrack.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Truck, ArrowRight } from "lucide-react";
+import "./QuickTrack.css";
 
 export default function QuickTrack() {
-  const [orderId, setOrderId] = useState('');
+  const [orderId, setOrderId] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     let cleanId = orderId.trim();
-    if (cleanId.startsWith('#')) {
+    if (cleanId.startsWith("#")) {
       cleanId = cleanId.substring(1).trim();
     }
     if (cleanId) {
@@ -28,7 +28,9 @@ export default function QuickTrack() {
             </div>
             <div className="text-content">
               <h2>Track Your Order</h2>
-              <p>Enter your unique Order ID to track your shipment in real-time.</p>
+              <p>
+                Enter your unique Order ID to track your shipment in real-time.
+              </p>
             </div>
           </div>
           <form onSubmit={handleSubmit} className="quick-track-form">
