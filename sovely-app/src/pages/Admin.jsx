@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowRight,
   Bell,
   Menu,
   X,
@@ -23,6 +24,15 @@ import {
   Truck,
   Tag,
   Trash2,
+  Megaphone,
+  Plus,
+  Image as ImageIcon,
+  Zap,
+  Percent,
+  Gift,
+  Flame,
+  Star,
+  Heart,
 } from "lucide-react";
 import {
   AreaChart,
@@ -34,7 +44,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./Admin.css";
-
 import { useData } from "../context/DataContext";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8014";
@@ -47,6 +56,104 @@ function removeToken() {
   localStorage.removeItem("userData");
 }
 
+const DEFAULT_SLIDES = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80",
+    title: "SUPER SAVER DEALS",
+    subtitle: "FREE SHIPPING ON ORDERS OVER ₹999*",
+    cta: "SHOP NOW",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=2000&q=80",
+    title: "PREMIUM ACTIVEWEAR & GEAR",
+    subtitle: "UP TO 30% OFF ON SPORTS & FITNESS ESSENTIALS",
+    cta: "EXPLORE NOW",
+  },
+];
+
+const DEFAULT_DEALS = [
+  {
+    icon: "Zap",
+    title: "Flash Sale",
+    subtitle: "Up to 60% Off",
+    desc: "Ends tonight",
+    gradient: "linear-gradient(135deg, #f97316 0%, #ef4444 100%)",
+  },
+  {
+    icon: "Percent",
+    title: "Budget Buys",
+    subtitle: "Under ₹199",
+    desc: "Best value picks",
+    gradient: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+  },
+  {
+    icon: "Gift",
+    title: "Gift Store",
+    subtitle: "Curated Hampers",
+    desc: "For every occasion",
+    gradient: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+  },
+  {
+    icon: "Flame",
+    title: "Trending Now",
+    subtitle: "Top Sellers",
+    desc: "Most popular items",
+    gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+  },
+];
+
+const GRADIENT_PRESETS = [
+  {
+    name: "Sunset (Orange/Red)",
+    value: "linear-gradient(135deg, #f97316 0%, #ef4444 100%)",
+  },
+  {
+    name: "Twilight (Purple/Indigo)",
+    value: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)",
+  },
+  {
+    name: "Rose (Pink/Rose)",
+    value: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+  },
+  {
+    name: "Forest (Emerald/Green)",
+    value: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+  },
+  {
+    name: "Ocean (Cyan/Blue)",
+    value: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+  },
+  {
+    name: "Midnight (Slate/Black)",
+    value: "linear-gradient(135deg, #475569 0%, #0f172a 100%)",
+  },
+];
+
+const ICON_OPTIONS = [
+  "Zap",
+  "Percent",
+  "Gift",
+  "Flame",
+  "Tag",
+  "ShoppingBag",
+  "Star",
+  "Heart",
+  "Truck",
+];
+const ICON_MAP = {
+  Zap,
+  Percent,
+  Gift,
+  Flame,
+  Tag,
+  ShoppingBag,
+  Star,
+  Heart,
+  Truck,
+};
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [orders, setOrders] = useState([]);
@@ -54,11 +161,40 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
-  
-  // Coupon State
-  const { availableCoupons: coupons, addCoupon, toggleCoupon: handleToggleCoupon, deleteCoupon: handleDeleteCoupon } = useData();
-  const [newCoupon, setNewCoupon] = useState({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
-  
+
+  const {
+    availableCoupons: coupons,
+    addCoupon,
+    toggleCoupon: handleToggleCoupon,
+    deleteCoupon: handleDeleteCoupon,
+  } = useData();
+  const [newCoupon, setNewCoupon] = useState({
+    code: "",
+    discountPercent: "",
+    expirationDate: "",
+    usageLimit: "",
+  });
+
+  // Marketing State
+  const [marketingSubTab, setMarketingSubTab] = useState("promo");
+
+  const [promoConfig, setPromoConfig] = useState({
+    tagText: "Limited Offer",
+    title: "Mega Sale",
+    highlight: "Up to 70% Off",
+    desc: "On top electronics, fashion & home décor. Don't miss out!",
+    btnText: "Shop Sale",
+    btnLink: "/deals",
+    imgUrl:
+      "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=400&h=400&fit=crop",
+    tagBg: "#10b981",
+  });
+
+  const [slidesConfig, setSlidesConfig] = useState(DEFAULT_SLIDES);
+  const [previewSlideIdx, setPreviewSlideIdx] = useState(0);
+
+  const [dealsConfig, setDealsConfig] = useState(DEFAULT_DEALS);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,6 +216,23 @@ export default function Admin() {
           }),
         ),
       );
+
+      try {
+        const mRes = await fetch(`${API}/api/marketing`);
+        if (mRes.ok) {
+          const mData = await mRes.json();
+          const promoDoc = mData.find((m) => m.section === "promo-banner");
+          if (promoDoc && promoDoc.data) setPromoConfig(promoDoc.data);
+
+          const heroDoc = mData.find((m) => m.section === "hero-slideshow");
+          if (heroDoc && heroDoc.data) setSlidesConfig(heroDoc.data);
+
+          const dealDoc = mData.find((m) => m.section === "deal-banners");
+          if (dealDoc && dealDoc.data) setDealsConfig(dealDoc.data);
+        }
+      } catch (e) {
+        console.error("Marketing config fetch skipped/failed");
+      }
 
       if (oRes.ok && cRes.ok) {
         setOrders(await oRes.json());
@@ -104,13 +257,12 @@ export default function Admin() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) {
+      if (res.ok)
         setOrders(
           orders.map((o) =>
             o._id === orderId ? { ...o, status: newStatus } : o,
           ),
         );
-      }
     } catch (err) {
       console.error("Update status error:", err);
     }
@@ -124,30 +276,94 @@ export default function Admin() {
 
   const handleCreateCoupon = (e) => {
     e.preventDefault();
-    if (!newCoupon.code || !newCoupon.code.trim()) {
-      alert("Please enter a Coupon Code.");
-      return;
-    }
-    if (!newCoupon.discountPercent) {
-      alert("Please enter a Discount Percentage.");
-      return;
-    }
-    
-    // Check if code already exists
-    if (coupons.some(c => c.code === newCoupon.code.toUpperCase())) {
-      alert("Coupon code already exists!");
-      return;
-    }
+    if (!newCoupon.code || !newCoupon.code.trim())
+      return alert("Please enter a Coupon Code.");
+    if (!newCoupon.discountPercent)
+      return alert("Please enter a Discount Percentage.");
+    if (coupons.some((c) => c.code === newCoupon.code.toUpperCase()))
+      return alert("Coupon code already exists!");
 
     const payload = {
       code: newCoupon.code.toUpperCase(),
       discountPercent: Number(newCoupon.discountPercent),
     };
-    if (newCoupon.expirationDate) payload.expirationDate = newCoupon.expirationDate;
+    if (newCoupon.expirationDate)
+      payload.expirationDate = newCoupon.expirationDate;
     if (newCoupon.usageLimit) payload.usageLimit = Number(newCoupon.usageLimit);
-
     addCoupon(payload);
-    setNewCoupon({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
+    setNewCoupon({
+      code: "",
+      discountPercent: "",
+      expirationDate: "",
+      usageLimit: "",
+    });
+  };
+
+  const saveMarketingData = async (sectionName, dataPayload) => {
+    try {
+      const res = await fetch(`${API}/api/admin/marketing`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ section: sectionName, data: dataPayload }),
+      });
+      if (res.ok) alert(`${sectionName} published successfully!`);
+      else alert("Failed to save marketing data.");
+    } catch (err) {
+      alert("Network error. Could not publish.");
+    }
+  };
+
+  const updateSlide = (index, field, value) => {
+    const updated = [...slidesConfig];
+    updated[index][field] = value;
+    setSlidesConfig(updated);
+  };
+  const addSlide = () => {
+    setSlidesConfig([
+      ...slidesConfig,
+      {
+        title: "NEW SLIDE",
+        subtitle: "Catchy subtitle here",
+        cta: "SHOP NOW",
+        image: "",
+      },
+    ]);
+    setPreviewSlideIdx(slidesConfig.length);
+  };
+  const removeSlide = (index) => {
+    if (slidesConfig.length <= 1)
+      return alert("You must have at least one slide.");
+    const updated = slidesConfig.filter((_, i) => i !== index);
+    setSlidesConfig(updated);
+    setPreviewSlideIdx(0);
+  };
+
+  const updateDeal = (index, field, value) => {
+    const updated = [...dealsConfig];
+    updated[index][field] = value;
+    setDealsConfig(updated);
+  };
+  const addDeal = () => {
+    if (dealsConfig.length >= 6)
+      return alert("Maximum 6 deal banners allowed.");
+    setDealsConfig([
+      ...dealsConfig,
+      {
+        icon: "Star",
+        title: "New Deal",
+        subtitle: "Description",
+        desc: "Extra info",
+        gradient: GRADIENT_PRESETS[0].value,
+      },
+    ]);
+  };
+  const removeDeal = (index) => {
+    if (dealsConfig.length <= 1)
+      return alert("You need at least one deal banner.");
+    setDealsConfig(dealsConfig.filter((_, i) => i !== index));
   };
 
   const processChartData = () => {
@@ -161,27 +377,20 @@ export default function Admin() {
         });
       })
       .reverse();
-
     const dataMap = last7Days.reduce(
       (acc, date) => ({ ...acc, [date]: { name: date, revenue: 0 } }),
       {},
     );
-
     orders.forEach((o) => {
       const dateStr = new Date(o.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       });
-      if (dataMap[dateStr]) {
-        dataMap[dateStr].revenue += o.total || 0;
-      }
+      if (dataMap[dateStr]) dataMap[dateStr].revenue += o.total || 0;
     });
-
     return Object.values(dataMap);
   };
-
   const chartData = processChartData();
-
   const stats = {
     totalOrders: orders.length,
     totalRevenue: orders.reduce((sum, o) => sum + (o.total || 0), 0),
@@ -190,7 +399,6 @@ export default function Admin() {
   };
 
   if (!getToken()) return null;
-
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
   return (
@@ -203,7 +411,6 @@ export default function Admin() {
           </div>
           <span>Sovely Admin</span>
         </div>
-
         <nav className="sidebar-nav">
           <button
             className={activeTab === "dashboard" ? "active" : ""}
@@ -221,16 +428,19 @@ export default function Admin() {
             className={activeTab === "customers" ? "active" : ""}
             onClick={() => setActiveTab("customers")}
           >
-            <Users size={20} />
-            {sidebarOpen && <span>Customers</span>}
+            <Users size={20} /> {sidebarOpen && <span>Customers</span>}
           </button>
-          
           <button
             className={activeTab === "coupons" ? "active" : ""}
             onClick={() => setActiveTab("coupons")}
           >
-            <Tag size={20} />
-            {sidebarOpen && <span>Coupons</span>}
+            <Tag size={20} /> {sidebarOpen && <span>Coupons</span>}
+          </button>
+          <button
+            className={activeTab === "marketing" ? "active" : ""}
+            onClick={() => setActiveTab("marketing")}
+          >
+            <Megaphone size={20} /> {sidebarOpen && <span>Marketing</span>}
           </button>
           <div className="nav-divider"></div>
           <button
@@ -240,7 +450,6 @@ export default function Admin() {
             <Settings size={20} /> <span>Settings</span>
           </button>
         </nav>
-
         <div className="sidebar-footer">
           <button className="logout-btn" onClick={handleLogout}>
             <LogOut size={20} /> <span>Sign Out</span>
@@ -260,15 +469,7 @@ export default function Admin() {
             </button>
             <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
           </div>
-
           <div className="header-right">
-            <div className="header-search">
-              <Search size={18} />
-              <input type="text" placeholder="Search..." />
-            </div>
-            <button className="icon-btn">
-              <Bell size={20} />
-            </button>
             <div className="admin-profile">
               <div className="admin-avatar">{userData.name?.[0] || "A"}</div>
             </div>
@@ -277,6 +478,7 @@ export default function Admin() {
 
         <main className="admin-scroll-content">
           <div className="admin-view-container">
+            {}
             {activeTab === "dashboard" && (
               <div className="dashboard-view animate-fadeUp">
                 <div className="stats-grid">
@@ -317,10 +519,7 @@ export default function Admin() {
                     </div>
                   </div>
                 </div>
-
-                {}
                 <div className="dashboard-sections">
-                  {}
                   <div className="card chart-card">
                     <div className="card-header">
                       <h3>Revenue Overview (Last 7 Days)</h3>
@@ -364,7 +563,7 @@ export default function Admin() {
                             axisLine={false}
                             tickLine={false}
                             tick={{ fill: "#64748b", fontSize: 12 }}
-                            tickFormatter={(value) => `₹${value}`}
+                            tickFormatter={(val) => `₹${val}`}
                             dx={-10}
                           />
                           <Tooltip
@@ -388,8 +587,6 @@ export default function Admin() {
                       </ResponsiveContainer>
                     </div>
                   </div>
-
-                  {}
                   <div className="card recent-orders">
                     <div className="card-header">
                       <h3>Recent Orders</h3>
@@ -435,7 +632,6 @@ export default function Admin() {
               </div>
             )}
 
-            {}
             {activeTab === "orders" && (
               <div className="orders-view animate-fadeUp">
                 <div className="view-header">
@@ -485,9 +681,6 @@ export default function Admin() {
                                     <span className="customer-email">
                                       {order.email}
                                     </span>
-                                    <span className="customer-phone">
-                                      {order.phone}
-                                    </span>
                                   </div>
                                 </td>
                                 <td>
@@ -534,18 +727,7 @@ export default function Admin() {
                                   </div>
                                 </td>
                                 <td>
-                                  <button
-                                    className="btn-details-toggle"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setExpandedOrderId(
-                                        isExpanded ? null : order._id,
-                                      );
-                                    }}
-                                  >
-                                    <span className="btn-text">
-                                      {isExpanded ? "Hide" : "View"}
-                                    </span>
+                                  <button className="btn-details-toggle">
                                     <ChevronDown
                                       size={14}
                                       className={`toggle-icon ${isExpanded ? "rotated" : ""}`}
@@ -553,123 +735,6 @@ export default function Admin() {
                                   </button>
                                 </td>
                               </tr>
-                              {isExpanded && (
-                                <tr
-                                  className="order-details-row"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <td colSpan="7">
-                                    <div className="order-details-expanded animate-slideDown">
-                                      <div className="details-grid">
-                                        {}
-                                        <div className="details-block products-list-block">
-                                          <h4>Products Ordered</h4>
-                                          <div className="products-table-wrap">
-                                            <table className="products-detail-table">
-                                              <thead>
-                                                <tr>
-                                                  <th>Image</th>
-                                                  <th>Product Name</th>
-                                                  <th>Price</th>
-                                                  <th>Qty</th>
-                                                  <th>Subtotal</th>
-                                                </tr>
-                                              </thead>
-                                              <tbody>
-                                                {order.items?.map(
-                                                  (item, index) => (
-                                                    <tr key={index}>
-                                                      <td>
-                                                        <img
-                                                          src={item.image}
-                                                          alt={item.name}
-                                                          className="admin-product-thumb"
-                                                        />
-                                                      </td>
-                                                      <td className="product-title-cell">
-                                                        {item.name}
-                                                      </td>
-                                                      <td>
-                                                        ₹
-                                                        {item.price?.toLocaleString()}
-                                                      </td>
-                                                      <td>{item.quantity}</td>
-                                                      <td>
-                                                        <strong>
-                                                          ₹
-                                                          {(
-                                                            item.price *
-                                                            item.quantity
-                                                          )?.toLocaleString()}
-                                                        </strong>
-                                                      </td>
-                                                    </tr>
-                                                  ),
-                                                )}
-                                              </tbody>
-                                            </table>
-                                          </div>
-                                        </div>
-
-                                        {}
-                                        <div className="details-block info-sidebar-block">
-                                          <div className="info-section">
-                                            <h4>Shipping Address</h4>
-                                            <div className="info-content">
-                                              <p>
-                                                <strong>Name:</strong>{" "}
-                                                {order.customerName}
-                                              </p>
-                                              <p>
-                                                <strong>Address:</strong>{" "}
-                                                {order.address}
-                                              </p>
-                                              <p>
-                                                <strong>City & Pincode:</strong>{" "}
-                                                {order.city} -{" "}
-                                                {order.postalCode}
-                                              </p>
-                                              <p>
-                                                <strong>Phone:</strong>{" "}
-                                                {order.phone || "N/A"}
-                                              </p>
-                                              <p>
-                                                <strong>Email:</strong>{" "}
-                                                {order.email}
-                                              </p>
-                                            </div>
-                                          </div>
-                                          <div className="info-section payment-section-info">
-                                            <h4>Payment Information</h4>
-                                            <div className="info-content">
-                                              <p>
-                                                <strong>Method:</strong>{" "}
-                                                {order.paymentMethod ===
-                                                "razorpay"
-                                                  ? "Razorpay Secure"
-                                                  : "Cash on Delivery (COD)"}
-                                              </p>
-                                              <p>
-                                                <strong>Payment ID:</strong>{" "}
-                                                <code className="admin-mono-text">
-                                                  {order.paymentId || "N/A"}
-                                                </code>
-                                              </p>
-                                              <p>
-                                                <strong>Total Amount:</strong>{" "}
-                                                <strong className="text-primary-dark">
-                                                  ₹
-                                                  {order.total?.toLocaleString()}
-                                                </strong>
-                                              </p>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
                             </React.Fragment>
                           );
                         })}
@@ -680,7 +745,6 @@ export default function Admin() {
               </div>
             )}
 
-            {}
             {activeTab === "customers" && (
               <div className="customers-view animate-fadeUp">
                 <div className="view-header">
@@ -694,7 +758,6 @@ export default function Admin() {
                           <th>Customer</th>
                           <th>Email</th>
                           <th>Joined</th>
-                          <th>Address Count</th>
                           <th>Role</th>
                         </tr>
                       </thead>
@@ -706,19 +769,13 @@ export default function Admin() {
                                 <div className="avatar-sm">
                                   {user.name?.[0]}
                                 </div>
-                                <div className="td-user-info">
-                                  <strong>{user.name}</strong>
-                                  <span className="td-phone">
-                                    {user.phone || "No Phone"}
-                                  </span>
-                                </div>
+                                <strong>{user.name}</strong>
                               </div>
                             </td>
                             <td>{user.email}</td>
                             <td>
                               {new Date(user.createdAt).toLocaleDateString()}
                             </td>
-                            <td>{user.savedAddresses?.length || 0} Saved</td>
                             <td>
                               <span className="badge-blue">{user.role}</span>
                             </td>
@@ -730,35 +787,60 @@ export default function Admin() {
                 </div>
               </div>
             )}
-            
+
             {activeTab === "coupons" && (
               <div className="coupons-view animate-fadeUp">
                 <div className="view-header">
                   <h3>Coupon Management</h3>
                 </div>
-                
                 <div className="card" style={{ marginBottom: "20px" }}>
-                  <form onSubmit={handleCreateCoupon} className="coupon-form" style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
+                  <form
+                    onSubmit={handleCreateCoupon}
+                    className="coupon-form"
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      flexWrap: "wrap",
+                      alignItems: "flex-end",
+                    }}
+                  >
                     <div className="input-group">
                       <label>Coupon Code</label>
-                      <input type="text" placeholder="e.g. SAVE20" value={newCoupon.code} onChange={e => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})} />
+                      <input
+                        type="text"
+                        value={newCoupon.code}
+                        onChange={(e) =>
+                          setNewCoupon({
+                            ...newCoupon,
+                            code: e.target.value.toUpperCase(),
+                          })
+                        }
+                      />
                     </div>
                     <div className="input-group">
                       <label>Discount %</label>
-                      <input type="number" min="1" max="100" placeholder="e.g. 15" value={newCoupon.discountPercent} onChange={e => setNewCoupon({...newCoupon, discountPercent: e.target.value})} />
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={newCoupon.discountPercent}
+                        onChange={(e) =>
+                          setNewCoupon({
+                            ...newCoupon,
+                            discountPercent: e.target.value,
+                          })
+                        }
+                      />
                     </div>
-                    <div className="input-group">
-                      <label>Usage Limit (Optional)</label>
-                      <input type="number" min="1" placeholder="e.g. 100" value={newCoupon.usageLimit} onChange={e => setNewCoupon({...newCoupon, usageLimit: e.target.value})} />
-                    </div>
-                    <div className="input-group">
-                      <label>Expiration (Optional)</label>
-                      <input type="date" value={newCoupon.expirationDate} onChange={e => setNewCoupon({...newCoupon, expirationDate: e.target.value})} />
-                    </div>
-                    <button type="submit" className="btn btn-primary" style={{ padding: "12px 24px" }}>Add Coupon</button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ padding: "12px 24px" }}
+                    >
+                      Add Coupon
+                    </button>
                   </form>
                 </div>
-                
                 <div className="card">
                   <div className="table-responsive">
                     <table className="admin-table">
@@ -766,33 +848,37 @@ export default function Admin() {
                         <tr>
                           <th>Code</th>
                           <th>Discount</th>
-                          <th>Usage</th>
-                          <th>Expires</th>
                           <th>Status</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {coupons.length === 0 && (
-                          <tr><td colSpan="6" style={{textAlign: "center"}}>No coupons found</td></tr>
-                        )}
                         {coupons.map((coupon) => (
                           <tr key={coupon._id}>
-                            <td><strong>{coupon.code}</strong></td>
-                            <td>{coupon.discountPercent}%</td>
-                            <td>{coupon.timesUsed} / {coupon.usageLimit || '∞'}</td>
-                            <td>{coupon.expirationDate ? new Date(coupon.expirationDate).toLocaleDateString() : 'Never'}</td>
                             <td>
-                              <button 
-                                onClick={() => handleToggleCoupon(coupon._id)} 
-                                className={`badge-${coupon.isActive ? 'green' : 'gray'}`}
-                                style={{ border: 'none', cursor: 'pointer' }}
+                              <strong>{coupon.code}</strong>
+                            </td>
+                            <td>{coupon.discountPercent}%</td>
+                            <td>
+                              <button
+                                onClick={() => handleToggleCoupon(coupon._id)}
+                                className={`badge-${coupon.isActive ? "green" : "gray"}`}
+                                style={{ border: "none", cursor: "pointer" }}
                               >
-                                {coupon.isActive ? 'Active' : 'Inactive'}
+                                {coupon.isActive ? "Active" : "Inactive"}
                               </button>
                             </td>
                             <td>
-                              <button onClick={() => handleDeleteCoupon(coupon._id)} className="btn-icon" style={{color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                              <button
+                                onClick={() => handleDeleteCoupon(coupon._id)}
+                                className="btn-icon"
+                                style={{
+                                  color: "#ef4444",
+                                  background: "transparent",
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                              >
                                 <Trash2 size={18} />
                               </button>
                             </td>
@@ -804,7 +890,864 @@ export default function Admin() {
                 </div>
               </div>
             )}
-            
+
+            {}
+            {activeTab === "marketing" && (
+              <div className="marketing-view animate-fadeUp">
+                <div className="view-header">
+                  <h3>Marketing & Storefront Designer</h3>
+                </div>
+
+                {}
+                <div
+                  className="marketing-tabs"
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    marginBottom: "24px",
+                    borderBottom: "1px solid #e2e8f0",
+                    paddingBottom: "12px",
+                    overflowX: "auto",
+                  }}
+                >
+                  <button
+                    onClick={() => setMarketingSubTab("promo")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background:
+                        marketingSubTab === "promo" ? "#0f172a" : "transparent",
+                      color: marketingSubTab === "promo" ? "#fff" : "#64748b",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    Promo Poster
+                  </button>
+                  <button
+                    onClick={() => setMarketingSubTab("hero")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background:
+                        marketingSubTab === "hero" ? "#0f172a" : "transparent",
+                      color: marketingSubTab === "hero" ? "#fff" : "#64748b",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    Hero Slideshow
+                  </button>
+                  <button
+                    onClick={() => setMarketingSubTab("deals")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background:
+                        marketingSubTab === "deals" ? "#0f172a" : "transparent",
+                      color: marketingSubTab === "deals" ? "#fff" : "#64748b",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    Deal Cards
+                  </button>
+                </div>
+
+                {}
+                {marketingSubTab === "promo" && (
+                  <div
+                    className="designer-layout animate-fadeUp"
+                    style={{
+                      display: "flex",
+                      gap: "24px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <div
+                      className="card"
+                      style={{ flex: "1", minWidth: "300px" }}
+                    >
+                      <h4>Main Promo Configuration</h4>
+                      <div
+                        className="form-grid"
+                        style={{
+                          display: "grid",
+                          gap: "16px",
+                          marginTop: "16px",
+                        }}
+                      >
+                        <div className="input-group">
+                          <label>Tag Text</label>
+                          <input
+                            type="text"
+                            value={promoConfig.tagText}
+                            onChange={(e) =>
+                              setPromoConfig({
+                                ...promoConfig,
+                                tagText: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Title</label>
+                          <input
+                            type="text"
+                            value={promoConfig.title}
+                            onChange={(e) =>
+                              setPromoConfig({
+                                ...promoConfig,
+                                title: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Highlight Text</label>
+                          <input
+                            type="text"
+                            value={promoConfig.highlight}
+                            onChange={(e) =>
+                              setPromoConfig({
+                                ...promoConfig,
+                                highlight: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Description</label>
+                          <textarea
+                            rows="2"
+                            value={promoConfig.desc}
+                            onChange={(e) =>
+                              setPromoConfig({
+                                ...promoConfig,
+                                desc: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: "12px",
+                          }}
+                        >
+                          <div className="input-group">
+                            <label>Button Text</label>
+                            <input
+                              type="text"
+                              value={promoConfig.btnText}
+                              onChange={(e) =>
+                                setPromoConfig({
+                                  ...promoConfig,
+                                  btnText: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="input-group">
+                            <label>Button Link</label>
+                            <input
+                              type="text"
+                              value={promoConfig.btnLink}
+                              onChange={(e) =>
+                                setPromoConfig({
+                                  ...promoConfig,
+                                  btnLink: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="input-group">
+                          <label>Image URL</label>
+                          <input
+                            type="text"
+                            value={promoConfig.imgUrl}
+                            onChange={(e) =>
+                              setPromoConfig({
+                                ...promoConfig,
+                                imgUrl: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() =>
+                            saveMarketingData("promo-banner", promoConfig)
+                          }
+                          style={{ marginTop: "10px" }}
+                        >
+                          Publish Poster to Homepage
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      className="card"
+                      style={{
+                        flex: "1.5",
+                        minWidth: "400px",
+                        background: "#f8fafc",
+                      }}
+                    >
+                      <h4>Live Homepage Preview</h4>
+                      <div
+                        style={{
+                          pointerEvents: "none",
+                          marginTop: "16px",
+                          transform: "scale(0.85)",
+                          transformOrigin: "top left",
+                          width: "117%",
+                          border: "1px dashed #cbd5e1",
+                          borderRadius: "16px",
+                          padding: "16px",
+                          background: "#fff",
+                        }}
+                      >
+                        <div
+                          className="promo-card promo-card--main"
+                          style={{ margin: 0 }}
+                        >
+                          <div className="promo-content">
+                            <span
+                              className="promo-tag"
+                              style={{
+                                background: promoConfig.tagBg,
+                                color: "#fff",
+                              }}
+                            >
+                              <Tag size={12} style={{ marginRight: "4px" }} />{" "}
+                              {promoConfig.tagText}
+                            </span>
+                            <h2 className="promo-title">
+                              {promoConfig.title}
+                              <br />
+                              <span className="promo-highlight">
+                                {promoConfig.highlight}
+                              </span>
+                            </h2>
+                            <p className="promo-desc">{promoConfig.desc}</p>
+                            <div
+                              className="btn btn-white promo-cta"
+                              style={{
+                                display: "inline-flex",
+                                width: "max-content",
+                              }}
+                            >
+                              {promoConfig.btnText} <ArrowRight size={16} />
+                            </div>
+                          </div>
+                          <div className="promo-visual">
+                            <img
+                              src={promoConfig.imgUrl}
+                              alt="Preview"
+                              onError={(e) => {
+                                e.target.src =
+                                  "https://via.placeholder.com/400?text=Invalid+Image";
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {}
+                {marketingSubTab === "hero" && (
+                  <div
+                    className="designer-layout animate-fadeUp"
+                    style={{
+                      display: "flex",
+                      gap: "24px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <div
+                      className="card"
+                      style={{ flex: "1", minWidth: "300px" }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "16px",
+                        }}
+                      >
+                        <h4>Slideshow Array</h4>
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            background: "#e2e8f0",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {slidesConfig.length} Slides
+                        </span>
+                      </div>
+                      <div
+                        className="slides-manager-list"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                        }}
+                      >
+                        {slidesConfig.map((slide, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => setPreviewSlideIdx(idx)}
+                            style={{
+                              padding: "12px",
+                              border: `2px solid ${previewSlideIdx === idx ? "#3b82f6" : "#e2e8f0"}`,
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              display: "flex",
+                              gap: "12px",
+                              alignItems: "center",
+                              background: "#f8fafc",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "60px",
+                                height: "40px",
+                                borderRadius: "4px",
+                                background: "#cbd5e1",
+                                overflow: "hidden",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyItems: "center",
+                              }}
+                            >
+                              {slide.image ? (
+                                <img
+                                  src={slide.image}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                  alt="thumb"
+                                />
+                              ) : (
+                                <ImageIcon size={20} color="#94a3b8" />
+                              )}
+                            </div>
+                            <div style={{ flex: 1, overflow: "hidden" }}>
+                              <p
+                                style={{
+                                  fontWeight: "bold",
+                                  margin: 0,
+                                  fontSize: "14px",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {slide.title || "Untitled Slide"}
+                              </p>
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: "12px",
+                                  color: "#64748b",
+                                }}
+                              >
+                                Slide #{idx + 1}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeSlide(idx);
+                              }}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                color: "#ef4444",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={addSlide}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            padding: "12px",
+                            background: "#fff",
+                            border: "1px dashed #cbd5e1",
+                            borderRadius: "8px",
+                            color: "#3b82f6",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            marginTop: "8px",
+                          }}
+                        >
+                          <Plus size={16} /> Add New Slide
+                        </button>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() =>
+                            saveMarketingData("hero-slideshow", slidesConfig)
+                          }
+                          style={{ marginTop: "16px", width: "100%" }}
+                        >
+                          Publish Slideshow to Homepage
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      className="card"
+                      style={{ flex: "1.5", minWidth: "400px" }}
+                    >
+                      {slidesConfig[previewSlideIdx] ? (
+                        <>
+                          <h4 style={{ marginBottom: "16px" }}>
+                            Editing Slide #{previewSlideIdx + 1}
+                          </h4>
+                          <div
+                            className="form-grid"
+                            style={{ display: "grid", gap: "16px" }}
+                          >
+                            <div className="input-group">
+                              <label>Small Tagline (Title)</label>
+                              <input
+                                type="text"
+                                value={slidesConfig[previewSlideIdx].title}
+                                onChange={(e) =>
+                                  updateSlide(
+                                    previewSlideIdx,
+                                    "title",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="input-group">
+                              <label>Main Headline (Subtitle)</label>
+                              <input
+                                type="text"
+                                value={slidesConfig[previewSlideIdx].subtitle}
+                                onChange={(e) =>
+                                  updateSlide(
+                                    previewSlideIdx,
+                                    "subtitle",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="input-group">
+                              <label>Button Text (CTA)</label>
+                              <input
+                                type="text"
+                                value={slidesConfig[previewSlideIdx].cta}
+                                onChange={(e) =>
+                                  updateSlide(
+                                    previewSlideIdx,
+                                    "cta",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="input-group">
+                              <label>Background Image URL</label>
+                              <input
+                                type="text"
+                                value={slidesConfig[previewSlideIdx].image}
+                                onChange={(e) =>
+                                  updateSlide(
+                                    previewSlideIdx,
+                                    "image",
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              marginTop: "24px",
+                              border: "1px solid #e2e8f0",
+                              borderRadius: "12px",
+                              overflow: "hidden",
+                              height: "250px",
+                              position: "relative",
+                              background: "#0f172a",
+                            }}
+                          >
+                            <img
+                              src={slidesConfig[previewSlideIdx].image}
+                              alt="Background"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                opacity: 0.7,
+                              }}
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                            />
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                padding: "32px",
+                                background:
+                                  "linear-gradient(to right, rgba(0,0,0,0.8), transparent)",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  color: "#fbbf24",
+                                  fontWeight: "bold",
+                                  fontSize: "12px",
+                                  letterSpacing: "2px",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                {slidesConfig[previewSlideIdx].title}
+                              </span>
+                              <h2
+                                style={{
+                                  color: "#fff",
+                                  fontSize: "24px",
+                                  margin: "0 0 16px 0",
+                                  maxWidth: "80%",
+                                }}
+                              >
+                                {slidesConfig[previewSlideIdx].subtitle}
+                              </h2>
+                              <button
+                                style={{
+                                  background: "#fff",
+                                  color: "#0f172a",
+                                  border: "none",
+                                  padding: "8px 16px",
+                                  fontWeight: "bold",
+                                  borderRadius: "4px",
+                                  width: "max-content",
+                                }}
+                              >
+                                {slidesConfig[previewSlideIdx].cta} →
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div
+                          style={{
+                            padding: "40px",
+                            textAlign: "center",
+                            color: "#64748b",
+                          }}
+                        >
+                          Select a slide to edit
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {}
+                {marketingSubTab === "deals" && (
+                  <div
+                    className="designer-layout animate-fadeUp"
+                    style={{
+                      display: "flex",
+                      gap: "24px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <div className="card" style={{ width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "16px",
+                        }}
+                      >
+                        <h4>Manage Deal Cards</h4>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() =>
+                            saveMarketingData("deal-banners", dealsConfig)
+                          }
+                        >
+                          Publish Deal Cards
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill, minmax(280px, 1fr))",
+                          gap: "16px",
+                        }}
+                      >
+                        {dealsConfig.map((deal, idx) => {
+                          const IconComponent = ICON_MAP[deal.icon] || Zap;
+                          return (
+                            <div
+                              key={idx}
+                              style={{
+                                border: "1px solid #e2e8f0",
+                                borderRadius: "12px",
+                                overflow: "hidden",
+                                background: "#f8fafc",
+                                position: "relative",
+                              }}
+                            >
+                              {}
+                              <div
+                                style={{
+                                  background: deal.gradient,
+                                  padding: "20px",
+                                  color: "white",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "12px",
+                                  minHeight: "140px",
+                                  position: "relative",
+                                }}
+                              >
+                                <button
+                                  onClick={() => removeDeal(idx)}
+                                  style={{
+                                    position: "absolute",
+                                    top: "12px",
+                                    right: "12px",
+                                    background: "rgba(0,0,0,0.2)",
+                                    border: "none",
+                                    color: "white",
+                                    width: "28px",
+                                    height: "28px",
+                                    borderRadius: "50%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <X size={14} />
+                                </button>
+                                <div
+                                  style={{
+                                    background: "rgba(255,255,255,0.2)",
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "8px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  <IconComponent size={20} />
+                                </div>
+                                <div>
+                                  <h3
+                                    style={{
+                                      margin: 0,
+                                      fontSize: "16px",
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    {deal.title}
+                                  </h3>
+                                  <p
+                                    style={{
+                                      margin: "4px 0 0 0",
+                                      fontSize: "14px",
+                                      opacity: 0.9,
+                                    }}
+                                  >
+                                    {deal.subtitle}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {}
+                              <div
+                                style={{
+                                  padding: "16px",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "12px",
+                                }}
+                              >
+                                <div className="input-group">
+                                  <label style={{ fontSize: "12px" }}>
+                                    Icon
+                                  </label>
+                                  <select
+                                    style={{
+                                      padding: "8px",
+                                      borderRadius: "6px",
+                                      border: "1px solid #cbd5e1",
+                                    }}
+                                    value={deal.icon}
+                                    onChange={(e) =>
+                                      updateDeal(idx, "icon", e.target.value)
+                                    }
+                                  >
+                                    {ICON_OPTIONS.map((i) => (
+                                      <option key={i} value={i}>
+                                        {i}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="input-group">
+                                  <label style={{ fontSize: "12px" }}>
+                                    Title
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={deal.title}
+                                    onChange={(e) =>
+                                      updateDeal(idx, "title", e.target.value)
+                                    }
+                                    style={{ padding: "8px" }}
+                                  />
+                                </div>
+                                <div className="input-group">
+                                  <label style={{ fontSize: "12px" }}>
+                                    Subtitle
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={deal.subtitle}
+                                    onChange={(e) =>
+                                      updateDeal(
+                                        idx,
+                                        "subtitle",
+                                        e.target.value,
+                                      )
+                                    }
+                                    style={{ padding: "8px" }}
+                                  />
+                                </div>
+                                <div className="input-group">
+                                  <label style={{ fontSize: "12px" }}>
+                                    Description Tag
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={deal.desc}
+                                    onChange={(e) =>
+                                      updateDeal(idx, "desc", e.target.value)
+                                    }
+                                    style={{ padding: "8px" }}
+                                  />
+                                </div>
+                                <div className="input-group">
+                                  <label style={{ fontSize: "12px" }}>
+                                    Color Preset
+                                  </label>
+                                  <select
+                                    style={{
+                                      padding: "8px",
+                                      borderRadius: "6px",
+                                      border: "1px solid #cbd5e1",
+                                    }}
+                                    value={deal.gradient}
+                                    onChange={(e) =>
+                                      updateDeal(
+                                        idx,
+                                        "gradient",
+                                        e.target.value,
+                                      )
+                                    }
+                                  >
+                                    {GRADIENT_PRESETS.map((preset) => (
+                                      <option
+                                        key={preset.name}
+                                        value={preset.value}
+                                      >
+                                        {preset.name}
+                                      </option>
+                                    ))}
+                                    <option value={deal.gradient}>
+                                      Custom (Keep Current)
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {}
+                        {dealsConfig.length < 6 && (
+                          <div
+                            onClick={addDeal}
+                            style={{
+                              border: "2px dashed #cbd5e1",
+                              borderRadius: "12px",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              minHeight: "350px",
+                              cursor: "pointer",
+                              color: "#64748b",
+                              background: "transparent",
+                              transition: "all 0.2s",
+                            }}
+                            onMouseOver={(e) =>
+                              (e.currentTarget.style.background = "#f1f5f9")
+                            }
+                            onMouseOut={(e) =>
+                              (e.currentTarget.style.background = "transparent")
+                            }
+                          >
+                            <Plus size={32} style={{ marginBottom: "8px" }} />
+                            <strong>Add Deal Card</strong>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -1,25 +1,44 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Tag, Clock } from "lucide-react";
+import { useData } from "../context/DataContext";
 import "./PromoBanner.css";
 
 export default function PromoBanner() {
+  const { marketing } = useData();
+
+  const promoDoc = marketing?.find((m) => m.section === "promo-banner");
+  const config = promoDoc?.data || {
+    tagText: "Limited Offer",
+    title: "Mega Sale",
+    highlight: "Up to 70% Off",
+    desc: "On top electronics, fashion & home décor. Don't miss out!",
+    btnText: "Shop Sale",
+    btnLink: "/deals",
+    imgUrl:
+      "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=400&h=400&fit=crop",
+    tagBg: "#10b981",
+  };
+
   return (
     <section className="promo-section" id="promo-section">
       <div className="container promo-grid">
         {}
         <div className="promo-card promo-card--main" id="promo-main-card">
           <div className="promo-content">
-            <span className="promo-tag">
-              <Tag size={12} /> Limited Offer
+            <span
+              className="promo-tag"
+              style={
+                promoDoc ? { background: config.tagBg, color: "#fff" } : {}
+              }
+            >
+              <Tag size={12} /> {config.tagText}
             </span>
             <h2 className="promo-title">
-              Mega Sale
+              {config.title}
               <br />
-              <span className="promo-highlight">Up to 70% Off</span>
+              <span className="promo-highlight">{config.highlight}</span>
             </h2>
-            <p className="promo-desc">
-              On top electronics, fashion & home décor. Don't miss out!
-            </p>
+            <p className="promo-desc">{config.desc}</p>
             <div className="promo-countdown">
               <Clock size={14} />
               <span>Ends in:</span>
@@ -41,24 +60,20 @@ export default function PromoBanner() {
               </div>
             </div>
             <Link
-              to="/deals"
+              to={config.btnLink}
               className="btn btn-white promo-cta"
               id="promo-main-cta-btn"
             >
-              Shop Sale <ArrowRight size={16} />
+              {config.btnText} <ArrowRight size={16} />
             </Link>
           </div>
           <div className="promo-visual">
-            <img
-              src="https://images.unsplash.com/photo-1607082349566-187342175e2f?w=400&h=400&fit=crop"
-              alt="Sale products"
-            />
+            <img src={config.imgUrl} alt={config.title} />
           </div>
         </div>
 
         {}
         <div className="promo-right">
-          {}
           <div
             className="promo-card promo-card--grocery"
             id="promo-grocery-card"
@@ -87,7 +102,6 @@ export default function PromoBanner() {
             />
           </div>
 
-          {}
           <div
             className="promo-card promo-card--fashion"
             id="promo-fashion-card"

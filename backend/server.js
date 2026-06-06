@@ -11,6 +11,7 @@ const Order = require("./models/Order");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
 const Coupon = require("./models/Coupon");
+const Marketing = require("./models/Marketing");
 const { signToken, authenticate } = require("./middleware/auth");
 
 if (!process.env.JWT_SECRET) {
@@ -180,6 +181,37 @@ app.get("/api/products/:id", async (req, res) => {
     res.json(product);
   } catch (error) {
     console.error("Error fetching product details:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+app.get("/api/marketing", async (req, res) => {
+  try {
+    const marketingData = await Marketing.find({});
+    res.json(marketingData);
+  } catch (error) {
+    console.error("Error fetching marketing data:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+app.post("/api/admin/marketing", authenticate("admin"), async (req, res) => {
+  try {
+    const { section, data } = req.body;
+
+    if (!section || !data) {
+      return res.status(400).json({ message: "Section and data are required" });
+    }
+
+    const updated = await Marketing.findOneAndUpdate(
+      { section },
+      { section, data },
+      { upsert: true, new: true },
+    );
+
+    res.json({ success: true, marketing: updated });
+  } catch (error) {
+    console.error("Error saving marketing data:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });

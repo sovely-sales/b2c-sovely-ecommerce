@@ -1,5 +1,5 @@
 .trust-bar-section {
-  background: var(--bg-main); /* Fixed: Was hardcoded '--gray-50' */
+  background: var(--bg-main);
   padding: 40px 0;
   border-top: var(--border-thick);
   border-bottom: var(--border-thick);
@@ -42,7 +42,7 @@
 
 .trust-badge p {
   font-size: 0.75rem;
-  color: var(--text-muted); /* Fixed: Was hardcoded '--gray-500' */
+  color: var(--text-muted);
   font-weight: 600;
 }
 

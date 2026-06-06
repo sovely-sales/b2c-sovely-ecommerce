@@ -22,8 +22,15 @@ const RAZORPAY_KEY_ID =
   import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_placeholder";
 
 export default function Checkout() {
-  const { cartItems, cartTotal, cartSubtotal, cartDelivery, clearCart, user, couponDiscount } =
-    useData();
+  const {
+    cartItems,
+    cartTotal,
+    cartSubtotal,
+    cartDelivery,
+    clearCart,
+    user,
+    couponDiscount,
+  } = useData();
 
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
@@ -464,7 +471,10 @@ export default function Checkout() {
                 </span>
               </div>
               {couponDiscount > 0 && (
-                <div className="detail-row" style={{ color: "var(--accent)", fontWeight: "700" }}>
+                <div
+                  className="detail-row"
+                  style={{ color: "var(--accent)", fontWeight: "700" }}
+                >
                   <span>Coupon Discount</span>
                   <span>- {formatPrice(couponDiscount)}</span>
                 </div>

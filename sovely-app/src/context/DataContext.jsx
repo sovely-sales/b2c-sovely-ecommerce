@@ -13,6 +13,7 @@ export function DataProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [marketing, setMarketing] = useState([]);
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cartItems");
     return savedCart ? JSON.parse(savedCart) : [];
@@ -92,16 +93,31 @@ export function DataProvider({ children }) {
     return cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   }, [cartItems]);
 
-const [coupon, setCoupon] = useState(null);
+  const [coupon, setCoupon] = useState(null);
   const [couponPercent, setCouponPercent] = useState(0);
 
-  // Simple frontend-only coupon management (bypasses backend API)
   const [availableCoupons, setAvailableCoupons] = useState(() => {
     const saved = localStorage.getItem("sovely_coupons");
     if (saved) return JSON.parse(saved);
     return [
-      { _id: "1", code: "SAVE10", discountPercent: 10, isActive: true, timesUsed: 0, usageLimit: null, expirationDate: null },
-      { _id: "2", code: "WELCOME20", discountPercent: 20, isActive: true, timesUsed: 0, usageLimit: null, expirationDate: null }
+      {
+        _id: "1",
+        code: "SAVE10",
+        discountPercent: 10,
+        isActive: true,
+        timesUsed: 0,
+        usageLimit: null,
+        expirationDate: null,
+      },
+      {
+        _id: "2",
+        code: "WELCOME20",
+        discountPercent: 20,
+        isActive: true,
+        timesUsed: 0,
+        usageLimit: null,
+        expirationDate: null,
+      },
     ];
   });
 
@@ -115,25 +131,27 @@ const [coupon, setCoupon] = useState(null);
       ...newCoupon,
       _id: Date.now().toString(),
       isActive: true,
-      timesUsed: 0
+      timesUsed: 0,
     };
     saveCoupons([couponToSave, ...availableCoupons]);
   };
 
   const toggleCoupon = (id) => {
-    saveCoupons(availableCoupons.map(c => c._id === id ? { ...c, isActive: !c.isActive } : c));
+    saveCoupons(
+      availableCoupons.map((c) =>
+        c._id === id ? { ...c, isActive: !c.isActive } : c,
+      ),
+    );
   };
 
   const deleteCoupon = (id) => {
-    saveCoupons(availableCoupons.filter(c => c._id !== id));
+    saveCoupons(availableCoupons.filter((c) => c._id !== id));
   };
 
-  const cartSubtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0,
-  );
-  
-  const couponDiscount = coupon && couponPercent > 0 ? Math.round(cartSubtotal * (couponPercent / 100)) : 0;
+  const couponDiscount =
+    coupon && couponPercent > 0
+      ? Math.round(cartSubtotal * (couponPercent / 100))
+      : 0;
   const cartDelivery = cartSubtotal > 999 ? 0 : 50;
   const cartTotal = cartSubtotal - couponDiscount + cartDelivery;
 
@@ -206,12 +224,13 @@ const [coupon, setCoupon] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes] = await Promise.all([
+        const [productsRes, categoriesRes, marketingRes] = await Promise.all([
           fetch(`${API_URL}/api/products?limit=12`),
           fetch(`${API_URL}/api/categories`),
+          fetch(`${API_URL}/api/marketing`),
         ]);
 
-        if (productsRes.ok && categoriesRes.ok) {
+        if (productsRes.ok && categoriesRes.ok && marketingRes.ok) {
           const productsData = await productsRes.json();
           const categoriesData = await categoriesRes.json();
 
@@ -372,6 +391,8 @@ const [coupon, setCoupon] = useState(null);
 
           setProducts(mappedProducts);
           setCategories(mappedCategories);
+          const marketingData = await marketingRes.json();
+          setMarketing(marketingData);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -387,6 +408,7 @@ const [coupon, setCoupon] = useState(null);
     () => ({
       products,
       categories,
+      marketing,
       loading,
       cartItems,
       updateQuantity,
@@ -413,6 +435,7 @@ const [coupon, setCoupon] = useState(null);
     [
       products,
       categories,
+      marketing,
       loading,
       cartItems,
       cartSubtotal,
@@ -436,9 +459,9 @@ const [coupon, setCoupon] = useState(null);
   );
 
   return (
-<DataContext.Provider
+    <DataContext.Provider
       value={{
-        ...contextValue, // Retaining the memoized values from remote
+        ...contextValue,
         couponDiscount,
         coupon,
         setCoupon,

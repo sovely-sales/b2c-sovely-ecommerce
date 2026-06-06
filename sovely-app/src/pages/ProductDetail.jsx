@@ -33,8 +33,6 @@ export default function ProductDetail() {
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quantity, setQuantity] = useState(1);
-
-  const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const timerRef = useRef(null);
 
@@ -147,7 +145,7 @@ export default function ProductDetail() {
       maximumFractionDigits: 0,
     }).format(n);
 
-const submitReview = async (e) => {
+  const submitReview = async (e) => {
     e.preventDefault();
     if (!user) {
       setSubmitError("You must be logged in to leave a review.");
@@ -363,7 +361,7 @@ const submitReview = async (e) => {
         </div>
       </div>
 
-<div className="pd-reviews-section">{}</div>
+      <div className="pd-reviews-section">{}</div>
       {recommendations.length > 0 && (
         <div className="pd-recommendations">
           <h2 className="recommendations-title">You May Also Like</h2>

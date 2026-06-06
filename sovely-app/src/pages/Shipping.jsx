@@ -18,7 +18,9 @@ export default function Shipping() {
           <BadgePercent size={24} className="card-icon" />
           <h3>1. Delivery Charges</h3>
           <p>
-We offer **FREE shipping** on all orders above **₹999**. For orders under ₹999, a flat shipping charge of **₹50** is applied at checkout. There are no hidden handling fees.
+            We offer **FREE shipping** on all orders above **₹999**. For orders
+            under ₹999, a flat shipping charge of **₹50** is applied at
+            checkout. There are no hidden handling fees.
           </p>
         </div>
 

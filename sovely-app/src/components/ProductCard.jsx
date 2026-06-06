@@ -147,7 +147,6 @@ export default function ProductCard({ product }) {
         </h3>
 
         <div className="card-size">{productSize}</div>
-
       </div>
     </Link>
   );
