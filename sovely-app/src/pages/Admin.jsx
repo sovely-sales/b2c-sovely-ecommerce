@@ -162,11 +162,22 @@ export default function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
 
+  const [products, setProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState("");
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editPrices, setEditPrices] = useState({ price: "", originalPrice: "" });
+  const [savingPriceId, setSavingPriceId] = useState(null);
+
+  const [bulkType, setBulkType] = useState("amount"); // "amount" or "percent"
+  const [bulkValue, setBulkValue] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   const {
     availableCoupons: coupons,
     addCoupon,
     toggleCoupon: handleToggleCoupon,
     deleteCoupon: handleDeleteCoupon,
+    categories,
   } = useData();
   const [newCoupon, setNewCoupon] = useState({
     code: "",
@@ -197,12 +208,71 @@ export default function Admin() {
 
   const navigate = useNavigate();
 
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/products?limit=250`);
+      if (res.ok) {
+        const rawProducts = await res.json();
+
+        // Build category map
+        const catMap = {};
+        if (categories && Array.isArray(categories)) {
+          categories.forEach((c) => {
+            catMap[String(c._id || c.id)] = c.name;
+          });
+        }
+
+        const mapped = rawProducts.map((p) => {
+          const rawCategory = String(p.categoryId || p.category || "");
+          const categoryName =
+            catMap[rawCategory] || rawCategory || "Uncategorized";
+
+          return {
+            _id: p._id,
+            id: p.id || p._id,
+            name: p.title || p.name || "Unnamed Product",
+            category: categoryName,
+            categoryId: rawCategory,
+            price:
+              p.price !== undefined
+                ? p.price
+                : (p.dropshipBasePrice || 0) + 30,
+            originalPrice:
+              p.originalPrice !== undefined
+                ? p.originalPrice
+                : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+            dropshipBasePrice: p.dropshipBasePrice,
+            suggestedRetailPrice: p.suggestedRetailPrice,
+            image:
+              p.images && p.images.length > 0
+                ? p.images[0].url
+                : p.image ||
+                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+          };
+        });
+
+        setProducts(mapped);
+      } else {
+        console.error("Failed to fetch products:", res.status);
+      }
+    } catch (err) {
+      console.error("Products fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!getToken()) {
       navigate("/login", { state: { from: "/admin" } });
       return;
     }
-    fetchData();
+    if (activeTab === "products") {
+      fetchProducts();
+    } else {
+      fetchData();
+    }
   }, [activeTab]);
 
   const fetchData = async () => {
@@ -265,6 +335,86 @@ export default function Admin() {
         );
     } catch (err) {
       console.error("Update status error:", err);
+    }
+  };
+
+  const handleUpdatePrice = async (e, productId) => {
+    e.preventDefault();
+    setSavingPriceId(productId);
+    try {
+      const res = await fetch(`${API}/api/admin/products/${productId}/price`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          price: Number(editPrices.price),
+          originalPrice: Number(editPrices.originalPrice),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(
+          products.map((p) =>
+            p._id === productId || p.id === productId
+              ? {
+                  ...p,
+                  price: data.product.price,
+                  originalPrice: data.product.originalPrice,
+                }
+              : p,
+          ),
+        );
+        setEditingProductId(null);
+        alert("Product price updated successfully!");
+      } else {
+        const errData = await res.json();
+        alert(errData.message || "Failed to update price.");
+      }
+    } catch (err) {
+      console.error("Price update error:", err);
+      alert("Network error. Could not update price.");
+    } finally {
+      setSavingPriceId(null);
+    }
+  };
+
+  const handleBulkPriceIncrease = async (e) => {
+    e.preventDefault();
+    if (!bulkValue || isNaN(bulkValue) || Number(bulkValue) <= 0) {
+      return alert("Please enter a valid positive number.");
+    }
+    const val = Number(bulkValue);
+    const confirmMsg = `Are you sure you want to increase the B2C price of ALL products by ${
+      bulkType === "amount" ? `₹${val}` : `${val}%`
+    }?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setBulkLoading(true);
+    try {
+      const res = await fetch(`${API}/api/admin/products/bulk-price-increase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ type: bulkType, value: val }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message || "Bulk price increase successfully executed!");
+        setBulkValue("");
+        fetchProducts(); // Refresh products
+      } else {
+        const errData = await res.json();
+        alert(errData.message || "Failed to update prices.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Could not perform bulk price increase.");
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -423,6 +573,12 @@ export default function Admin() {
             onClick={() => setActiveTab("orders")}
           >
             <ShoppingBag size={20} /> <span>Orders</span>
+          </button>
+          <button
+            className={activeTab === "products" ? "active" : ""}
+            onClick={() => setActiveTab("products")}
+          >
+            <Package size={20} /> {sidebarOpen && <span>Products</span>}
           </button>
           <button
             className={activeTab === "customers" ? "active" : ""}
@@ -738,6 +894,387 @@ export default function Admin() {
                             </React.Fragment>
                           );
                         })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "products" && (
+              <div className="orders-view animate-fadeUp">
+                <div className="view-header">
+                  <h3>Product Inventory & Pricing</h3>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder="Search products by name or category..."
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: "8px",
+                        border: "1.5px solid #cbd5e1",
+                        fontSize: "14px",
+                        outline: "none",
+                        width: "280px",
+                        background: "#fff",
+                      }}
+                    />
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={fetchProducts}
+                    >
+                      <RefreshCw size={14} className={loading ? "spin" : ""} />{" "}
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="card"
+                  style={{
+                    marginBottom: "24px",
+                    padding: "20px",
+                    background:
+                      "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <h4
+                    style={{
+                      margin: "0 0 12px 0",
+                      color: "#0f172a",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <DollarSign size={18} style={{ color: "#3b82f6" }} />
+                    Bulk Price Adjuster
+                  </h4>
+                  <p
+                    style={{
+                      margin: "0 0 16px 0",
+                      fontSize: "13px",
+                      color: "#64748b",
+                    }}
+                  >
+                    Increase the B2C price (both Selling Price and Original
+                    Price) of ALL products in the inventory instantly by a flat
+                    amount or percentage. B2B prices will remain untouched.
+                  </p>
+                  <form
+                    onSubmit={handleBulkPriceIncrease}
+                    style={{
+                      display: "flex",
+                      gap: "16px",
+                      flexWrap: "wrap",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <div className="input-group" style={{ margin: 0 }}>
+                      <label
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          marginBottom: "6px",
+                          display: "block",
+                        }}
+                      >
+                        Adjustment Type
+                      </label>
+                      <select
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1.5px solid #cbd5e1",
+                          fontSize: "14px",
+                          outline: "none",
+                          width: "160px",
+                          background: "#fff",
+                        }}
+                        value={bulkType}
+                        onChange={(e) => setBulkType(e.target.value)}
+                      >
+                        <option value="amount">Flat Amount (₹)</option>
+                        <option value="percent">Percentage (%)</option>
+                      </select>
+                    </div>
+
+                    <div className="input-group" style={{ margin: 0 }}>
+                      <label
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                          marginBottom: "6px",
+                          display: "block",
+                        }}
+                      >
+                        Increase Value
+                      </label>
+                      <input
+                        type="number"
+                        placeholder={
+                          bulkType === "amount" ? "e.g. 50" : "e.g. 10"
+                        }
+                        value={bulkValue}
+                        onChange={(e) => setBulkValue(e.target.value)}
+                        min="0.01"
+                        step="any"
+                        required
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1.5px solid #cbd5e1",
+                          fontSize: "14px",
+                          outline: "none",
+                          width: "160px",
+                          background: "#fff",
+                        }}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={bulkLoading}
+                      style={{
+                        padding: "10px 24px",
+                        height: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {bulkLoading ? "Applying..." : "Apply to All Products"}
+                    </button>
+                  </form>
+                </div>
+
+                <div className="card">
+                  <div className="table-responsive">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Product Details</th>
+                          <th>Category</th>
+                          <th>B2C Selling Price</th>
+                          <th>B2C Original Price</th>
+                          <th>B2B Base Price (ReadOnly)</th>
+                          <th>B2B Retail Price (ReadOnly)</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {products
+                          .filter((p) => {
+                            const term = productSearch.toLowerCase();
+                            return (
+                              p.name.toLowerCase().includes(term) ||
+                              p.category.toLowerCase().includes(term)
+                            );
+                          })
+                          .map((product) => {
+                            const isEditing =
+                              editingProductId === (product.id || product._id);
+                            return (
+                              <tr key={product._id || product.id}>
+                                <td>
+                                  <div
+                                    className="td-user-row"
+                                    style={{
+                                      display: "flex",
+                                      gap: "12px",
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <img
+                                      src={product.image}
+                                      alt={product.name}
+                                      style={{
+                                        width: "48px",
+                                        height: "48px",
+                                        borderRadius: "6px",
+                                        objectFit: "cover",
+                                        border: "1px solid #e2e8f0",
+                                      }}
+                                    />
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "2px",
+                                      }}
+                                    >
+                                      <strong
+                                        style={{
+                                          fontSize: "14px",
+                                          color: "#0f172a",
+                                        }}
+                                      >
+                                        {product.name}
+                                      </strong>
+                                      <span
+                                        style={{
+                                          fontSize: "11px",
+                                          color: "#64748b",
+                                        }}
+                                      >
+                                        ID: {product.id}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span
+                                    className="badge-blue"
+                                    style={{ textTransform: "capitalize" }}
+                                  >
+                                    {product.category}
+                                  </span>
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="number"
+                                      className="status-select"
+                                      style={{ width: "90px", padding: "6px" }}
+                                      value={editPrices.price}
+                                      onChange={(e) =>
+                                        setEditPrices({
+                                          ...editPrices,
+                                          price: e.target.value,
+                                        })
+                                      }
+                                      min="0"
+                                      required
+                                    />
+                                  ) : (
+                                    <strong>
+                                      ₹{product.price?.toLocaleString()}
+                                    </strong>
+                                  )}
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="number"
+                                      className="status-select"
+                                      style={{ width: "90px", padding: "6px" }}
+                                      value={editPrices.originalPrice}
+                                      onChange={(e) =>
+                                        setEditPrices({
+                                          ...editPrices,
+                                          originalPrice: e.target.value,
+                                        })
+                                      }
+                                      min="0"
+                                      required
+                                    />
+                                  ) : (
+                                    <span
+                                      style={{
+                                        textDecoration: "line-through",
+                                        color: "#94a3b8",
+                                      }}
+                                    >
+                                      ₹{product.originalPrice?.toLocaleString()}
+                                    </span>
+                                  )}
+                                </td>
+                                <td>
+                                  <span
+                                    style={{
+                                      color: "#64748b",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    {product.dropshipBasePrice !== undefined
+                                      ? `₹${product.dropshipBasePrice.toLocaleString()}`
+                                      : "—"}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span
+                                    style={{
+                                      color: "#64748b",
+                                      fontWeight: "500",
+                                    }}
+                                  >
+                                    {product.suggestedRetailPrice !== undefined
+                                      ? `₹${product.suggestedRetailPrice.toLocaleString()}`
+                                      : "—"}
+                                  </span>
+                                </td>
+                                <td>
+                                  {isEditing ? (
+                                    <div style={{ display: "flex", gap: "8px" }}>
+                                      <button
+                                        className="badge-green"
+                                        style={{
+                                          border: "none",
+                                          cursor: "pointer",
+                                          padding: "6px 12px",
+                                          borderRadius: "6px",
+                                          fontWeight: "bold",
+                                        }}
+                                        onClick={(e) =>
+                                          handleUpdatePrice(
+                                            e,
+                                            product.id || product._id,
+                                          )
+                                        }
+                                        disabled={savingPriceId !== null}
+                                      >
+                                        {savingPriceId ===
+                                        (product.id || product._id)
+                                          ? "Saving..."
+                                          : "Save"}
+                                      </button>
+                                      <button
+                                        className="badge-gray"
+                                        style={{
+                                          border: "none",
+                                          cursor: "pointer",
+                                          padding: "6px 12px",
+                                          borderRadius: "6px",
+                                          fontWeight: "bold",
+                                        }}
+                                        onClick={() =>
+                                          setEditingProductId(null)
+                                        }
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      className="badge-blue"
+                                      style={{
+                                        border: "none",
+                                        cursor: "pointer",
+                                        padding: "6px 12px",
+                                        borderRadius: "6px",
+                                        fontWeight: "bold",
+                                      }}
+                                      onClick={() => {
+                                        setEditingProductId(
+                                          product.id || product._id,
+                                        );
+                                        setEditPrices({
+                                          price: product.price || "",
+                                          originalPrice: product.originalPrice || "",
+                                        });
+                                      }}
+                                    >
+                                      Edit Price
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>

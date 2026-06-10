@@ -357,6 +357,104 @@ app.patch(
   },
 );
 
+app.patch(
+  "/api/admin/products/:id/price",
+  authenticate("admin"),
+  async (req, res) => {
+    try {
+      const { price, originalPrice } = req.body;
+      const { id } = req.params;
+
+      if (price === undefined || originalPrice === undefined) {
+        return res
+          .status(400)
+          .json({ message: "Price and originalPrice are required" });
+      }
+
+      let query = mongoose.Types.ObjectId.isValid(id)
+        ? { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] }
+        : { id: isNaN(id) ? -1 : parseInt(id) };
+
+      const updatedProduct = await Product.findOneAndUpdate(
+        query,
+        {
+          $set: {
+            price: Number(price),
+            originalPrice: Number(originalPrice),
+          },
+        },
+        { new: true },
+      );
+
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      res.json({ success: true, product: updatedProduct });
+    } catch (err) {
+      console.error("Price change error:", err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  },
+);
+
+app.post(
+  "/api/admin/products/bulk-price-increase",
+  authenticate("admin"),
+  async (req, res) => {
+    try {
+      const { type, value } = req.body;
+      if (!type || value === undefined || isNaN(value)) {
+        return res.status(400).json({ message: "Invalid type or value" });
+      }
+
+      const products = await Product.find({});
+      const bulkOps = products.map((p) => {
+        const currentPrice =
+          p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30;
+        const currentOriginalPrice =
+          p.originalPrice !== undefined
+            ? p.originalPrice
+            : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30;
+
+        let newPrice = currentPrice;
+        let newOriginalPrice = currentOriginalPrice;
+
+        if (type === "amount") {
+          newPrice += Number(value);
+          newOriginalPrice += Number(value);
+        } else if (type === "percent") {
+          newPrice = Math.round(newPrice * (1 + Number(value) / 100));
+          newOriginalPrice = Math.round(
+            newOriginalPrice * (1 + Number(value) / 100),
+          );
+        }
+
+        return {
+          updateOne: {
+            filter: { _id: p._id },
+            update: {
+              $set: { price: newPrice, originalPrice: newOriginalPrice },
+            },
+          },
+        };
+      });
+
+      if (bulkOps.length > 0) {
+        await Product.bulkWrite(bulkOps);
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully increased prices of ${bulkOps.length} products.`,
+      });
+    } catch (err) {
+      console.error("Bulk price increase error:", err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  },
+);
+
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
