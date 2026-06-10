@@ -19,11 +19,13 @@ export default function Contact() {
               <MapPin size={24} />
             </div>
             <div>
-              <h3>Our Office</h3>
+              <h3>Headquarters</h3>
               <p>
-                123 Sovely Avenue, Tech Park
+                Sovely Supply Chain Pvt. Ltd.
                 <br />
-                Bangalore, KA 560001, India
+                123 Enterprise Avenue, Tech Park
+                <br />
+                Bengaluru, Karnataka 560001
               </p>
             </div>
           </div>
@@ -33,11 +35,11 @@ export default function Contact() {
               <Phone size={24} />
             </div>
             <div>
-              <h3>Phone</h3>
+              <h3>Direct Line</h3>
               <p>
-                +91 98765 43210
+                +91 95350 94003
                 <br />
-                Mon-Fri, 9am to 6pm
+                Don't hesitate to call. You can call Anytime!
               </p>
             </div>
           </div>
@@ -47,11 +49,11 @@ export default function Contact() {
               <Mail size={24} />
             </div>
             <div>
-              <h3>Email</h3>
+              <h3>Email Desks</h3>
               <p>
-                support@sovely.com
+                partners@sovely.com
                 <br />
-                sales@sovely.com
+                support@sovely.com
               </p>
             </div>
           </div>

@@ -62,15 +62,15 @@ export default function Footer() {
           <div className="footer-contact">
             <div className="footer-contact-item">
               <Phone size={14} />
-              <span>1800-123-SOVELY</span>
+              <span>+91 95350 94003</span>
             </div>
             <div className="footer-contact-item">
               <Mail size={14} />
-              <span>support@sovely.in</span>
+              <span>support@sovely.com</span>
             </div>
             <div className="footer-contact-item">
               <MapPin size={14} />
-              <span>Bengaluru, Karnataka, India</span>
+              <span>123 Enterprise Avenue, Bengaluru</span>
             </div>
           </div>
           {}
