@@ -16,7 +16,7 @@ export default function Home() {
     <main id="home-page">
       <HeroBanner />
       <CategoryStrip />
-      {/* <DealBanners /> */}
+      {}
       <AllProducts />
       <PromoBanner />
       <TrustBar />

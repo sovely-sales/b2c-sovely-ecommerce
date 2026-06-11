@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const Razorpay = require("razorpay");
 require("dotenv").config({ path: "../.env" });
 
@@ -42,7 +43,7 @@ mongoose
 
 const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const calculateCartTotal = async (items) => {
+const calculateCartTotal = async (items, couponCode = null) => {
   let calculatedSubtotal = 0;
 
   for (let item of items) {
@@ -62,11 +63,29 @@ const calculateCartTotal = async (items) => {
     }
   }
 
-  const deliveryFee = calculatedSubtotal > 499 ? 0 : 50;
+  let discountAmount = 0;
+
+  if (couponCode) {
+    const validCoupon = await Coupon.findOne({
+      code: couponCode,
+      isActive: true,
+    });
+
+    if (validCoupon) {
+      discountAmount = Math.round(
+        calculatedSubtotal * (validCoupon.discountPercent / 100),
+      );
+    }
+  }
+
+  const discountedSubtotal = calculatedSubtotal - discountAmount;
+  const deliveryFee = discountedSubtotal > 499 ? 0 : 50;
+
   return {
     calculatedSubtotal,
+    discountAmount,
     deliveryFee,
-    finalTotal: calculatedSubtotal + deliveryFee,
+    finalTotal: discountedSubtotal + deliveryFee,
   };
 };
 
@@ -263,13 +282,15 @@ app.get("/api/orders/track/:id", async (req, res) => {
     }
 
     if (!order) {
-      const allOrders = await Order.find({}).sort({ createdAt: -1 }).limit(500);
+      const allOrders = await Order.find({ status: { $ne: "Pending Payment" } })
+        .sort({ createdAt: -1 })
+        .limit(500);
       order = allOrders.find(
         (o) => o._id.toString().endsWith(id) || o._id.toString().includes(id),
       );
     }
 
-    if (!order) {
+    if (!order || order.status === "Pending Payment") {
       return res.status(404).json({
         message: "Order not found. Please check your Order ID and try again.",
       });
@@ -281,6 +302,81 @@ app.get("/api/orders/track/:id", async (req, res) => {
     res.status(400).json({
       message: "Could not look up that Order ID. Please verify and try again.",
     });
+  }
+});
+
+app.post("/api/orders/init", async (req, res) => {
+  try {
+    const { items, couponCode, ...restBody } = req.body;
+
+    let { calculatedSubtotal, deliveryFee, finalTotal } =
+      await calculateCartTotal(items);
+
+    let discount = 0;
+    if (couponCode === "SAVE10")
+      discount = Math.round(calculatedSubtotal * 0.1);
+    if (couponCode === "WELCOME20")
+      discount = Math.round(calculatedSubtotal * 0.2);
+
+    finalTotal = finalTotal - discount;
+
+    const options = {
+      amount: Math.round(finalTotal * 100),
+      currency: "INR",
+      receipt: `rcpt_${Date.now()}`,
+    };
+    const rzpOrder = await razorpay.orders.create(options);
+
+    const order = new Order({
+      ...restBody,
+      items,
+      total: finalTotal,
+      status: restBody.paymentMethod === "COD" ? "Pending" : "Pending Payment",
+      razorpayOrderId: rzpOrder.id,
+    });
+
+    const savedOrder = await order.save();
+
+    res.json({ success: true, rzpOrder, dbOrderId: savedOrder._id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Order initialization failed" });
+  }
+});
+
+app.post("/api/orders/verify", async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      dbOrderId,
+    } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature === razorpay_signature) {
+      await Order.findByIdAndUpdate(dbOrderId, {
+        status: "Paid",
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+      });
+
+      res.json({ success: true, message: "Payment verified successfully" });
+    } else {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Invalid Signature. Spoofing detected.",
+        });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Verification failed" });
   }
 });
 
@@ -318,9 +414,14 @@ app.get("/api/admin/me", authenticate("admin"), (req, res) => {
   });
 });
 
-app.get("/api/admin/orders", authenticate("admin"), async (req, res) => {
+app.get("/api/user/orders", authenticate("user"), async (req, res) => {
   try {
-    const orders = await Order.find({}).sort({ createdAt: -1 });
+    const orders = await Order.find({
+      email: req.user.email,
+      status: { $ne: "Pending Payment" },
+    }).sort({
+      createdAt: -1,
+    });
     res.json(orders);
   } catch {
     res.status(500).json({ message: "Server Error" });
@@ -344,12 +445,19 @@ app.patch(
   async (req, res) => {
     try {
       const { status } = req.body;
-      const order = await Order.findByIdAndUpdate(
-        req.params.id,
-        { status },
-        { new: true },
-      );
+
+      const order = await Order.findById(req.params.id);
       if (!order) return res.status(404).json({ message: "Order not found" });
+
+      if (order.status === "Pending Payment" && status !== "Cancelled") {
+        return res.status(400).json({
+          message: "Cannot update status. Payment has not been verified yet.",
+        });
+      }
+
+      order.status = status;
+      await order.save();
+
       res.json({ success: true, order });
     } catch (err) {
       res.status(500).json({ message: "Server Error" });
@@ -694,4 +802,88 @@ app.post("/api/razorpay/order", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+
+app.get("/api/coupons", async (req, res) => {
+  try {
+    res.json(await Coupon.find().sort({ createdAt: -1 }));
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching coupons" });
+  }
+});
+
+app.post("/api/admin/coupons", authenticate("admin"), async (req, res) => {
+  try {
+    const coupon = await Coupon.create(req.body);
+    res.status(201).json({ success: true, coupon });
+  } catch (err) {
+    res.status(400).json({ message: "Error creating coupon" });
+  }
+});
+
+app.delete(
+  "/api/admin/coupons/:id",
+  authenticate("admin"),
+  async (req, res) => {
+    try {
+      await Coupon.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Error deleting coupon" });
+    }
+  },
+);
+
+
+
+app.post("/api/razorpay/webhook", async (req, res) => {
+  try {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) return res.status(500).send("Webhook secret not configured");
+
+    const signature = req.headers["x-razorpay-signature"];
+
+    
+    const shasum = crypto.createHmac("sha256", secret);
+    shasum.update(JSON.stringify(req.body));
+    const digest = shasum.digest("hex");
+
+    if (digest === signature) {
+      console.log(`Webhook Received: ${req.body.event}`);
+
+      
+      if (req.body.event === "payment.captured" || req.body.event === "order.paid") {
+        const paymentEntity = req.body.payload.payment.entity;
+        const rzpOrderId = paymentEntity.order_id;
+        const rzpPaymentId = paymentEntity.id;
+
+        
+        
+        
+        const order = await Order.findOneAndUpdate(
+          { razorpayOrderId: rzpOrderId, status: "Pending Payment" },
+          {
+            $set: {
+              status: "Paid",
+              razorpayPaymentId: rzpPaymentId,
+            },
+          },
+          { new: true }
+        );
+
+        if (order) {
+          console.log(`✅ Webhook rescued & updated order: ${order._id}`);
+        }
+      }
+      
+      
+      res.status(200).json({ status: "ok" });
+    } else {
+      console.error("❌ Webhook signature mismatch. Potential spoofing attempt.");
+      res.status(400).send("Invalid signature");
+    }
+  } catch (err) {
+    console.error("Webhook processing error:", err);
+    res.status(500).send("Server Error");
+  }
 });

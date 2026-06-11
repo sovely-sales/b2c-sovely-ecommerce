@@ -226,3 +226,10 @@
     gap: 16px;
   }
 }
+
+.status-pill.pending-payment,
+.status-badge.pending-payment {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}

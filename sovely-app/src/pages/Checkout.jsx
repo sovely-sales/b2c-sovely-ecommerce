@@ -204,32 +204,73 @@ export default function Checkout() {
       city: form.city,
       postalCode: form.postalCode,
       paymentMethod: form.payment,
-      paymentId: paymentId,
       items: cartItems,
-      total: cartTotal,
-      status: paymentId === "COD" ? "Pending" : "Paid",
+      couponCode: coupon?.code || null,
     };
 
     try {
-      const headers = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch(`${API}/api/orders`, {
+      const initRes = await fetch(`${API}/api/orders/init`, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify(orderPayload),
       });
-      const data = await res.json();
-      if (data.success) {
+      const initData = await initRes.json();
+
+      if (!initData.success) throw new Error(initData.message);
+
+      if (form.payment === "razorpay") {
+        const options = {
+          key: RAZORPAY_KEY_ID,
+          amount: initData.rzpOrder.amount,
+          currency: "INR",
+          name: "Sovely B2C",
+          order_id: initData.rzpOrder.id,
+          prefill: {
+            name: `${form.firstName} ${form.lastName}`,
+            email: form.email,
+            contact: form.phone,
+          },
+          handler: async (response) => {
+            try {
+              const verifyRes = await fetch(`${API}/api/orders/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  dbOrderId: initData.dbOrderId,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+
+              if (verifyData.success) {
+                orderCompletedRef.current = true;
+                clearCart();
+                navigate(`/order-success?orderId=${initData.dbOrderId}`);
+              } else {
+                setOrderError("Payment verification failed.");
+              }
+            } catch (err) {
+              setOrderError("Could not verify payment with server.");
+            }
+          },
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          setOrderError("Payment failed or cancelled.");
+        });
+        rzp.open();
+      } else {
         orderCompletedRef.current = true;
         clearCart();
-        navigate(`/order-success?orderId=${data.orderId}`);
-      } else {
-        setOrderError(data.message || "Order failed.");
+        navigate(`/order-success?orderId=${initData.dbOrderId}`);
       }
     } catch (err) {
-      setOrderError("Finalization error.");
+      setOrderError(err.message || "Failed to initialize order.");
     } finally {
       setPlacing(false);
     }

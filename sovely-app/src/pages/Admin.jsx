@@ -165,15 +165,18 @@ export default function Admin() {
   const [products, setProducts] = useState([]);
   const [productSearch, setProductSearch] = useState("");
   const [editingProductId, setEditingProductId] = useState(null);
-  const [editPrices, setEditPrices] = useState({ price: "", originalPrice: "" });
+  const [editPrices, setEditPrices] = useState({
+    price: "",
+    originalPrice: "",
+  });
   const [savingPriceId, setSavingPriceId] = useState(null);
 
-  const [bulkType, setBulkType] = useState("amount"); // "amount" or "percent"
+  const [bulkType, setBulkType] = useState("amount");
   const [bulkValue, setBulkValue] = useState("");
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [coupons, setCoupons] = useState([]);
 
   const {
-    availableCoupons: coupons,
     addCoupon,
     toggleCoupon: handleToggleCoupon,
     deleteCoupon: handleDeleteCoupon,
@@ -215,7 +218,6 @@ export default function Admin() {
       if (res.ok) {
         const rawProducts = await res.json();
 
-        // Build category map
         const catMap = {};
         if (categories && Array.isArray(categories)) {
           categories.forEach((c) => {
@@ -235,9 +237,7 @@ export default function Admin() {
             category: categoryName,
             categoryId: rawCategory,
             price:
-              p.price !== undefined
-                ? p.price
-                : (p.dropshipBasePrice || 0) + 30,
+              p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
             originalPrice:
               p.originalPrice !== undefined
                 ? p.originalPrice
@@ -272,6 +272,14 @@ export default function Admin() {
       fetchProducts();
     } else {
       fetchData();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === "coupons") {
+      fetch(`${API}/api/coupons`)
+        .then((res) => res.json())
+        .then((data) => setCoupons(data));
     }
   }, [activeTab]);
 
@@ -424,29 +432,26 @@ export default function Admin() {
     window.location.reload();
   };
 
-  const handleCreateCoupon = (e) => {
+  const handleCreateCoupon = async (e) => {
     e.preventDefault();
-    if (!newCoupon.code || !newCoupon.code.trim())
-      return alert("Please enter a Coupon Code.");
-    if (!newCoupon.discountPercent)
-      return alert("Please enter a Discount Percentage.");
-    if (coupons.some((c) => c.code === newCoupon.code.toUpperCase()))
-      return alert("Coupon code already exists!");
-
     const payload = {
       code: newCoupon.code.toUpperCase(),
       discountPercent: Number(newCoupon.discountPercent),
     };
-    if (newCoupon.expirationDate)
-      payload.expirationDate = newCoupon.expirationDate;
-    if (newCoupon.usageLimit) payload.usageLimit = Number(newCoupon.usageLimit);
-    addCoupon(payload);
-    setNewCoupon({
-      code: "",
-      discountPercent: "",
-      expirationDate: "",
-      usageLimit: "",
+
+    const res = await fetch(`${API}/api/admin/coupons`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(payload),
     });
+
+    if (res.ok) {
+      const data = await res.json();
+      setCoupons([data.coupon, ...coupons]);
+    }
   };
 
   const saveMarketingData = async (sectionName, dataPayload) => {
@@ -545,9 +550,11 @@ export default function Admin() {
     totalOrders: orders.length,
     totalRevenue: orders.reduce((sum, o) => sum + (o.total || 0), 0),
     totalUsers: customers.length,
-    pendingOrders: orders.filter((o) => o.status === "Pending").length,
-  };
 
+    pendingOrders: orders.filter((o) =>
+      ["Pending", "Pending Payment"].includes(o.status),
+    ).length,
+  };
   if (!getToken()) return null;
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
@@ -850,8 +857,9 @@ export default function Admin() {
                                   </strong>
                                 </td>
                                 <td>
+                                  {}
                                   <span
-                                    className={`status-pill ${order.status?.toLowerCase()}`}
+                                    className={`status-pill ${order.status?.toLowerCase().replace(/\s+/g, "-")}`}
                                   >
                                     {order.status}
                                   </span>
@@ -867,8 +875,19 @@ export default function Admin() {
                                           e.target.value,
                                         )
                                       }
+                                      disabled={
+                                        order.status === "Pending Payment"
+                                      }
                                     >
-                                      <option value="Pending">Pending</option>
+                                      {}
+                                      {order.status === "Pending Payment" && (
+                                        <option value="Pending Payment">
+                                          Pending Payment
+                                        </option>
+                                      )}
+                                      <option value="Pending">
+                                        Pending (COD/Paid)
+                                      </option>
                                       <option value="Processing">
                                         Processing
                                       </option>
@@ -905,7 +924,13 @@ export default function Admin() {
               <div className="orders-view animate-fadeUp">
                 <div className="view-header">
                   <h3>Product Inventory & Pricing</h3>
-                  <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      alignItems: "center",
+                    }}
+                  >
                     <input
                       type="text"
                       placeholder="Search products by name or category..."
@@ -1209,7 +1234,9 @@ export default function Admin() {
                                 </td>
                                 <td>
                                   {isEditing ? (
-                                    <div style={{ display: "flex", gap: "8px" }}>
+                                    <div
+                                      style={{ display: "flex", gap: "8px" }}
+                                    >
                                       <button
                                         className="badge-green"
                                         style={{
@@ -1264,7 +1291,8 @@ export default function Admin() {
                                         );
                                         setEditPrices({
                                           price: product.price || "",
-                                          originalPrice: product.originalPrice || "",
+                                          originalPrice:
+                                            product.originalPrice || "",
                                         });
                                       }}
                                     >

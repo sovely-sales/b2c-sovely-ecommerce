@@ -94,8 +94,9 @@ export default function Orders() {
                   </div>
                 </div>
                 <div className="order-status-block">
+                  {}
                   <span
-                    className={`status-badge ${order.status?.toLowerCase()}`}
+                    className={`status-pill ${order.status?.toLowerCase().replace(/\s+/g, "-")}`}
                   >
                     {order.status}
                   </span>
