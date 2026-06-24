@@ -137,6 +137,7 @@ export default function Checkout() {
     setPlacing(true);
     setOrderError("");
 
+    // 1. Save new address if requested
     if (saveAddress && showNewForm && token) {
       try {
         await fetch(`${API}/api/user/address`, {
@@ -152,50 +153,7 @@ export default function Checkout() {
       }
     }
 
-    if (form.payment === "razorpay") {
-      try {
-        const headers = { "Content-Type": "application/json" };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
-        const orderRes = await fetch(`${API}/api/razorpay/order`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ items: cartItems }),
-        });
-        const orderData = await orderRes.json();
-
-        if (!orderData.success) throw new Error(orderData.message);
-
-        const options = {
-          key: RAZORPAY_KEY_ID,
-          amount: orderData.order.amount,
-          currency: "INR",
-          name: "Sovely B2C",
-          description: "Secure Payment",
-          order_id: orderData.order.id,
-          handler: async (response) =>
-            finalizeOrder(response.razorpay_payment_id),
-          prefill: {
-            name: `${form.firstName} ${form.lastName}`,
-            email: form.email,
-            contact: form.phone,
-          },
-          theme: { color: "#10b981" },
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        setOrderError("Payment failed to initialize. Check your Razorpay Key.");
-        setPlacing(false);
-      }
-    } else {
-      finalizeOrder("COD");
-    }
-  };
-
-  const finalizeOrder = async (paymentId) => {
+    // 2. Prepare the complete order payload
     const orderPayload = {
       customerName: `${form.firstName} ${form.lastName}`,
       email: form.email,
@@ -209,6 +167,7 @@ export default function Checkout() {
     };
 
     try {
+      // 3. Initialize the order in the DB and create the Razorpay order simultaneously
       const initRes = await fetch(`${API}/api/orders/init`, {
         method: "POST",
         headers: {
@@ -222,19 +181,23 @@ export default function Checkout() {
       if (!initData.success) throw new Error(initData.message);
 
       if (form.payment === "razorpay") {
+        // 4. Open Razorpay exactly ONCE
         const options = {
           key: RAZORPAY_KEY_ID,
           amount: initData.rzpOrder.amount,
           currency: "INR",
           name: "Sovely B2C",
+          description: "Secure Payment",
           order_id: initData.rzpOrder.id,
           prefill: {
             name: `${form.firstName} ${form.lastName}`,
             email: form.email,
             contact: form.phone,
           },
+          theme: { color: "#10b981" },
           handler: async (response) => {
             try {
+              // 5. Verify the payment signature directly
               const verifyRes = await fetch(`${API}/api/orders/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -252,19 +215,23 @@ export default function Checkout() {
                 clearCart();
                 navigate(`/order-success?orderId=${initData.dbOrderId}`);
               } else {
-                setOrderError("Payment verification failed.");
+                setOrderError(
+                  "Payment verification failed. Please contact support.",
+                );
               }
             } catch (err) {
               setOrderError("Could not verify payment with server.");
             }
           },
         };
+
         const rzp = new window.Razorpay(options);
         rzp.on("payment.failed", function (response) {
           setOrderError("Payment failed or cancelled.");
         });
         rzp.open();
       } else {
+        // COD Flow
         orderCompletedRef.current = true;
         clearCart();
         navigate(`/order-success?orderId=${initData.dbOrderId}`);
