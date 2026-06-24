@@ -30,6 +30,7 @@ export default function Checkout() {
     clearCart,
     user,
     couponDiscount,
+    coupon,
   } = useData();
 
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -153,7 +154,7 @@ export default function Checkout() {
       }
     }
 
-    // 2. Prepare the complete order payload
+    
     const orderPayload = {
       customerName: `${form.firstName} ${form.lastName}`,
       email: form.email,
@@ -167,7 +168,7 @@ export default function Checkout() {
     };
 
     try {
-      // 3. Initialize the order in the DB and create the Razorpay order simultaneously
+      
       const initRes = await fetch(`${API}/api/orders/init`, {
         method: "POST",
         headers: {
@@ -181,7 +182,7 @@ export default function Checkout() {
       if (!initData.success) throw new Error(initData.message);
 
       if (form.payment === "razorpay") {
-        // 4. Open Razorpay exactly ONCE
+        
         const options = {
           key: RAZORPAY_KEY_ID,
           amount: initData.rzpOrder.amount,
@@ -197,7 +198,7 @@ export default function Checkout() {
           theme: { color: "#10b981" },
           handler: async (response) => {
             try {
-              // 5. Verify the payment signature directly
+              
               const verifyRes = await fetch(`${API}/api/orders/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -231,7 +232,7 @@ export default function Checkout() {
         });
         rzp.open();
       } else {
-        // COD Flow
+        
         orderCompletedRef.current = true;
         clearCart();
         navigate(`/order-success?orderId=${initData.dbOrderId}`);

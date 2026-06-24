@@ -29,7 +29,13 @@ const razorpay = new Razorpay({
 });
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf.toString();
+    },
+  }),
+);
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -45,8 +51,14 @@ const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const calculateCartTotal = async (items, couponCode = null) => {
   let calculatedSubtotal = 0;
+  const sanitizedItems = [];
 
   for (let item of items) {
+    const qty = parseInt(item.quantity, 10);
+    if (isNaN(qty) || qty <= 0) {
+      throw new Error(`Invalid quantity for item ID: ${item.id}`);
+    }
+
     let query = mongoose.Types.ObjectId.isValid(item.id)
       ? {
           $or: [
@@ -57,24 +69,54 @@ const calculateCartTotal = async (items, couponCode = null) => {
       : { id: isNaN(item.id) ? -1 : parseInt(item.id) };
 
     const product = await Product.findOne(query);
+
     if (product) {
       const itemPrice = (product.dropshipBasePrice || product.price || 0) + 30;
-      calculatedSubtotal += itemPrice * item.quantity;
+      calculatedSubtotal += itemPrice * qty;
+
+      sanitizedItems.push({
+        id: String(product.id || product._id),
+        productId: product._id,
+        name: product.name,
+        price: itemPrice,
+        quantity: qty,
+        image: product.image,
+      });
+    } else {
+      throw new Error(`Product not found for ID: ${item.id}`);
     }
   }
 
   let discountAmount = 0;
+  let appliedCoupon = null;
 
   if (couponCode) {
     const validCoupon = await Coupon.findOne({
-      code: couponCode,
+      code: couponCode.toUpperCase(),
       isActive: true,
     });
 
     if (validCoupon) {
+      if (
+        validCoupon.expirationDate &&
+        new Date() > validCoupon.expirationDate
+      ) {
+        throw new Error("This coupon has expired.");
+      }
+
+      if (
+        validCoupon.usageLimit &&
+        validCoupon.timesUsed >= validCoupon.usageLimit
+      ) {
+        throw new Error("This coupon has reached its usage limit.");
+      }
+
       discountAmount = Math.round(
         calculatedSubtotal * (validCoupon.discountPercent / 100),
       );
+      appliedCoupon = validCoupon.code;
+    } else {
+      throw new Error("Invalid coupon code.");
     }
   }
 
@@ -86,9 +128,10 @@ const calculateCartTotal = async (items, couponCode = null) => {
     discountAmount,
     deliveryFee,
     finalTotal: discountedSubtotal + deliveryFee,
+    sanitizedItems,
+    appliedCoupon,
   };
 };
-
 app.get("/api/categories", async (req, res) => {
   try {
     res.json(await Category.find({}));
@@ -237,13 +280,14 @@ app.post("/api/admin/marketing", authenticate("admin"), async (req, res) => {
 
 app.post("/api/orders", async (req, res) => {
   try {
-    const { items, ...restBody } = req.body;
+    const { items, couponCode, ...restBody } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
 
-    const { finalTotal } = await calculateCartTotal(items);
+    const { finalTotal, sanitizedItems, appliedCoupon } =
+      await calculateCartTotal(items, couponCode);
 
     let userId = null;
     const authHeader = req.headers.authorization || "";
@@ -252,23 +296,31 @@ app.post("/api/orders", async (req, res) => {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.id;
-      } catch (err) {
-        // Ignore invalid token
-      }
+      } catch (err) {}
     }
 
     const order = new Order({
       ...restBody,
-      items,
+      items: sanitizedItems,
       total: finalTotal,
+      couponCode: appliedCoupon, // <-- Explicitly save it here too
       userId,
     });
 
     const saved = await order.save();
+
+    // <-- ADD THIS: Increment the coupon right away for COD orders
+    if (appliedCoupon) {
+      await Coupon.findOneAndUpdate(
+        { code: appliedCoupon },
+        { $inc: { timesUsed: 1 } },
+      );
+    }
+
     res.status(201).json({ success: true, orderId: saved._id });
   } catch (error) {
     console.error("Order creation error:", error);
-    res.status(500).json({ message: "Failed to save order" });
+    res.status(500).json({ message: error.message || "Failed to save order" });
   }
 });
 
@@ -309,16 +361,18 @@ app.post("/api/orders/init", async (req, res) => {
   try {
     const { items, couponCode, ...restBody } = req.body;
 
-    let { calculatedSubtotal, deliveryFee, finalTotal } =
-      await calculateCartTotal(items);
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
 
-    let discount = 0;
-    if (couponCode === "SAVE10")
-      discount = Math.round(calculatedSubtotal * 0.1);
-    if (couponCode === "WELCOME20")
-      discount = Math.round(calculatedSubtotal * 0.2);
-
-    finalTotal = finalTotal - discount;
+    const {
+      calculatedSubtotal,
+      deliveryFee,
+      finalTotal,
+      discountAmount,
+      sanitizedItems,
+      appliedCoupon,
+    } = await calculateCartTotal(items, couponCode);
 
     const options = {
       amount: Math.round(finalTotal * 100),
@@ -329,8 +383,9 @@ app.post("/api/orders/init", async (req, res) => {
 
     const order = new Order({
       ...restBody,
-      items,
+      items: sanitizedItems,
       total: finalTotal,
+      couponCode: appliedCoupon,
       status: restBody.paymentMethod === "COD" ? "Pending" : "Pending Payment",
       razorpayOrderId: rzpOrder.id,
     });
@@ -339,8 +394,10 @@ app.post("/api/orders/init", async (req, res) => {
 
     res.json({ success: true, rzpOrder, dbOrderId: savedOrder._id });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Order initialization failed" });
+    console.error("Init Error:", err);
+    res
+      .status(500)
+      .json({ message: err.message || "Order initialization failed" });
   }
 });
 
@@ -360,22 +417,46 @@ app.post("/api/orders/verify", async (req, res) => {
       .digest("hex");
 
     if (expectedSignature === razorpay_signature) {
-      await Order.findByIdAndUpdate(dbOrderId, {
-        status: "Paid",
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-      });
+      const order = await Order.findOneAndUpdate(
+        {
+          _id: dbOrderId,
+          razorpayOrderId: razorpay_order_id,
+          status: "Pending Payment",
+        },
+        {
+          $set: {
+            status: "Paid",
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+          },
+        },
+        { new: true },
+      );
+
+      const completedOrder = await Order.findById(dbOrderId);
+      if (completedOrder && completedOrder.couponCode) {
+        await Coupon.findOneAndUpdate(
+          { code: completedOrder.couponCode },
+          { $inc: { timesUsed: 1 } },
+        );
+      }
+
+      if (!order) {
+        return res.status(400).json({
+          success: false,
+          message: "Order already processed, not found, or ID mismatch.",
+        });
+      }
 
       res.json({ success: true, message: "Payment verified successfully" });
     } else {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Invalid Signature. Spoofing detected.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Invalid Signature. Spoofing detected.",
+      });
     }
   } catch (err) {
+    console.error("Verify Error:", err);
     res.status(500).json({ message: "Verification failed" });
   }
 });
@@ -834,8 +915,6 @@ app.delete(
   },
 );
 
-
-
 app.post("/api/razorpay/webhook", async (req, res) => {
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -843,23 +922,21 @@ app.post("/api/razorpay/webhook", async (req, res) => {
 
     const signature = req.headers["x-razorpay-signature"];
 
-    
     const shasum = crypto.createHmac("sha256", secret);
-    shasum.update(JSON.stringify(req.body));
+    shasum.update(req.rawBody);
     const digest = shasum.digest("hex");
 
     if (digest === signature) {
       console.log(`Webhook Received: ${req.body.event}`);
 
-      
-      if (req.body.event === "payment.captured" || req.body.event === "order.paid") {
+      if (
+        req.body.event === "payment.captured" ||
+        req.body.event === "order.paid"
+      ) {
         const paymentEntity = req.body.payload.payment.entity;
         const rzpOrderId = paymentEntity.order_id;
         const rzpPaymentId = paymentEntity.id;
 
-        
-        
-        
         const order = await Order.findOneAndUpdate(
           { razorpayOrderId: rzpOrderId, status: "Pending Payment" },
           {
@@ -868,18 +945,19 @@ app.post("/api/razorpay/webhook", async (req, res) => {
               razorpayPaymentId: rzpPaymentId,
             },
           },
-          { new: true }
+          { new: true },
         );
 
         if (order) {
           console.log(`✅ Webhook rescued & updated order: ${order._id}`);
         }
       }
-      
-      
+
       res.status(200).json({ status: "ok" });
     } else {
-      console.error("❌ Webhook signature mismatch. Potential spoofing attempt.");
+      console.error(
+        "❌ Webhook signature mismatch. Potential spoofing attempt.",
+      );
       res.status(400).send("Invalid signature");
     }
   } catch (err) {

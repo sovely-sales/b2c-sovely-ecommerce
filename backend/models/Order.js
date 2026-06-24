@@ -20,6 +20,7 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     total: { type: Number, required: true },
+    couponCode: { type: String },
     razorpayOrderId: { type: String, unique: true, sparse: true },
     razorpayPaymentId: { type: String, unique: true, sparse: true },
     razorpaySignature: { type: String },
