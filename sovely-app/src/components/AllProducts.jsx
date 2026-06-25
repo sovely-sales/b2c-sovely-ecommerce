@@ -19,6 +19,31 @@ export default function AllProducts() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
 
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [appliedMinPrice, setAppliedMinPrice] = useState("");
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState("");
+  const [sortOption, setSortOption] = useState("latest");
+
+  const handleApplyFilters = () => {
+    setAppliedMinPrice(minPrice);
+    setAppliedMaxPrice(maxPrice);
+  };
+
+  const handleClearFilters = () => {
+    setMinPrice("");
+    setMaxPrice("");
+    setAppliedMinPrice("");
+    setAppliedMaxPrice("");
+    setSortOption("latest");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleApplyFilters();
+    }
+  };
+
   const categoryMap = useMemo(() => {
     const map = {};
     categories.forEach((c) => {
@@ -39,6 +64,9 @@ export default function AllProducts() {
           skip: 0,
           category: selectedCategory === "All" ? "" : selectedCategory,
           search: searchFilter || "",
+          minPrice: appliedMinPrice,
+          maxPrice: appliedMaxPrice,
+          sort: sortOption,
         });
         const res = await fetch(
           `${API_URL}/api/products?${queryParams.toString()}`,
@@ -98,7 +126,16 @@ export default function AllProducts() {
     return () => {
       active = false;
     };
-  }, [selectedCategory, searchFilter, loading, categories, categoryMap]);
+  }, [
+    selectedCategory,
+    searchFilter,
+    appliedMinPrice,
+    appliedMaxPrice,
+    sortOption,
+    loading,
+    categories,
+    categoryMap,
+  ]);
 
   const handleShowMore = async () => {
     const nextPage = page + 1;
@@ -109,6 +146,9 @@ export default function AllProducts() {
         skip: nextPage * PAGE_SIZE,
         category: selectedCategory === "All" ? "" : selectedCategory,
         search: searchFilter || "",
+        minPrice: appliedMinPrice,
+        maxPrice: appliedMaxPrice,
+        sort: sortOption,
       });
       const res = await fetch(
         `${API_URL}/api/products?${queryParams.toString()}`,
@@ -199,6 +239,64 @@ export default function AllProducts() {
           ))}
         </div>
 
+        {/* Price & Sort Filter Bar */}
+        <div className="price-filter-bar">
+          <div className="price-filter-section">
+            <span className="price-filter-title">Price Range:</span>
+            <div className="price-input-wrapper">
+              <div className="price-field-group">
+                <span className="price-currency">₹</span>
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  aria-label="Min Price"
+                />
+              </div>
+              <span className="price-range-to">to</span>
+              <div className="price-field-group">
+                <span className="price-currency">₹</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  aria-label="Max Price"
+                />
+              </div>
+              <button className="price-btn-apply" onClick={handleApplyFilters}>
+                Apply
+              </button>
+              {(appliedMinPrice || appliedMaxPrice || minPrice || maxPrice || sortOption !== "latest") && (
+                <button className="price-btn-clear" onClick={handleClearFilters}>
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="sort-select-wrapper">
+            <span className="price-filter-title">Sort:</span>
+            <select
+              className="sort-select"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              aria-label="Sort products"
+            >
+              <option value="latest">Latest Arrivals</option>
+              <option value="priceAsc">Price: Low to High</option>
+              <option value="priceDesc">Price: High to Low</option>
+              <option value="popularity">Top Customer Rating</option>
+              <option value="reviews">Most Reviewed</option>
+              <option value="nameAsc">Name: A to Z</option>
+              <option value="nameDesc">Name: Z to A</option>
+            </select>
+          </div>
+        </div>
+
         {}
         {loadingProducts && productsList.length === 0 ? (
           <div
@@ -241,7 +339,10 @@ export default function AllProducts() {
             </p>
             <button
               className="reset-filters-btn"
-              onClick={() => setSelectedCategory("All")}
+              onClick={() => {
+                setSelectedCategory("All");
+                handleClearFilters();
+              }}
             >
               Show All Products
             </button>

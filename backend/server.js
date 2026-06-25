@@ -142,8 +142,18 @@ app.get("/api/categories", async (req, res) => {
 
 app.get("/api/products", async (req, res) => {
   try {
-    const { category, limit, skip, search, deals, minPrice, maxPrice, sort } =
-      req.query;
+    const {
+      category,
+      limit,
+      skip,
+      search,
+      deals,
+      minPrice,
+      maxPrice,
+      sort,
+      freeDelivery,
+      minRating,
+    } = req.query;
     let filter = {};
 
     if (category && category !== "All") {
@@ -188,6 +198,23 @@ app.get("/api/products", async (req, res) => {
       ];
     }
 
+    if (freeDelivery === "true") {
+      filter.freeDelivery = true;
+    }
+
+    if (minRating) {
+      const ratingNum = parseFloat(minRating);
+      if (!isNaN(ratingNum)) {
+        filter.$and = filter.$and || [];
+        filter.$and.push({
+          $or: [
+            { rating: { $gte: ratingNum } },
+            { averageRating: { $gte: ratingNum } },
+          ],
+        });
+      }
+    }
+
     if (minPrice || maxPrice) {
       const priceFilter = {};
       if (minPrice) {
@@ -210,7 +237,13 @@ app.get("/api/products", async (req, res) => {
     } else if (sort === "priceDesc") {
       sortObj = { dropshipBasePrice: -1, price: -1 };
     } else if (sort === "popularity") {
-      sortObj = { rating: -1, reviews: -1, averageRating: -1, reviewCount: -1 };
+      sortObj = { rating: -1, averageRating: -1 };
+    } else if (sort === "reviews") {
+      sortObj = { reviews: -1, reviewCount: -1 };
+    } else if (sort === "nameAsc") {
+      sortObj = { name: 1, title: 1 };
+    } else if (sort === "nameDesc") {
+      sortObj = { name: -1, title: -1 };
     } else {
       sortObj = { createdAt: -1 };
     }
