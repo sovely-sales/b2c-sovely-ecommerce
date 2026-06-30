@@ -13,6 +13,9 @@ import {
   Mail,
   User,
   Zap,
+  Award,
+  Banknote,
+  RotateCcw,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import "./Checkout.css";
@@ -60,7 +63,7 @@ export default function Checkout() {
   useEffect(() => {
     if (orderCompletedRef.current) return;
     if (cartItems.length === 0) {
-      navigate("/cart");
+      navigate("/products");
       return;
     }
     if (token) {
@@ -250,6 +253,44 @@ export default function Checkout() {
       currency: "INR",
       maximumFractionDigits: 0,
     }).format(n);
+
+  const getWhatsAppLink = () => {
+    const itemList = cartItems.map(item => `- ${item.name} (Qty: ${item.quantity})`).join("%0A");
+    const text = `Hi! I'm on the checkout page of Sovely and want to place an order:%0A%0A${itemList}%0A%0ATotal Amount: ${formatPrice(cartTotal)}%0A%0APlease help me confirm.`;
+    return `https://wa.me/919535094003?text=${text}`;
+  };
+
+  const handleShareToWhatsApp = async (e) => {
+    e.preventDefault();
+    const itemListText = cartItems.map(item => `- ${item.name} (Qty: ${item.quantity})`).join("\n");
+    const shareText = `Hi! I'm on the checkout page of Sovely and want to place an order:\n\n${itemListText}\n\nTotal Amount: ${formatPrice(cartTotal)}\n\nPlease help me confirm.`;
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [] }) && cartItems.length > 0) {
+        const firstItem = cartItems[0];
+        const imgUrl = firstItem.image && !firstItem.image.includes("undefined") ? firstItem.image : null;
+
+        if (imgUrl) {
+          const response = await fetch(imgUrl);
+          const blob = await response.blob();
+          const file = new File([blob], "product.jpg", { type: blob.type });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Sovely Order Request",
+              text: shareText,
+              files: [file],
+            });
+            return;
+          }
+        }
+      }
+      window.open(getWhatsAppLink(), "_blank", "noopener,noreferrer");
+    } catch (err) {
+      console.warn("Sharing failed, falling back to URL redirect:", err);
+      window.open(getWhatsAppLink(), "_blank", "noopener,noreferrer");
+    }
+  };
 
   return (
     <div className="checkout-page container section">
@@ -468,6 +509,46 @@ export default function Checkout() {
               ))}
             </div>
 
+            <div className="shipping-upsell-offers" style={{
+              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)",
+              border: "2px dashed var(--primary)",
+              borderRadius: "var(--radius-sm)",
+              padding: "16px",
+              margin: "16px 0",
+              fontSize: "0.85rem",
+              lineHeight: "1.4"
+            }}>
+              <h4 style={{
+                margin: "0 0 10px 0",
+                fontWeight: "900",
+                color: "var(--text-main)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                textTransform: "uppercase",
+                fontSize: "0.75rem",
+                letterSpacing: "0.5px"
+              }}>
+                🔥 Special Shipping Offers
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "1.1rem" }}>🚚</span>
+                  <div>
+                    <strong style={{ color: "var(--text-main)", display: "block" }}>Flat ₹50 Shipping</strong>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>On multiple products with a total weight of up to 500g.</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "1.1rem" }}>🎉</span>
+                  <div>
+                    <strong style={{ color: "var(--text-main)", display: "block" }}>FREE Shipping</strong>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>Get free shipping on all orders above ₹999.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="summary-details">
               <div className="detail-row">
                 <span>Subtotal</span>
@@ -509,12 +590,97 @@ export default function Checkout() {
               )}
             </button>
 
-            <div className="checkout-trust">
-              <div className="trust-badge">
-                <ShieldCheck size={16} /> 256-bit SSL Secure
+            <button
+              onClick={handleShareToWhatsApp}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+                width: "100%",
+                padding: "12px",
+                border: "2px solid #25D366",
+                borderRadius: "var(--radius-sm)",
+                background: "transparent",
+                color: "#25D366",
+                fontWeight: "800",
+                textTransform: "uppercase",
+                fontSize: "0.85rem",
+                textDecoration: "none",
+                marginTop: "16px",
+                transition: "all 0.3s",
+                cursor: "pointer"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#25D366";
+                e.currentTarget.style.color = "#fff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "#25D366";
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.63 1.97 14.162.946 11.535.946c-5.438 0-9.863 4.372-9.867 9.802-.001 1.73.463 3.42 1.343 4.926l-1.014 3.705 3.821-.993zm11.272-7.01c-.3-.149-1.772-.864-2.047-.964-.275-.1-.475-.149-.675.15-.2.299-.775.964-.95 1.163-.175.199-.35.224-.65.075-.3-.149-1.265-.462-2.41-1.474-.89-.785-1.49-1.754-1.665-2.052-.175-.299-.019-.461.13-.609.135-.133.3-.349.45-.523.15-.174.2-.299.3-.499.1-.199.05-.374-.025-.524-.075-.15-.675-1.608-.925-2.203-.244-.582-.49-.5-.675-.509-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.772-.717 2.022-1.412.25-.694.25-1.29.175-1.413-.075-.124-.275-.199-.575-.349z"/>
+              </svg>
+              <span>Order On WhatsApp</span>
+            </button>
+
+            <div className="our-approach-section" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "var(--border-thin)" }}>
+              <h4 style={{
+                margin: "0 0 16px 0",
+                fontWeight: "900",
+                color: "var(--text-main)",
+                textTransform: "uppercase",
+                fontSize: "0.8rem",
+                letterSpacing: "0.5px"
+              }}>
+                Our Approach
+              </h4>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Award size={18} className="text-primary" />
+                  </div>
+                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Best Quality</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Banknote size={18} className="text-primary" />
+                  </div>
+                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Cash On Delivery</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Truck size={18} className="text-primary" />
+                  </div>
+                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Free Shipping</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <RotateCcw size={18} className="text-primary" />
+                  </div>
+                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Hassle Free Returns</span>
+                </div>
               </div>
-              <div className="trust-badge">
-                <Truck size={16} /> Tracked Delivery
+            </div>
+
+            <div className="safe-checkout-section" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "var(--border-thin)" }}>
+              <h4 style={{
+                margin: "0 0 12px 0",
+                fontWeight: "900",
+                color: "var(--text-main)",
+                textTransform: "uppercase",
+                fontSize: "0.8rem",
+                letterSpacing: "0.5px"
+              }}>
+                Safe Checkout
+              </h4>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>✓ Norton Secured</span>
+                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🛡️ TRUSTe Privacy</span>
+                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🔑 VeriSign</span>
+                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🔒 McAfee Secure</span>
               </div>
             </div>
           </div>

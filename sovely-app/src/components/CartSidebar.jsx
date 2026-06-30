@@ -109,11 +109,11 @@ export default function CartSidebar() {
               </div>
 
               <Link
-                to="/cart"
+                to="/checkout"
                 className="cart-checkout-btn"
                 onClick={() => setIsCartOpen(false)}
               >
-                View Cart <ArrowRight size={16} />
+                Proceed to Checkout <ArrowRight size={16} />
               </Link>
             </div>
           </>

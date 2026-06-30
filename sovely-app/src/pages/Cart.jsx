@@ -228,6 +228,46 @@ export default function Cart() {
               {couponError && <p className="coupon-error">{couponError}</p>}
             </div>
 
+            <div className="shipping-upsell-offers" style={{
+              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)",
+              border: "2px dashed var(--primary)",
+              borderRadius: "var(--radius-sm)",
+              padding: "16px",
+              margin: "16px 0",
+              fontSize: "0.85rem",
+              lineHeight: "1.4"
+            }}>
+              <h4 style={{
+                margin: "0 0 10px 0",
+                fontWeight: "900",
+                color: "var(--text-main)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                textTransform: "uppercase",
+                fontSize: "0.75rem",
+                letterSpacing: "0.5px"
+              }}>
+                🔥 Special Shipping Offers
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "1.1rem" }}>🚚</span>
+                  <div>
+                    <strong style={{ color: "var(--text-main)", display: "block" }}>Flat ₹50 Shipping</strong>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>On multiple products with a total weight of up to 500g.</span>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                  <span style={{ fontSize: "1.1rem" }}>🎉</span>
+                  <div>
+                    <strong style={{ color: "var(--text-main)", display: "block" }}>FREE Shipping</strong>
+                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>Get free shipping on all orders above ₹999.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="summary-rows">
               <div className="summary-row">
                 <span>Subtotal</span>

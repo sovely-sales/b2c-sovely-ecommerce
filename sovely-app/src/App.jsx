@@ -28,6 +28,7 @@ import Seller from "./pages/Seller";
 import Returns from "./pages/Returns";
 import Shipping from "./pages/Shipping";
 import Faq from "./pages/Faq";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 import Careers from "./pages/Careers";
 import Press from "./pages/Press";
 import Privacy from "./pages/Privacy";
@@ -50,13 +51,14 @@ export default function App() {
         <Navbar />
         <MobileBottomNav />
         <CartSidebar />
+        <WhatsAppWidget />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/deals" element={<Deals />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<Navigate to="/checkout" replace />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/search" element={<Search />} />
           <Route path="/checkout" element={<Checkout />} />

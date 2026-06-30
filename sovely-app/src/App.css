@@ -16,4 +16,10 @@ main {
   #root {
     padding-bottom: 72px;
   }
+  .whatsapp-float {
+    bottom: 90px !important;
+    right: 16px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
 }
