@@ -44,8 +44,10 @@ export default function Cart() {
     if (!couponInput.trim()) return;
     setCouponError("");
 
+    const normalizedInput = couponInput.toUpperCase().replace(/\s+/g, "");
+
     const matchedCoupon = availableCoupons.find(
-      (c) => c.code === couponInput.toUpperCase(),
+      (c) => c.code.toUpperCase().replace(/\s+/g, "") === normalizedInput,
     );
 
     if (!matchedCoupon) {

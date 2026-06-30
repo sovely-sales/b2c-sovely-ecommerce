@@ -29,7 +29,7 @@ export default function CategoryGrid() {
         </div>
 
         <div className="category-grid">
-          {categories.map((cat, idx) => (
+          {categories.slice(0, 8).map((cat, idx) => (
             <Link
               to={`/products?category=${cat.name}`}
               className="category-card"

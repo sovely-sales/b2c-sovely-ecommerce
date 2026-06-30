@@ -77,7 +77,7 @@ const calculateCartTotal = async (items, couponCode = null) => {
       sanitizedItems.push({
         id: String(product.id || product._id),
         productId: product._id,
-        name: product.name,
+        name: product.name || product.title || "Product",
         price: itemPrice,
         quantity: qty,
         image: product.image,
@@ -91,8 +91,9 @@ const calculateCartTotal = async (items, couponCode = null) => {
   let appliedCoupon = null;
 
   if (couponCode) {
+    const normalizedCode = couponCode.toUpperCase().replace(/\s+/g, "");
     const validCoupon = await Coupon.findOne({
-      code: couponCode.toUpperCase(),
+      code: normalizedCode,
       isActive: true,
     });
 
@@ -134,8 +135,30 @@ const calculateCartTotal = async (items, couponCode = null) => {
 };
 app.get("/api/categories", async (req, res) => {
   try {
-    res.json(await Category.find({}));
-  } catch {
+    const activeCategories = await Product.aggregate([
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 30 }
+    ]);
+    
+    const categoryIds = activeCategories.map(c => c._id).filter(Boolean);
+    const categories = await Category.find({ _id: { $in: categoryIds } }).lean();
+    
+    const countMap = {};
+    activeCategories.forEach(c => {
+      countMap[String(c._id)] = c.count;
+    });
+    
+    const enriched = categories.map(cat => ({
+      ...cat,
+      count: countMap[String(cat._id)] || 0
+    }));
+    
+    enriched.sort((a, b) => (countMap[String(b._id)] || 0) - (countMap[String(a._id)] || 0));
+    
+    res.json(enriched);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });
@@ -245,7 +268,7 @@ app.get("/api/products", async (req, res) => {
     } else if (sort === "nameDesc") {
       sortObj = { name: -1, title: -1 };
     } else {
-      sortObj = { createdAt: -1 };
+      sortObj = { _id: -1 };
     }
     query.sort(sortObj);
 
@@ -538,6 +561,16 @@ app.get("/api/user/orders", authenticate("user"), async (req, res) => {
     });
     res.json(orders);
   } catch {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+app.get("/api/admin/orders", authenticate("admin"), async (req, res) => {
+  try {
+    const orders = await Order.find({ status: { $ne: "Pending Payment" } }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching admin orders:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });

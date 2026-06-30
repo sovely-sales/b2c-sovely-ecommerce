@@ -219,26 +219,6 @@ export default function AllProducts() {
           )}
         </div>
 
-        {}
-        <div className="category-filter-tabs">
-          <button
-            className={`filter-chip ${selectedCategory === "All" ? "active" : ""}`}
-            onClick={() => setSelectedCategory("All")}
-          >
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              className={`filter-chip ${selectedCategory === cat.name ? "active" : ""}`}
-              onClick={() => setSelectedCategory(cat.name)}
-            >
-              <span className="chip-icon">{cat.icon}</span>
-              {cat.name}
-            </button>
-          ))}
-        </div>
-
         {/* Price & Sort Filter Bar */}
         <div className="price-filter-bar">
           <div className="price-filter-section">

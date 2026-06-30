@@ -10,10 +10,23 @@ import {
 const DataContext = createContext();
 
 export function DataProvider({ children }) {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [marketing, setMarketing] = useState([]);
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem("cachedProducts");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [categories, setCategories] = useState(() => {
+    const saved = localStorage.getItem("cachedCategories");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [loading, setLoading] = useState(() => {
+    const savedProducts = localStorage.getItem("cachedProducts");
+    const savedCategories = localStorage.getItem("cachedCategories");
+    return !(savedProducts && savedCategories);
+  });
+  const [marketing, setMarketing] = useState(() => {
+    const saved = localStorage.getItem("cachedMarketing");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cartItems");
     return savedCart ? JSON.parse(savedCart) : [];
@@ -224,58 +237,21 @@ export function DataProvider({ children }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes, marketingRes] = await Promise.all([
-          fetch(`${API_URL}/api/products?limit=12`),
-          fetch(`${API_URL}/api/categories`),
-          fetch(`${API_URL}/api/marketing`),
+        const [productsRes, categoriesRes, marketingRes, couponsRes] = await Promise.all([
+          fetch(`${API_URL}/api/products?limit=12`).catch(() => null),
+          fetch(`${API_URL}/api/categories`).catch(() => null),
+          fetch(`${API_URL}/api/marketing`).catch(() => null),
+          fetch(`${API_URL}/api/coupons`).catch(() => null),
         ]);
 
-        if (productsRes.ok && categoriesRes.ok && marketingRes.ok) {
-          const productsData = await productsRes.json();
-          const categoriesData = await categoriesRes.json();
+        let categoriesData = [];
+        const categoryMap = {};
 
-          const categoryMap = {};
+        if (categoriesRes && categoriesRes.ok) {
+          categoriesData = await categoriesRes.json();
           categoriesData.forEach((c) => {
             const key = String(c._id || c.id);
             categoryMap[key] = c.name;
-          });
-
-          const mappedProducts = productsData.map((p) => {
-            const rawCategory = String(p.categoryId || p.category || "");
-            const categoryName =
-              categoryMap[rawCategory] || rawCategory || "Uncategorized";
-
-            return {
-              id: p._id || p.id,
-              name: p.title || p.name,
-              category: categoryName,
-              categoryId: rawCategory,
-              price: (p.dropshipBasePrice || p.price || 0) + 30,
-              originalPrice:
-                (p.suggestedRetailPrice ||
-                  p.originalPrice ||
-                  p.dropshipBasePrice ||
-                  0) + 30,
-              rating: p.averageRating || p.rating || 0,
-              reviews: p.reviewCount || p.reviews || 0,
-              badge:
-                p.badge ||
-                (p.suggestedRetailPrice > p.dropshipBasePrice ? "Sale" : null),
-              badgeColor: p.badgeColor || "#ef4444",
-              image:
-                p.images && p.images.length > 0
-                  ? p.images[0].url
-                  : p.image ||
-                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-              images:
-                p.images && p.images.length > 0
-                  ? p.images
-                  : p.image
-                    ? [{ url: p.image }]
-                    : [],
-              freeDelivery:
-                p.freeDelivery !== undefined ? p.freeDelivery : false,
-            };
           });
 
           const colors = [
@@ -389,10 +365,64 @@ export function DataProvider({ children }) {
             };
           });
 
-          setProducts(mappedProducts);
           setCategories(mappedCategories);
+          localStorage.setItem("cachedCategories", JSON.stringify(mappedCategories));
+        }
+
+        if (productsRes && productsRes.ok) {
+          const productsData = await productsRes.json();
+          const mappedProducts = productsData.map((p) => {
+            const rawCategory = String(p.categoryId || p.category || "");
+            const categoryName =
+              categoryMap[rawCategory] || rawCategory || "Uncategorized";
+
+            return {
+              id: p._id || p.id,
+              name: p.title || p.name,
+              category: categoryName,
+              categoryId: rawCategory,
+              price: (p.dropshipBasePrice || p.price || 0) + 30,
+              originalPrice:
+                (p.suggestedRetailPrice ||
+                  p.originalPrice ||
+                  p.dropshipBasePrice ||
+                  0) + 30,
+              rating: p.averageRating || p.rating || 0,
+              reviews: p.reviewCount || p.reviews || 0,
+              badge:
+                p.badge ||
+                (p.suggestedRetailPrice > p.dropshipBasePrice ? "Sale" : null),
+              badgeColor: p.badgeColor || "#ef4444",
+              image:
+                p.images && p.images.length > 0
+                  ? p.images[0].url
+                  : p.image ||
+                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+              images:
+                p.images && p.images.length > 0
+                  ? p.images
+                  : p.image
+                    ? [{ url: p.image }]
+                    : [],
+              freeDelivery:
+                p.freeDelivery !== undefined ? p.freeDelivery : false,
+            };
+          });
+
+          setProducts(mappedProducts);
+          localStorage.setItem("cachedProducts", JSON.stringify(mappedProducts));
+        }
+
+        if (marketingRes && marketingRes.ok) {
           const marketingData = await marketingRes.json();
           setMarketing(marketingData);
+          localStorage.setItem("cachedMarketing", JSON.stringify(marketingData));
+        }
+
+        if (couponsRes && couponsRes.ok) {
+          const couponsData = await couponsRes.json();
+          setAvailableCoupons(couponsData);
+          localStorage.setItem("sovely_coupons", JSON.stringify(couponsData));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
