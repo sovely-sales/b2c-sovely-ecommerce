@@ -135,7 +135,7 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
           <p className="footer-copy">
-            © {new Date().getFullYear()} Sovely Technologies Pvt. Ltd. All
+            © {new Date().getFullYear()} Sovely Technologies. All
             rights reserved.
           </p>
           <div className="footer-bottom-links">
