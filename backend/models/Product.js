@@ -19,6 +19,7 @@ const productSchema = new mongoose.Schema(
     id: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
     category: { type: String, required: true, index: true },
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Category", index: true },
     price: { type: Number, required: true },
     originalPrice: { type: Number, required: true },
     dropshipBasePrice: { type: Number },

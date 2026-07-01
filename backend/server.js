@@ -710,6 +710,67 @@ app.post(
   },
 );
 
+app.post(
+  "/api/admin/products/bulk-price-decrease",
+  authenticate("admin"),
+  async (req, res) => {
+    try {
+      const { type, value } = req.body;
+      if (!type || value === undefined || isNaN(value)) {
+        return res.status(400).json({ message: "Invalid type or value" });
+      }
+
+      const products = await Product.find({});
+      const bulkOps = products.map((p) => {
+        const currentPrice =
+          p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30;
+        const currentOriginalPrice =
+          p.originalPrice !== undefined
+            ? p.originalPrice
+            : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30;
+
+        let newPrice = currentPrice;
+        let newOriginalPrice = currentOriginalPrice;
+
+        if (type === "amount") {
+          newPrice -= Number(value);
+          newOriginalPrice -= Number(value);
+        } else if (type === "percent") {
+          newPrice = Math.round(newPrice * (1 - Number(value) / 100));
+          newOriginalPrice = Math.round(
+            newOriginalPrice * (1 - Number(value) / 100),
+          );
+        }
+
+        // Prevent negative prices
+        newPrice = Math.max(0, newPrice);
+        newOriginalPrice = Math.max(0, newOriginalPrice);
+
+        return {
+          updateOne: {
+            filter: { _id: p._id },
+            update: {
+              $set: { price: newPrice, originalPrice: newOriginalPrice },
+            },
+          },
+        };
+      });
+
+      if (bulkOps.length > 0) {
+        await Product.bulkWrite(bulkOps);
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully decreased prices of ${bulkOps.length} products.`,
+      });
+    } catch (err) {
+      console.error("Bulk price decrease error:", err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  },
+);
+
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;

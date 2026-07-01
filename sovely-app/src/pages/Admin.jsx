@@ -173,7 +173,9 @@ export default function Admin() {
 
   const [bulkType, setBulkType] = useState("amount");
   const [bulkValue, setBulkValue] = useState("");
+  const [bulkDecreaseValue, setBulkDecreaseValue] = useState("");
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkDecreaseLoading, setBulkDecreaseLoading] = useState(false);
   const [coupons, setCoupons] = useState([]);
 
   const {
@@ -424,6 +426,44 @@ export default function Admin() {
       alert("Network error. Could not perform bulk price increase.");
     } finally {
       setBulkLoading(false);
+    }
+  };
+
+  const handleBulkPriceDecrease = async (e) => {
+    e.preventDefault();
+    if (!bulkDecreaseValue || isNaN(bulkDecreaseValue) || Number(bulkDecreaseValue) <= 0) {
+      return alert("Please enter a valid positive number.");
+    }
+    const val = Number(bulkDecreaseValue);
+    const confirmMsg = `Are you sure you want to DECREASE the B2C price of ALL products by ${
+      bulkType === "amount" ? `₹${val}` : `${val}%`
+    }?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setBulkDecreaseLoading(true);
+    try {
+      const res = await fetch(`${API}/api/admin/products/bulk-price-decrease`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ type: bulkType, value: val }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message || "Bulk price decrease successfully executed!");
+        setBulkDecreaseValue("");
+        fetchProducts(); // Refresh products
+      } else {
+        const errData = await res.json();
+        alert(errData.message || "Failed to update prices.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Could not perform bulk price decrease.");
+    } finally {
+      setBulkDecreaseLoading(false);
     }
   };
 
@@ -1070,19 +1110,12 @@ export default function Admin() {
                       color: "#64748b",
                     }}
                   >
-                    Increase the B2C price (both Selling Price and Original
+                    Increase or decrease the B2C price (both Selling Price and Original
                     Price) of ALL products in the inventory instantly by a flat
                     amount or percentage. B2B prices will remain untouched.
                   </p>
-                  <form
-                    onSubmit={handleBulkPriceIncrease}
-                    style={{
-                      display: "flex",
-                      gap: "16px",
-                      flexWrap: "wrap",
-                      alignItems: "flex-end",
-                    }}
-                  >
+
+                  <div style={{ marginBottom: "16px" }}>
                     <div className="input-group" style={{ margin: 0 }}>
                       <label
                         style={{
@@ -1111,55 +1144,152 @@ export default function Admin() {
                         <option value="percent">Percentage (%)</option>
                       </select>
                     </div>
+                  </div>
 
-                    <div className="input-group" style={{ margin: 0 }}>
-                      <label
-                        style={{
-                          fontSize: "12px",
-                          fontWeight: "bold",
-                          marginBottom: "6px",
-                          display: "block",
-                        }}
-                      >
-                        Increase Value
-                      </label>
-                      <input
-                        type="number"
-                        placeholder={
-                          bulkType === "amount" ? "e.g. 50" : "e.g. 10"
-                        }
-                        value={bulkValue}
-                        onChange={(e) => setBulkValue(e.target.value)}
-                        min="0.01"
-                        step="any"
-                        required
-                        style={{
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-                          border: "1.5px solid #cbd5e1",
-                          fontSize: "14px",
-                          outline: "none",
-                          width: "160px",
-                          background: "#fff",
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={bulkLoading}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "24px",
+                      flexWrap: "wrap",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    {/* Increase Section */}
+                    <form
+                      onSubmit={handleBulkPriceIncrease}
                       style={{
-                        padding: "10px 24px",
-                        height: "40px",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        gap: "16px",
+                        flexWrap: "wrap",
+                        alignItems: "flex-end",
+                        background: "#fff",
+                        padding: "16px",
+                        borderRadius: "8px",
+                        border: "1px solid #e2e8f0"
                       }}
                     >
-                      {bulkLoading ? "Applying..." : "Apply to All Products"}
-                    </button>
-                  </form>
+                      <div className="input-group" style={{ margin: 0 }}>
+                        <label
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            marginBottom: "6px",
+                            display: "block",
+                            color: "#10b981"
+                          }}
+                        >
+                          Increase Value
+                        </label>
+                        <input
+                          type="number"
+                          placeholder={
+                            bulkType === "amount" ? "e.g. 50" : "e.g. 10"
+                          }
+                          value={bulkValue}
+                          onChange={(e) => setBulkValue(e.target.value)}
+                          min="0.01"
+                          step="any"
+                          required
+                          style={{
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "1.5px solid #cbd5e1",
+                            fontSize: "14px",
+                            outline: "none",
+                            width: "140px",
+                            background: "#fff",
+                          }}
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={bulkLoading}
+                        style={{
+                          padding: "10px 24px",
+                          height: "40px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#10b981",
+                          border: "none",
+                          fontWeight: "bold",
+                          opacity: bulkLoading ? 0.7 : 1
+                        }}
+                      >
+                        {bulkLoading ? "Applying..." : "Apply Increase"}
+                      </button>
+                    </form>
+
+                    {/* Decrease Section */}
+                    <form
+                      onSubmit={handleBulkPriceDecrease}
+                      style={{
+                        display: "flex",
+                        gap: "16px",
+                        flexWrap: "wrap",
+                        alignItems: "flex-end",
+                        background: "#fff",
+                        padding: "16px",
+                        borderRadius: "8px",
+                        border: "1px solid #e2e8f0"
+                      }}
+                    >
+                      <div className="input-group" style={{ margin: 0 }}>
+                        <label
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            marginBottom: "6px",
+                            display: "block",
+                            color: "#ef4444"
+                          }}
+                        >
+                          Decrease Value
+                        </label>
+                        <input
+                          type="number"
+                          placeholder={
+                            bulkType === "amount" ? "e.g. 50" : "e.g. 10"
+                          }
+                          value={bulkDecreaseValue}
+                          onChange={(e) => setBulkDecreaseValue(e.target.value)}
+                          min="0.01"
+                          step="any"
+                          required
+                          style={{
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            border: "1.5px solid #cbd5e1",
+                            fontSize: "14px",
+                            outline: "none",
+                            width: "140px",
+                            background: "#fff",
+                          }}
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={bulkDecreaseLoading}
+                        style={{
+                          padding: "10px 24px",
+                          height: "40px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#ef4444",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                          opacity: bulkDecreaseLoading ? 0.7 : 1
+                        }}
+                      >
+                        {bulkDecreaseLoading ? "Applying..." : "Apply Decrease"}
+                      </button>
+                    </form>
+                  </div>
                 </div>
 
                 <div className="card">

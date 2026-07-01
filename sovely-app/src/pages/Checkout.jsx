@@ -34,11 +34,16 @@ export default function Checkout() {
     user,
     couponDiscount,
     coupon,
+    availableCoupons,
+    setCoupon,
+    setCouponPercent,
   } = useData();
 
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
   const [selectedAddrId, setSelectedAddrId] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
 
   const [form, setForm] = useState({
     firstName: user?.name?.split(" ")[0] || "",
@@ -111,6 +116,30 @@ export default function Checkout() {
       postalCode: addr.postalCode,
     });
     setShowNewForm(false);
+  };
+
+  const handleApplyCoupon = () => {
+    setCouponError("");
+    if (!couponInput.trim()) return;
+    
+    const found = availableCoupons.find(
+      (c) => c.code.toUpperCase() === couponInput.trim().toUpperCase()
+    );
+
+    if (found && found.isActive) {
+      setCoupon(found);
+      setCouponPercent(found.discountPercent);
+      setCouponInput("");
+    } else if (found && !found.isActive) {
+      setCouponError("This coupon is currently inactive.");
+    } else {
+      setCouponError("Invalid coupon code.");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCoupon(null);
+    setCouponPercent(0);
   };
 
   // 3. ADDED: Elegant Quick Fill handler
@@ -547,6 +576,36 @@ export default function Checkout() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="coupon-section" style={{ marginTop: "16px", marginBottom: "16px" }}>
+              <h4 style={{ margin: "0 0 10px 0", fontWeight: "900", color: "var(--text-main)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Apply Coupon
+              </h4>
+              
+              {coupon ? (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "rgba(16, 185, 129, 0.1)", border: "1px dashed #10b981", borderRadius: "var(--radius-sm)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ color: "#10b981", fontWeight: "800", fontSize: "0.9rem" }}>✓ {coupon.code}</span>
+                    <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>({coupon.discountPercent}% OFF)</span>
+                  </div>
+                  <button onClick={handleRemoveCoupon} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "700", fontSize: "0.8rem", padding: "4px" }}>Remove</button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input 
+                      type="text" 
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      placeholder="Enter code" 
+                      style={{ flex: 1, padding: "10px", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", textTransform: "uppercase", fontSize: "0.9rem", fontWeight: "600", outline: "none", background: "var(--bg-main)", color: "var(--text-main)" }}
+                    />
+                    <button onClick={handleApplyCoupon} style={{ padding: "10px 20px", background: "var(--primary)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer", fontWeight: "800", textTransform: "uppercase", fontSize: "0.85rem" }}>Apply</button>
+                  </div>
+                  {couponError && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "6px", fontWeight: "600" }}>{couponError}</div>}
+                </>
+              )}
             </div>
 
             <div className="summary-details">
