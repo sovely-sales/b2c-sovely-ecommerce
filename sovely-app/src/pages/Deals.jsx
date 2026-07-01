@@ -37,18 +37,12 @@ export default function Deals() {
               name: p.title || p.name,
               category: categoryName,
               categoryId: rawCategory,
-              price: (p.dropshipBasePrice || p.price || 0) + 30,
-              originalPrice:
-                (p.suggestedRetailPrice ||
-                  p.originalPrice ||
-                  p.dropshipBasePrice ||
-                  0) + 30,
+              price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
+              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
               rating: p.averageRating || p.rating || 0,
               reviews: p.reviewCount || p.reviews || 0,
-              badge:
-                p.badge ||
-                (p.suggestedRetailPrice > p.dropshipBasePrice ? "Sale" : null),
-              badgeColor: p.badgeColor || "#ef4444",
+              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
+              badgeColor: p.badgeColor || '#ef4444',
               image:
                 p.images && p.images.length > 0
                   ? p.images[0].url
