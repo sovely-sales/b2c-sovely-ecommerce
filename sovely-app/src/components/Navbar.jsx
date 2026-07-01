@@ -141,9 +141,7 @@ export default function Navbar() {
           </div>
 
           {user?.role !== "admin" ? (
-            <div
-              className={`nav-search-section ${showMobileSearch ? "show-mobile" : ""}`}
-            >
+            <div className="nav-search-section">
               <form className="search-bar" onSubmit={handleSearchSubmit}>
                 <Search size={16} className="search-icon" />
                 <input
@@ -183,15 +181,6 @@ export default function Navbar() {
 
             {user?.role !== "admin" ? (
               <>
-                <button
-                  className="action-link-text search-toggle-btn show-on-mobile-inline"
-                  onClick={() => setShowMobileSearch(!showMobileSearch)}
-                  title="Search"
-                  aria-label="Toggle Mobile Search"
-                >
-                  <Search size={20} className="nav-icon" />
-                </button>
-
                 <Link
                   to="/wishlist"
                   className="action-link-text"

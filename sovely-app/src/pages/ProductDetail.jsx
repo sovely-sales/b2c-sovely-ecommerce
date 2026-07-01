@@ -7,12 +7,14 @@ import {
   Truck,
   Shield,
   RotateCcw,
+  Lock,
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 import ProductCard from "../components/ProductCard";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
+
   const { id } = useParams();
   const {
     products,
@@ -231,7 +233,7 @@ export default function ProductDetail() {
   );
 
   return (
-    <div className="product-detail-page section container">
+    <div className="product-detail-page">
       {}
       <div className="pd-grid">
         <div className="pd-image-section">
@@ -336,7 +338,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {}
           <div className="pd-trust">
             <div className="trust-item">
               <Truck size={20} />
@@ -346,17 +347,24 @@ export default function ProductDetail() {
             </div>
             <div className="trust-item">
               <Shield size={20} />
-              <span>1 Year Warranty</span>
+              <span>Premium Quality</span>
             </div>
             <div className="trust-item">
               <RotateCcw size={20} />
-              <span>30-Day Returns</span>
+              <span>Easy Returns</span>
+            </div>
+            <div className="trust-item">
+              <Star size={20} />
+              <span>Trusted Brands</span>
+            </div>
+            <div className="trust-item">
+              <Lock size={20} />
+              <span>Razorpay Secured</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="pd-reviews-section">{}</div>
       {recommendations.length > 0 && (
         <div className="pd-recommendations">
           <h2 className="recommendations-title">You May Also Like</h2>
