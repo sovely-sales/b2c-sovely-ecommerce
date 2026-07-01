@@ -44,6 +44,15 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   return children;
 };
 
+const AdminRedirect = ({ children }) => {
+  const { user } = useData();
+  
+  if (user && user.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+  return children;
+};
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -53,7 +62,14 @@ export default function App() {
         <CartSidebar />
         <WhatsAppWidget />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <AdminRedirect>
+                <Home />
+              </AdminRedirect>
+            }
+          />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/categories" element={<Categories />} />

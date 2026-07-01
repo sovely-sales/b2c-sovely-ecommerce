@@ -34,9 +34,12 @@ export default function Signup() {
 
   useEffect(() => {
     if (user) {
-      // Go back to previous page (like cart/checkout) or home
-      const from = location.state?.from || "/";
-      navigate(from, { replace: true });
+      if (user.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        const from = location.state?.from || "/";
+        navigate(from, { replace: true });
+      }
     }
   }, [user, navigate, location]);
 
