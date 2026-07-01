@@ -1042,6 +1042,24 @@ app.delete(
   },
 );
 
+app.put(
+  "/api/admin/coupons/:id",
+  authenticate("admin"),
+  async (req, res) => {
+    try {
+      const { isActive } = req.body;
+      const coupon = await Coupon.findByIdAndUpdate(
+        req.params.id,
+        { isActive },
+        { new: true }
+      );
+      res.json({ success: true, coupon });
+    } catch (err) {
+      res.status(500).json({ message: "Error updating coupon" });
+    }
+  }
+);
+
 app.post("/api/razorpay/webhook", async (req, res) => {
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;

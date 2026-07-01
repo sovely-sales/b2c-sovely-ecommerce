@@ -179,9 +179,6 @@ export default function Admin() {
   const [coupons, setCoupons] = useState([]);
 
   const {
-    addCoupon,
-    toggleCoupon: handleToggleCoupon,
-    deleteCoupon: handleDeleteCoupon,
     categories,
     products: globalProducts,
   } = useData();
@@ -492,6 +489,46 @@ export default function Admin() {
     if (res.ok) {
       const data = await res.json();
       setCoupons([data.coupon, ...coupons]);
+      setNewCoupon({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
+    }
+  };
+
+  const handleToggleCoupon = async (id) => {
+    const target = coupons.find((c) => c._id === id);
+    if (!target) return;
+    try {
+      const res = await fetch(`${API}/api/admin/coupons/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ isActive: !target.isActive }),
+      });
+      if (res.ok) {
+        setCoupons(
+          coupons.map((c) =>
+            c._id === id ? { ...c, isActive: !target.isActive } : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+    try {
+      const res = await fetch(`${API}/api/admin/coupons/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (res.ok) {
+        setCoupons(coupons.filter((c) => c._id !== id));
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
