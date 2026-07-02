@@ -56,10 +56,14 @@ export default function Deals() {
                     : [],
               freeDelivery:
                 p.freeDelivery !== undefined ? p.freeDelivery : false,
+              stock: p.inventory?.stock,
             };
           });
 
           mapped.sort((a, b) => {
+            const stockA = a.stock === 0 ? 0 : 1;
+            const stockB = b.stock === 0 ? 0 : 1;
+            if (stockA !== stockB) return stockB - stockA;
             const discountA = (a.originalPrice - a.price) / a.originalPrice;
             const discountB = (b.originalPrice - b.price) / b.originalPrice;
             return discountB - discountA;

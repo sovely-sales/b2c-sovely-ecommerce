@@ -252,7 +252,20 @@ app.get("/api/products", async (req, res) => {
       });
     }
 
-    const query = Product.find(filter);
+    const pipeline = [
+      { $match: filter },
+      {
+        $addFields: {
+          isOutOfStock: {
+            $cond: {
+              if: { $eq: ["$inventory.stock", 0] },
+              then: 1,
+              else: 0,
+            },
+          },
+        },
+      },
+    ];
 
     let sortObj = {};
     if (sort === "priceAsc") {
@@ -270,14 +283,17 @@ app.get("/api/products", async (req, res) => {
     } else {
       sortObj = { _id: -1 };
     }
-    query.sort(sortObj);
+    
+    // Sort by out of stock flag first, then by requested sort options
+    pipeline.push({ $sort: { isOutOfStock: 1, ...sortObj } });
 
     const queryLimit = Math.max(1, parseInt(limit) || 24);
     const querySkip = Math.max(0, parseInt(skip) || 0);
 
-    query.skip(querySkip).limit(queryLimit);
+    pipeline.push({ $skip: querySkip });
+    pipeline.push({ $limit: queryLimit });
 
-    const products = await query;
+    const products = await Product.aggregate(pipeline);
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -617,7 +633,7 @@ app.patch(
   authenticate("admin"),
   async (req, res) => {
     try {
-      const { price, originalPrice } = req.body;
+      const { price, originalPrice, stock } = req.body;
       const { id } = req.params;
 
       if (price === undefined || originalPrice === undefined) {
@@ -630,13 +646,19 @@ app.patch(
         ? { $or: [{ _id: id }, { id: isNaN(id) ? -1 : parseInt(id) }] }
         : { id: isNaN(id) ? -1 : parseInt(id) };
 
+      const updateData = {
+        price: Number(price),
+        originalPrice: Number(originalPrice),
+      };
+
+      if (stock !== undefined) {
+        updateData["inventory.stock"] = Number(stock);
+      }
+
       const updatedProduct = await Product.findOneAndUpdate(
         query,
         {
-          $set: {
-            price: Number(price),
-            originalPrice: Number(originalPrice),
-          },
+          $set: updateData,
         },
         { new: true },
       );

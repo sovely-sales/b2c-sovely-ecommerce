@@ -39,8 +39,14 @@ export default function Search() {
               badgeColor: p.badgeColor || '#ef4444',
             image: p.images && p.images.length > 0 ? p.images[0].url : p.image,
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
           }));
-          setResults(mappedResults);
+          const sortedResults = [...mappedResults].sort((a, b) => {
+            const stockA = a.stock === 0 ? 0 : 1;
+            const stockB = b.stock === 0 ? 0 : 1;
+            return stockB - stockA;
+          });
+          setResults(sortedResults);
         }
       } catch (error) {
         console.error("Search fetch error:", error);

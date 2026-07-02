@@ -1,13 +1,19 @@
+import React, { useState } from "react";
 import { useData } from "../context/DataContext";
 import "./CategoryStrip.css";
 
 export default function CategoryStrip() {
   const { categories, setSelectedCategory } = useData();
+  const [imageErrors, setImageErrors] = useState({});
 
   const handleClick = (catName) => {
     setSelectedCategory(catName);
     const el = document.getElementById("all-products-section");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleImageError = (catId) => {
+    setImageErrors((prev) => ({ ...prev, [catId]: true }));
   };
 
   if (!categories || categories.length === 0) return null;
@@ -25,7 +31,16 @@ export default function CategoryStrip() {
               onClick={() => handleClick(cat.name)}
             >
               <div className="strip-icon-circle" style={{ background: cat.bg }}>
-                <img src={cat.image} alt={cat.name} className="strip-img" />
+                {imageErrors[cat.id] || !cat.image ? (
+                  <span className="strip-emoji">{cat.icon || "📦"}</span>
+                ) : (
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="strip-img"
+                    onError={() => handleImageError(cat.id)}
+                  />
+                )}
               </div>
               <span className="strip-label">{cat.name}</span>
             </button>

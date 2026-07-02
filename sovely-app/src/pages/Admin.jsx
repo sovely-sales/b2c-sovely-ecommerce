@@ -168,6 +168,7 @@ export default function Admin() {
   const [editPrices, setEditPrices] = useState({
     price: "",
     originalPrice: "",
+    stock: "",
   });
   const [savingPriceId, setSavingPriceId] = useState(null);
 
@@ -249,6 +250,7 @@ export default function Admin() {
                 ? p.images[0].url
                 : p.image ||
                   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+            stock: p.inventory?.stock,
           };
         });
 
@@ -359,6 +361,7 @@ export default function Admin() {
         body: JSON.stringify({
           price: Number(editPrices.price),
           originalPrice: Number(editPrices.originalPrice),
+          stock: Number(editPrices.stock),
         }),
       });
       if (res.ok) {
@@ -370,15 +373,16 @@ export default function Admin() {
                   ...p,
                   price: data.product.price,
                   originalPrice: data.product.originalPrice,
+                  stock: data.product.inventory?.stock !== undefined ? data.product.inventory.stock : p.stock,
                 }
               : p,
           ),
         );
         setEditingProductId(null);
-        alert("Product price updated successfully!");
+        alert("Product updated successfully!");
       } else {
         const errData = await res.json();
-        alert(errData.message || "Failed to update price.");
+        alert(errData.message || "Failed to update product.");
       }
     } catch (err) {
       console.error("Price update error:", err);
@@ -1338,6 +1342,7 @@ export default function Admin() {
                           <th>Category</th>
                           <th>B2C Selling Price</th>
                           <th>B2C Original Price</th>
+                          <th>Stock</th>
                           <th>B2B Base Price (ReadOnly)</th>
                           <th>B2B Retail Price (ReadOnly)</th>
                           <th>Actions</th>
@@ -1461,6 +1466,28 @@ export default function Admin() {
                                   )}
                                 </td>
                                 <td>
+                                  {isEditing ? (
+                                    <input
+                                      type="number"
+                                      className="status-select"
+                                      style={{ width: "70px", padding: "6px" }}
+                                      value={editPrices.stock}
+                                      onChange={(e) =>
+                                        setEditPrices({
+                                          ...editPrices,
+                                          stock: e.target.value,
+                                        })
+                                      }
+                                      min="0"
+                                      required
+                                    />
+                                  ) : (
+                                    <span style={{ fontWeight: 600 }}>
+                                      {product.stock !== undefined ? product.stock : "—"}
+                                    </span>
+                                  )}
+                                </td>
+                                <td>
                                   <span
                                     style={{
                                       color: "#64748b",
@@ -1545,6 +1572,7 @@ export default function Admin() {
                                           price: product.price || "",
                                           originalPrice:
                                             product.originalPrice || "",
+                                          stock: product.stock !== undefined ? product.stock : 0,
                                         });
                                       }}
                                     >

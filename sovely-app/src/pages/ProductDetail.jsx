@@ -102,6 +102,7 @@ export default function ProductDetail() {
                   ? [{ url: p.image }]
                   : [],
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
           };
 
           setProduct(mappedProduct);
@@ -285,6 +286,9 @@ export default function ProductDetail() {
             {discount > 0 && (
               <span className="pd-discount">{discount}% OFF</span>
             )}
+            {product.stock === 0 && (
+              <span className="pd-discount" style={{ backgroundColor: "#ef4444", color: "#fff", borderColor: "#000" }}>OUT OF STOCK</span>
+            )}
           </div>
 
           <p className="pd-desc">
@@ -294,47 +298,63 @@ export default function ProductDetail() {
           </p>
 
           <div className="pd-actions">
-            <div className="pd-qty">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                aria-label="Decrease quantity"
-              >
-                -
-              </button>
-              <span aria-label="Quantity">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
-            <div className="pd-btn-group">
-              <button
-                className={`btn btn-primary pd-cart-btn ${added ? "added" : ""}`}
-                onClick={handleAddToCart}
-                aria-live="polite"
-              >
-                <ShoppingCart size={18} style={{ marginRight: "8px" }} />
-                {added ? "Added to Cart!" : "Add to Cart"}
-              </button>
-              <button
-                className={`btn btn-outline pd-wishlist-btn ${wishlist.includes(String(product.id)) ? "active" : ""}`}
-                onClick={() => toggleWishlist(product.id)}
-                aria-label="Toggle wishlist"
-              >
-                <Heart
-                  size={18}
-                  fill={
-                    wishlist.includes(String(product.id)) ? "#ef4444" : "none"
-                  }
-                  color={
-                    wishlist.includes(String(product.id))
-                      ? "#ef4444"
-                      : "currentColor"
-                  }
-                />
-              </button>
+            {product.stock > 0 && (
+              <div className="pd-qty">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span aria-label="Quantity">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            )}
+            <div className="pd-btn-group" style={{ width: product.stock === 0 ? '100%' : 'auto' }}>
+              {product.stock > 0 ? (
+                <button
+                  className={`btn btn-primary pd-cart-btn ${added ? "added" : ""}`}
+                  onClick={handleAddToCart}
+                  aria-live="polite"
+                >
+                  <ShoppingCart size={18} style={{ marginRight: "8px" }} />
+                  {added ? "Added to Cart!" : "Add to Cart"}
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary pd-cart-btn"
+                  style={{ backgroundColor: wishlist.includes(String(product.id)) ? "#ef4444" : "var(--primary)" }}
+                  onClick={() => toggleWishlist(product.id)}
+                  aria-live="polite"
+                >
+                  <Heart size={18} style={{ marginRight: "8px" }} />
+                  {wishlist.includes(String(product.id)) ? "Remove from Wishlist" : "Add to Wishlist"}
+                </button>
+              )}
+              {product.stock > 0 && (
+                <button
+                  className={`btn btn-outline pd-wishlist-btn ${wishlist.includes(String(product.id)) ? "active" : ""}`}
+                  onClick={() => toggleWishlist(product.id)}
+                  aria-label="Toggle wishlist"
+                >
+                  <Heart
+                    size={18}
+                    fill={
+                      wishlist.includes(String(product.id)) ? "#ef4444" : "none"
+                    }
+                    color={
+                      wishlist.includes(String(product.id))
+                        ? "#ef4444"
+                        : "currentColor"
+                    }
+                  />
+                </button>
+              )}
             </div>
           </div>
 

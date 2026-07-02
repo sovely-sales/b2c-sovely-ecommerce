@@ -31,6 +31,10 @@ const productSchema = new mongoose.Schema(
     badgeColor: { type: String },
     image: { type: String, required: true },
     freeDelivery: { type: Boolean, default: false },
+    inventory: {
+      stock: { type: Number },
+      alertThreshold: { type: Number },
+    },
   },
   { timestamps: true },
 );

@@ -33,16 +33,23 @@
 .strip-icon-circle {
   width: 72px;
   height: 72px;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
   border: var(--border-thick);
   box-shadow: var(--shadow-neo);
   transition: var(--transition);
   overflow: hidden;
   background: var(--bg-card) !important;
+}
+
+.strip-emoji {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
 }
 
 .strip-item:hover {
@@ -69,4 +76,35 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .category-strip {
+    padding: 16px 0 12px;
+  }
+
+  .strip-scroll {
+    gap: 8px;
+  }
+
+  .strip-item {
+    min-width: 76px;
+    gap: 6px;
+    padding: 4px 2px;
+  }
+
+  .strip-icon-circle {
+    width: 54px;
+    height: 54px;
+    border-width: 2.5px; /* slightly thinner neobrutalist border for mobile scaling */
+  }
+
+  .strip-emoji {
+    font-size: 1.5rem;
+  }
+
+  .strip-label {
+    font-size: 0.68rem;
+    margin-top: 2px;
+  }
 }

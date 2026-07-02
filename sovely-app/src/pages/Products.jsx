@@ -112,11 +112,16 @@ export default function Products() {
                   : p.image
                     ? [{ url: p.image }]
                     : [],
-              freeDelivery:
-                p.freeDelivery !== undefined ? p.freeDelivery : false,
+              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
             };
           });
-          setProducts(mapped);
+          const sorted = [...mapped].sort((a, b) => {
+            const stockA = a.stock === 0 ? 0 : 1;
+            const stockB = b.stock === 0 ? 0 : 1;
+            return stockB - stockA;
+          });
+          setProducts(sorted);
           setPage(0);
           setHasMore(data.length === PAGE_SIZE);
         }
@@ -190,9 +195,15 @@ export default function Products() {
                   ? [{ url: p.image }]
                   : [],
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
           };
         });
-        setProducts((prev) => [...prev, ...mapped]);
+        const sortedMore = [...mapped].sort((a, b) => {
+          const stockA = a.stock === 0 ? 0 : 1;
+          const stockB = b.stock === 0 ? 0 : 1;
+          return stockB - stockA;
+        });
+        setProducts((prev) => [...prev, ...sortedMore]);
         setPage(nextPage);
         setHasMore(data.length === PAGE_SIZE);
       }

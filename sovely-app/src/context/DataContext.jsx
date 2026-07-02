@@ -400,10 +400,16 @@ export function DataProvider({ children }) {
                     : [],
               freeDelivery:
                 p.freeDelivery !== undefined ? p.freeDelivery : false,
+              stock: p.inventory?.stock,
             };
           });
 
-          setProducts(mappedProducts);
+          const sortedProducts = [...mappedProducts].sort((a, b) => {
+            const stockA = a.stock === 0 ? 0 : 1;
+            const stockB = b.stock === 0 ? 0 : 1;
+            return stockB - stockA;
+          });
+          setProducts(sortedProducts);
           localStorage.setItem("cachedProducts", JSON.stringify(mappedProducts));
         }
 

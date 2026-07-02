@@ -99,11 +99,16 @@ export default function AllProducts() {
                   : p.image
                     ? [{ url: p.image }]
                     : [],
-              freeDelivery:
-                p.freeDelivery !== undefined ? p.freeDelivery : false,
+              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
             };
           });
-          setProductsList(mapped);
+          const sortedList = [...mapped].sort((a, b) => {
+            const stockA = a.stock === 0 ? 0 : 1;
+            const stockB = b.stock === 0 ? 0 : 1;
+            return stockB - stockA;
+          });
+          setProductsList(sortedList);
           setPage(0);
           setHasMore(data.length === PAGE_SIZE);
         }
@@ -176,9 +181,15 @@ export default function AllProducts() {
                   ? [{ url: p.image }]
                   : [],
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
+            stock: p.inventory?.stock,
           };
         });
-        setProductsList((prev) => [...prev, ...mapped]);
+        const sortedList = [...mapped].sort((a, b) => {
+          const stockA = a.stock === 0 ? 0 : 1;
+          const stockB = b.stock === 0 ? 0 : 1;
+          return stockB - stockA;
+        });
+        setProductsList((prev) => [...prev, ...sortedList]);
         setPage(nextPage);
         setHasMore(data.length === PAGE_SIZE);
       }

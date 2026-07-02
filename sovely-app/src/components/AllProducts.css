@@ -320,6 +320,9 @@
 }
 
 @media (max-width: 640px) {
+  .all-products-section {
+    padding: 16px 0 30px !important;
+  }
   .all-products-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
@@ -327,36 +330,73 @@
   .products-section-header {
     flex-direction: column;
     gap: 4px;
+    margin-bottom: 12px !important;
   }
   .price-filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+    display: flex !important;
+    flex-direction: column !important; /* Stack filters vertically */
+    align-items: stretch !important;
+    padding: 10px !important;
+    gap: 10px !important;
+    margin-bottom: 24px !important;
   }
   .price-filter-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
+    display: flex !important;
+    flex-direction: row !important; /* Keep Price Range title and inputs on same line */
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .price-filter-title {
+    font-size: 0.78rem !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
   }
   .price-input-wrapper {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 1 !important;
+    justify-content: flex-end !important;
   }
   .price-field-group {
-    flex: 1;
-    min-width: 80px;
+    padding: 4px 6px !important;
+    width: 70px !important;
+    flex-shrink: 0 !important;
+  }
+  .price-field-group input {
+    font-size: 0.8rem !important;
+    padding: 4px 0 !important;
+  }
+  .price-currency {
+    font-size: 0.8rem !important;
+    margin-right: 2px !important;
+  }
+  .price-range-to {
+    font-size: 0.75rem !important;
+  }
+  .price-btn-apply,
+  .price-btn-clear {
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+    height: 28px !important;
+    line-height: 1 !important;
   }
   .sort-select-wrapper {
-    width: 100%;
-    justify-content: space-between;
-    border-top: var(--border-thin);
-    padding-top: 12px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-top: var(--border-thin) !important;
+    padding-top: 10px !important;
+    margin-top: 2px !important;
+    box-sizing: border-box !important;
   }
   .sort-select {
-    flex: 1;
-    max-width: 200px;
+    width: auto !important;
+    max-width: 140px !important; /* Prevent it from expanding past parent border */
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    height: 30px !important;
   }
 }

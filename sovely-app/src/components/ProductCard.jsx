@@ -108,13 +108,21 @@ export default function ProductCard({ product }) {
           />
         </button>
 
+        {isSoldOut && (
+          <div className="card-soldout-overlay">
+            <span>OUT OF STOCK</span>
+          </div>
+        )}
+
         <button
-          className={`card-add-btn ${added ? "added" : ""}`}
-          onClick={handleQuickAdd}
-          disabled={isSoldOut}
-          aria-label={added ? "Added to cart" : "Add to cart"}
+          className={`card-add-btn ${isSoldOut ? "soldout" : ""} ${added ? "added" : ""}`}
+          onClick={isSoldOut ? handleWishlistToggle : handleQuickAdd}
+          aria-label={isSoldOut ? "Toggle Wishlist" : added ? "Added to cart" : "Add to cart"}
+          style={isSoldOut ? { backgroundColor: wishlist.includes(String(product.id)) ? "#ef4444" : "#f1f5f9", color: wishlist.includes(String(product.id)) ? "#fff" : "#0f172a" } : undefined}
         >
-          {added ? (
+          {isSoldOut ? (
+            wishlist.includes(String(product.id)) ? "WISHLISTED" : "WISHLIST"
+          ) : added ? (
             <>
               <Check size={14} style={{ marginRight: "4px" }} />
               ADDED
