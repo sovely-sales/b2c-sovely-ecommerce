@@ -43,9 +43,7 @@ export default function Cart() {
   const handleApplyCoupon = () => {
     if (!couponInput.trim()) return;
     setCouponError("");
-
     const normalizedInput = couponInput.toUpperCase().replace(/\s+/g, "");
-
     const matchedCoupon = availableCoupons.find(
       (c) => c.code.toUpperCase().replace(/\s+/g, "") === normalizedInput,
     );
@@ -125,7 +123,6 @@ export default function Cart() {
               <div className="cart-item-img">
                 <img src={item.image} alt={item.name} />
               </div>
-
               <div className="cart-item-details">
                 <div className="item-header">
                   <Link to={`/product/${item.id}`}>
@@ -139,14 +136,11 @@ export default function Cart() {
                     <Trash2 size={18} />
                   </button>
                 </div>
-
                 <p className="item-price-unit">
                   {formatPrice(item.price)} per unit
                 </p>
-
                 <div className="item-actions">
                   <div className="qty-picker">
-                    {}
                     <button
                       onClick={() => updateQuantity(item.id, -1)}
                       disabled={item.quantity <= 1}
@@ -154,8 +148,6 @@ export default function Cart() {
                       <Minus size={16} />
                     </button>
                     <span>{item.quantity}</span>
-
-                    {}
                     <button onClick={() => updateQuantity(item.id, 1)}>
                       <Plus size={16} />
                     </button>
@@ -176,7 +168,6 @@ export default function Cart() {
           <div className="summary-card glass">
             <h3>Order Summary</h3>
 
-            {}
             <div className="coupon-section">
               {coupon ? (
                 <div className="applied-coupon">
@@ -194,32 +185,18 @@ export default function Cart() {
                   </button>
                 </div>
               ) : (
-                <div
-                  className="coupon-action-group"
-                  style={{ display: "flex", gap: "12px" }}
-                >
+                <div className="coupon-action-group">
                   <input
                     type="text"
                     className="coupon-input-standalone"
                     placeholder="Enter coupon"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: "12px 16px",
-                      border: "2px solid var(--border-color)",
-                      borderRadius: "8px",
-                      background: "transparent",
-                      color: "var(--text-main)",
-                      outline: "none",
-                      fontWeight: "700",
-                    }}
                   />
                   <button
                     onClick={handleApplyCoupon}
-                    className="btn btn-primary"
+                    className="btn btn-primary coupon-apply-btn"
                     disabled={couponLoading || !couponInput.trim()}
-                    style={{ padding: "0 24px", whiteSpace: "nowrap" }}
                   >
                     {couponLoading ? "..." : "Apply"}
                   </button>
@@ -228,41 +205,23 @@ export default function Cart() {
               {couponError && <p className="coupon-error">{couponError}</p>}
             </div>
 
-            <div className="shipping-upsell-offers" style={{
-              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)",
-              border: "2px dashed var(--primary)",
-              borderRadius: "var(--radius-sm)",
-              padding: "16px",
-              margin: "16px 0",
-              fontSize: "0.85rem",
-              lineHeight: "1.4"
-            }}>
-              <h4 style={{
-                margin: "0 0 10px 0",
-                fontWeight: "900",
-                color: "var(--text-main)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                textTransform: "uppercase",
-                fontSize: "0.75rem",
-                letterSpacing: "0.5px"
-              }}>
-                🔥 Special Shipping Offers
-              </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "1.1rem" }}>🚚</span>
-                  <div>
-                    <strong style={{ color: "var(--text-main)", display: "block" }}>Flat ₹50 Shipping</strong>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>On multiple products with a total weight of up to 500g.</span>
+            <div className="shipping-upsell-offers">
+              <h4 className="upsell-title">≡ƒöÑ Special Shipping Offers</h4>
+              <div className="upsell-list">
+                <div className="upsell-item">
+                  <span className="upsell-icon">≡ƒÜÜ</span>
+                  <div className="upsell-text">
+                    <strong>Flat Γé╣50 Shipping</strong>
+                    <span>
+                      On multiple products with a total weight of up to 500g.
+                    </span>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "1.1rem" }}>🎉</span>
-                  <div>
-                    <strong style={{ color: "var(--text-main)", display: "block" }}>FREE Shipping</strong>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>Get free shipping on all orders above ₹999.</span>
+                <div className="upsell-item">
+                  <span className="upsell-icon">≡ƒÄë</span>
+                  <div className="upsell-text">
+                    <strong>FREE Shipping</strong>
+                    <span>Get free shipping on all orders above Γé╣999.</span>
                   </div>
                 </div>
               </div>
@@ -312,9 +271,8 @@ export default function Cart() {
               </div>
             </div>
           </div>
-
           <div className="continue-shopping">
-            <Link to="/products">← Continue Shopping</Link>
+            <Link to="/products">ΓåÉ Continue Shopping</Link>
           </div>
         </aside>
       </div>

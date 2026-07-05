@@ -91,7 +91,6 @@
   color: var(--text-muted);
   background: transparent;
   border: 3px solid transparent;
-  cursor: pointer;
   text-align: left;
   width: 100%;
   transition: var(--transition);
@@ -103,9 +102,6 @@
   color: #000;
   border: var(--border-thick);
   box-shadow: var(--shadow-neo);
-}
-
-.cat-item:hover {
   transform: translate(-2px, -2px);
 }
 
@@ -154,20 +150,12 @@
   outline: none;
 }
 
-.search-bar input::placeholder {
-  color: var(--text-muted);
-}
-
 .search-clear {
   color: var(--text-main);
   background: var(--primary);
   border: var(--border-thick);
   padding: 4px;
   border-radius: var(--radius-sm);
-}
-
-.search-clear:hover {
-  background: var(--accent);
 }
 
 .nav-actions {
@@ -210,15 +198,11 @@
 .action-link-text:hover {
   color: var(--primary);
 }
-
 .nav-icon {
   color: var(--gray-800);
   transition: var(--transition);
 }
-
-.action-link-text:hover .nav-icon,
-.cart-link-text:hover .nav-icon,
-.user-btn-text:hover .nav-icon {
+.action-link-text:hover .nav-icon {
   color: var(--primary);
 }
 
@@ -250,12 +234,6 @@
   border: 1px solid var(--primary);
 }
 
-.cart-icon-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 .user-profile-wrap {
   position: relative;
 }
@@ -280,17 +258,14 @@
   display: flex;
   flex-direction: column;
 }
-
 .dropdown-user-info strong {
   font-size: 0.95rem;
   color: var(--text-main);
 }
-
 .dropdown-user-info span {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-
 .dropdown-divider {
   height: 2px;
   background: var(--border-color);
@@ -307,7 +282,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: transparent;
   border: 3px solid transparent;
   transition: var(--transition);
 }
@@ -324,7 +298,6 @@
   width: 100%;
   color: #ef4444;
 }
-
 .logout-item:hover {
   background: #ef4444;
   color: #fff;
@@ -345,165 +318,94 @@
   border-bottom: var(--border-thick);
 }
 
-.search-toggle-btn {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-}
-
-.show-on-mobile-inline {
-  display: none;
-}
-
 @media (max-width: 1024px) {
   .nav-search-section {
-    margin: 0 15px;
+    margin: 0 20px;
   }
   .nav-actions {
     gap: 15px;
+  }
+
+  .hide-on-tablet {
+    display: none;
+  }
+
+  .cart-btn-neo {
+    padding: 8px;
+  }
+  .cart-btn-neo span:not(.cart-badge-neo) {
+    display: none;
+  }
+
+  .nav-categories-dropdown span,
+  .nav-categories-dropdown .chevron-rotated,
+  .nav-categories-dropdown svg:last-child {
+    display: none;
   }
 }
 
 @media (max-width: 768px) {
   .main-navbar,
   .main-navbar.scrolled {
-    height: 60px !important;
+    height: 64px;
   }
 
   .nav-container {
-    flex-wrap: nowrap !important;
-    height: 100% !important;
-    padding: 0 12px !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 8px !important; /* Set uniform gap */
+    padding: 0 12px;
+    gap: 12px;
   }
 
   .nav-left {
-    order: 1 !important;
-    flex-shrink: 0 !important;
-    gap: 6px !important;
+    gap: 10px;
   }
 
   .nav-logo-img {
-    height: 30px !important; /* Scale down logo */
+    height: 32px;
+  }
+  .nav-categories-wrap {
+    display: none;
   }
 
   .nav-search-section {
-    order: 2 !important;
-    display: flex !important;
-    flex: 1 !important;
-    margin: 0 !important; /* Remove heavy margin */
-    min-width: 0 !important;
+    margin: 0;
+    max-width: none;
   }
 
   .search-bar {
-    padding: 0 10px !important;
+    padding: 0 12px;
   }
-
   .search-bar input {
-    padding: 8px 0 !important;
-    font-size: 0.82rem !important;
+    padding: 8px 0;
+    font-size: 0.85rem;
   }
 
   .nav-actions {
-    order: 3 !important;
-    flex-shrink: 0 !important;
-    gap: 8px !important; /* Uniform gap */
+    gap: 10px;
+  }
+
+  .action-link-text,
+  .admin-pill,
+  .user-profile-wrap {
+    display: none;
   }
 
   .theme-toggle-btn,
   .cart-btn-neo {
-    position: relative !important; /* Enable absolute positioning context */
-    padding: 6px !important;
-    width: 38px !important;
-    height: 38px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
-  }
-
-  .theme-toggle-btn svg,
-  .cart-btn-neo svg {
-    width: 16px !important;
-    height: 16px !important;
+    padding: 8px;
+    position: relative;
   }
 
   .cart-badge-neo {
-    position: absolute !important;
-    top: -6px !important;
-    right: -6px !important;
-    background: #000 !important;
-    color: var(--primary) !important;
-    font-size: 0.65rem !important;
-    padding: 1px 5px !important;
-    border-radius: 4px !important;
-    border: 1px solid var(--primary) !important;
-    z-index: 10 !important;
-    display: inline-block !important;
-    line-height: 1 !important;
-  }
-
-  .hide-on-mobile {
-    display: none !important;
-  }
-
-  .show-on-mobile-inline,
-  .search-toggle-btn {
-    display: none !important;
-  }
-
-  .cart-icon-wrap {
-    margin-right: 2px !important;
-  }
-
-  .cart-badge-square {
-    position: absolute !important;
-    top: -8px !important;
-    right: -8px !important;
-    font-size: 0.65rem !important;
-    padding: 1px 5px !important;
-    border-radius: 4px !important;
-    margin-bottom: 0 !important;
-  }
-
-  .nav-categories-dropdown {
-    padding: 8px !important;
-  }
-
-  .nav-categories-dropdown span,
-  .nav-categories-dropdown svg:last-child {
-    display: none !important;
-  }
-
-  .nav-logo-text {
-    font-size: 1.25rem !important;
-  }
-
-  .nav-categories-wrap {
-    display: none !important;
-  }
-
-  .nav-actions a.action-link-text {
-    display: none !important;
-  }
-
-  .nav-actions .user-profile-wrap {
-    display: none !important;
-  }
-
-  .admin-pill {
-    display: none !important;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    line-height: 1;
   }
 
   .nav-secondary-banner {
-    font-size: 0.62rem !important;
-    letter-spacing: 0.5px !important;
-    padding: 6px 0 !important;
+    font-size: 0.65rem;
+    padding: 6px 12px;
   }
 }

@@ -31,12 +31,21 @@ export default function Search() {
           const mappedResults = data.map((p) => ({
             id: p._id || p.id,
             name: p.title || p.name,
-            price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
-              rating: p.averageRating || p.rating || 0,
-              reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+            price:
+              p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
+            originalPrice:
+              p.originalPrice !== undefined
+                ? p.originalPrice
+                : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge:
+              p.badge ||
+              ((p.originalPrice || p.suggestedRetailPrice) >
+              (p.price || p.dropshipBasePrice)
+                ? "Sale"
+                : null),
+            badgeColor: p.badgeColor || "#ef4444",
             image: p.images && p.images.length > 0 ? p.images[0].url : p.image,
             freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
             stock: p.inventory?.stock,

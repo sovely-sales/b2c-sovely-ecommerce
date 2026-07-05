@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from "react";
 import { ChevronDown, Filter, LayoutGrid, List } from "lucide-react";
 import { useData } from "../context/DataContext";
 import ProductCard from "../components/ProductCard";
@@ -16,20 +16,40 @@ export default function Products() {
   );
   const categoryFilter = queryParams.get("category");
 
+  const initialState = useMemo(() => {
+    try {
+      const saved = sessionStorage.getItem("productsPageState");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+
+        if (parsed.categoryFilter === categoryFilter) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error("Cache read error", e);
+    }
+    return null;
+  }, [categoryFilter]);
+
   const { categories, loading: contextLoading } = useData();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+
+  const [products, setProducts] = useState(initialState?.products || []);
+  const [loading, setLoading] = useState(!initialState);
+  const [page, setPage] = useState(initialState?.page || 0);
+  const [hasMore, setHasMore] = useState(initialState?.hasMore ?? true);
+  const [sortOption, setSortOption] = useState(
+    initialState?.sortOption || "latest",
+  );
+  const [minPrice, setMinPrice] = useState(initialState?.minPrice || "");
+  const [maxPrice, setMaxPrice] = useState(initialState?.maxPrice || "");
 
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [sortOption, setSortOption] = useState("latest");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
 
   const categoryRef = useRef(null);
   const sortRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   const sortLabels = {
     latest: "Latest",
@@ -54,6 +74,58 @@ export default function Products() {
   }, [categoryFilter]);
 
   useEffect(() => {
+    const stateToSave = {
+      categoryFilter,
+      products,
+      page,
+      hasMore,
+      sortOption,
+      minPrice,
+      maxPrice,
+    };
+    sessionStorage.setItem("productsPageState", JSON.stringify(stateToSave));
+  }, [categoryFilter, products, page, hasMore, sortOption, minPrice, maxPrice]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = window.scrollY;
+      const previous = parseInt(
+        sessionStorage.getItem("productsScrollY") || "0",
+        10,
+      );
+
+      if (current === 0 && previous > 150) {
+        return;
+      }
+
+      sessionStorage.setItem("productsScrollY", current.toString());
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (initialState) {
+      const savedScrollY = sessionStorage.getItem("productsScrollY");
+      if (savedScrollY) {
+        const targetY = parseInt(savedScrollY, 10);
+
+        window.scrollTo(0, targetY);
+
+        let attempts = 0;
+        const scrollLock = setInterval(() => {
+          window.scrollTo(0, targetY);
+          attempts++;
+          if (attempts > 10) clearInterval(scrollLock);
+        }, 50);
+
+        return () => clearInterval(scrollLock);
+      }
+    }
+  }, [initialState]);
+
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (categoryRef.current && !categoryRef.current.contains(e.target)) {
         setShowCategoryDropdown(false);
@@ -69,6 +141,11 @@ export default function Products() {
   useEffect(() => {
     let active = true;
     let timer;
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (initialState) return;
+    }
 
     const fetchProducts = async () => {
       setLoading(true);
@@ -95,12 +172,23 @@ export default function Products() {
               name: p.title || p.name,
               category: categoryName,
               categoryId: rawCategory,
-              price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+              price:
+                p.price !== undefined
+                  ? p.price
+                  : (p.dropshipBasePrice || 0) + 30,
+              originalPrice:
+                p.originalPrice !== undefined
+                  ? p.originalPrice
+                  : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
               rating: p.averageRating || p.rating || 0,
               reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+              badge:
+                p.badge ||
+                ((p.originalPrice || p.suggestedRetailPrice) >
+                (p.price || p.dropshipBasePrice)
+                  ? "Sale"
+                  : null),
+              badgeColor: p.badgeColor || "#ef4444",
               image:
                 p.images && p.images.length > 0
                   ? p.images[0].url
@@ -112,8 +200,9 @@ export default function Products() {
                   : p.image
                     ? [{ url: p.image }]
                     : [],
-              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
-            stock: p.inventory?.stock,
+              freeDelivery:
+                p.freeDelivery !== undefined ? p.freeDelivery : false,
+              stock: p.inventory?.stock,
             };
           });
           const sorted = [...mapped].sort((a, b) => {
@@ -150,6 +239,7 @@ export default function Products() {
     contextLoading,
     categories,
     categoryMap,
+    initialState,
   ]);
 
   const handleShowMore = async () => {
@@ -177,12 +267,21 @@ export default function Products() {
             name: p.title || p.name,
             category: categoryName,
             categoryId: rawCategory,
-            price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
-              rating: p.averageRating || p.rating || 0,
-              reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+            price:
+              p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
+            originalPrice:
+              p.originalPrice !== undefined
+                ? p.originalPrice
+                : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge:
+              p.badge ||
+              ((p.originalPrice || p.suggestedRetailPrice) >
+              (p.price || p.dropshipBasePrice)
+                ? "Sale"
+                : null),
+            badgeColor: p.badgeColor || "#ef4444",
             image:
               p.images && p.images.length > 0
                 ? p.images[0].url
@@ -218,6 +317,10 @@ export default function Products() {
     setSortOption("latest");
     setShowCategoryDropdown(false);
     setShowSortDropdown(false);
+
+    sessionStorage.removeItem("productsPageState");
+    sessionStorage.removeItem("productsScrollY");
+
     navigate("/products");
   };
 

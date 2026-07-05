@@ -75,6 +75,16 @@ h6 {
   line-height: 1.2;
 }
 
+h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+h3 {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -180,7 +190,6 @@ select {
     transform: translateY(0);
   }
 }
-
 .animate-fadeUp {
   animation: fadeUp 0.4s ease-out forwards;
 }
@@ -197,9 +206,20 @@ select {
     transform: translateX(4px);
   }
 }
-
 .animate-shake {
   animation: shake 0.3s ease-in-out;
+}
+
+@media (max-width: 1024px) {
+  .section {
+    padding: 60px 0;
+  }
+  .container {
+    padding: 0 20px;
+  }
+  .card {
+    padding: 24px;
+  }
 }
 
 @media (max-width: 768px) {

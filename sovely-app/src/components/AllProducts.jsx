@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useData } from "../context/DataContext";
 import ProductCard from "./ProductCard";
 import "./AllProducts.css";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 24;
 
 export default function AllProducts() {
   const {
@@ -24,6 +24,10 @@ export default function AllProducts() {
   const [appliedMinPrice, setAppliedMinPrice] = useState("");
   const [appliedMaxPrice, setAppliedMaxPrice] = useState("");
   const [sortOption, setSortOption] = useState("latest");
+
+  const loaderRef = useRef(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const isFetchingRef = useRef(false);
 
   const handleApplyFilters = () => {
     setAppliedMinPrice(minPrice);
@@ -82,12 +86,23 @@ export default function AllProducts() {
               name: p.title || p.name,
               category: categoryName,
               categoryId: rawCategory,
-              price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+              price:
+                p.price !== undefined
+                  ? p.price
+                  : (p.dropshipBasePrice || 0) + 30,
+              originalPrice:
+                p.originalPrice !== undefined
+                  ? p.originalPrice
+                  : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
               rating: p.averageRating || p.rating || 0,
               reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+              badge:
+                p.badge ||
+                ((p.originalPrice || p.suggestedRetailPrice) >
+                (p.price || p.dropshipBasePrice)
+                  ? "Sale"
+                  : null),
+              badgeColor: p.badgeColor || "#ef4444",
               image:
                 p.images && p.images.length > 0
                   ? p.images[0].url
@@ -99,8 +114,9 @@ export default function AllProducts() {
                   : p.image
                     ? [{ url: p.image }]
                     : [],
-              freeDelivery: p.freeDelivery !== undefined ? p.freeDelivery : false,
-            stock: p.inventory?.stock,
+              freeDelivery:
+                p.freeDelivery !== undefined ? p.freeDelivery : false,
+              stock: p.inventory?.stock,
             };
           });
           const sortedList = [...mapped].sort((a, b) => {
@@ -108,6 +124,7 @@ export default function AllProducts() {
             const stockB = b.stock === 0 ? 0 : 1;
             return stockB - stockA;
           });
+
           setProductsList(sortedList);
           setPage(0);
           setHasMore(data.length === PAGE_SIZE);
@@ -137,6 +154,11 @@ export default function AllProducts() {
   ]);
 
   const handleShowMore = async () => {
+    if (isFetchingRef.current || !hasMore) return;
+
+    isFetchingRef.current = true;
+    setIsFetchingMore(true);
+
     const nextPage = page + 1;
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8014";
     try {
@@ -163,12 +185,21 @@ export default function AllProducts() {
             name: p.title || p.name,
             category: categoryName,
             categoryId: rawCategory,
-            price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
-              rating: p.averageRating || p.rating || 0,
-              reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+            price:
+              p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
+            originalPrice:
+              p.originalPrice !== undefined
+                ? p.originalPrice
+                : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge:
+              p.badge ||
+              ((p.originalPrice || p.suggestedRetailPrice) >
+              (p.price || p.dropshipBasePrice)
+                ? "Sale"
+                : null),
+            badgeColor: p.badgeColor || "#ef4444",
             image:
               p.images && p.images.length > 0
                 ? p.images[0].url
@@ -189,26 +220,73 @@ export default function AllProducts() {
           const stockB = b.stock === 0 ? 0 : 1;
           return stockB - stockA;
         });
-        setProductsList((prev) => [...prev, ...sortedList]);
+
+        setProductsList((prev) => {
+          const existingIds = new Set(prev.map((p) => String(p.id)));
+          const uniqueNewItems = sortedList.filter(
+            (p) => !existingIds.has(String(p.id)),
+          );
+          return [...prev, ...uniqueNewItems];
+        });
+
         setPage(nextPage);
         setHasMore(data.length === PAGE_SIZE);
       }
     } catch (error) {
       console.error("Error fetching more products:", error);
+    } finally {
+      isFetchingRef.current = false;
+      setIsFetchingMore(false);
     }
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingRef.current) {
+          handleShowMore();
+        }
+      },
+      {
+        threshold: 0,
+        rootMargin: "600px",
+      },
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [
+    hasMore,
+    page,
+    selectedCategory,
+    searchFilter,
+    appliedMinPrice,
+    appliedMaxPrice,
+    sortOption,
+    loadingProducts,
+  ]);
+
   if (loading)
     return (
-      <div className="container" style={{ padding: "80px 0" }}>
-        Loading categories...
+      <div
+        className="container"
+        style={{ padding: "80px 0", textAlign: "center" }}
+      >
+        <span
+          className="spin"
+          style={{ fontSize: "24px", display: "inline-block" }}
+        >
+          ⚙️
+        </span>
       </div>
     );
 
   return (
     <section className="section all-products-section" id="all-products-section">
       <div className="container">
-        {}
         <div className="products-section-header">
           <h2 className="section-title-autorev">Explore Our Products</h2>
           {!loadingProducts && (
@@ -218,7 +296,7 @@ export default function AllProducts() {
           )}
         </div>
 
-        {/* Price & Sort Filter Bar */}
+        {}
         <div className="price-filter-bar">
           <div className="price-filter-section">
             <span className="price-filter-title">Price Range:</span>
@@ -249,8 +327,15 @@ export default function AllProducts() {
               <button className="price-btn-apply" onClick={handleApplyFilters}>
                 Apply
               </button>
-              {(appliedMinPrice || appliedMaxPrice || minPrice || maxPrice || sortOption !== "latest") && (
-                <button className="price-btn-clear" onClick={handleClearFilters}>
+              {(appliedMinPrice ||
+                appliedMaxPrice ||
+                minPrice ||
+                maxPrice ||
+                sortOption !== "latest") && (
+                <button
+                  className="price-btn-clear"
+                  onClick={handleClearFilters}
+                >
                   Clear
                 </button>
               )}
@@ -276,13 +361,12 @@ export default function AllProducts() {
           </div>
         </div>
 
-        {}
         {loadingProducts && productsList.length === 0 ? (
           <div
             style={{
               textAlign: "center",
               padding: "80px 0",
-              color: "var(--gray-500)",
+              color: "var(--text-muted)",
               fontSize: "1rem",
               fontWeight: "600",
             }}
@@ -301,10 +385,24 @@ export default function AllProducts() {
 
             {}
             {hasMore && (
-              <div className="show-more-container">
-                <button className="show-more-btn" onClick={handleShowMore}>
-                  Show More
-                </button>
+              <div
+                ref={loaderRef}
+                style={{
+                  width: "100%",
+                  height: "60px",
+                  marginTop: "40px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {isFetchingMore && (
+                  <span
+                    style={{ color: "var(--text-muted)", fontWeight: "600" }}
+                  >
+                    Loading more items...
+                  </span>
+                )}
               </div>
             )}
           </>

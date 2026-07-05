@@ -6,7 +6,7 @@
 .deal-banners-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 .deal-banner-card {
@@ -15,7 +15,7 @@
   color: #fff;
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 16px;
   cursor: pointer;
   transition: var(--transition);
   position: relative;
@@ -30,8 +30,8 @@
 }
 
 .deal-icon-wrap {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-sm);
   background: rgba(0, 0, 0, 0.25);
   border: 2px solid #fff;
@@ -43,19 +43,21 @@
 }
 
 .deal-text h3 {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .deal-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
   opacity: 0.95;
+  margin-bottom: 2px;
 }
 
 .deal-desc {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   opacity: 0.85;
 }
@@ -66,27 +68,26 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .deal-banners-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .deal-banner-card {
-    padding: 16px 14px;
-    gap: 10px;
-  }
-  .deal-text h3 {
-    font-size: 0.85rem;
-  }
-  .deal-subtitle {
-    font-size: 0.75rem;
+    padding: 16px;
+    gap: 12px;
   }
   .deal-icon-wrap {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
   .deal-icon-wrap svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+  }
+  .deal-text h3 {
+    font-size: 0.9rem;
+  }
+  .deal-subtitle {
+    font-size: 0.8rem;
   }
 }

@@ -19,8 +19,9 @@ import Orders from "./pages/Orders";
 import Settings from "./pages/Settings";
 import OrderSuccess from "./pages/OrderSuccess";
 import { DataProvider } from "./context/DataContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigationType } from "react-router-dom";
 import { useData } from "./context/DataContext";
+import { useEffect } from "react";
 import "./App.css";
 import Wishlist from "./pages/Wishlist";
 import Search from "./pages/Search";
@@ -46,16 +47,34 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
 const AdminRedirect = ({ children }) => {
   const { user } = useData();
-  
+
   if (user && user.role === "admin") {
     return <Navigate to="/admin" replace />;
   }
   return children;
 };
 
+const ScrollManager = () => {
+  const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    if (navigationType !== "POP") {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, navigationType]);
+
+  return null;
+};
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollManager />
       <DataProvider>
         <Navbar />
         <MobileBottomNav />

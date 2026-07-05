@@ -28,6 +28,8 @@ const OFFERS = [
 
 export default function HeroBanner() {
   const [current, setCurrent] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -36,19 +38,30 @@ export default function HeroBanner() {
     return () => clearInterval(timer);
   }, []);
 
-  const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % OFFERS.length);
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % OFFERS.length);
+  const prevSlide = () =>
+    setCurrent((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
+
+  const handleTouchStart = (e) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
   };
 
-  const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX || !touchEndX) return;
+    const distance = touchStartX - touchEndX;
+    if (distance > 50) nextSlide();
+    if (distance < -50) prevSlide();
   };
 
   const handleCtaClick = () => {
     const productsSection = document.getElementById("all-products-section");
-    if (productsSection) {
+    if (productsSection)
       productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   };
 
   return (
@@ -56,6 +69,9 @@ export default function HeroBanner() {
       <div
         className="slider-wrapper"
         style={{ transform: `translateX(-${current * 100}%)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {OFFERS.map((offer, idx) => (
           <div

@@ -138,24 +138,28 @@ app.get("/api/categories", async (req, res) => {
     const activeCategories = await Product.aggregate([
       { $group: { _id: "$categoryId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
-      { $limit: 30 }
+      { $limit: 30 },
     ]);
-    
-    const categoryIds = activeCategories.map(c => c._id).filter(Boolean);
-    const categories = await Category.find({ _id: { $in: categoryIds } }).lean();
-    
+
+    const categoryIds = activeCategories.map((c) => c._id).filter(Boolean);
+    const categories = await Category.find({
+      _id: { $in: categoryIds },
+    }).lean();
+
     const countMap = {};
-    activeCategories.forEach(c => {
+    activeCategories.forEach((c) => {
       countMap[String(c._id)] = c.count;
     });
-    
-    const enriched = categories.map(cat => ({
+
+    const enriched = categories.map((cat) => ({
       ...cat,
-      count: countMap[String(cat._id)] || 0
+      count: countMap[String(cat._id)] || 0,
     }));
-    
-    enriched.sort((a, b) => (countMap[String(b._id)] || 0) - (countMap[String(a._id)] || 0));
-    
+
+    enriched.sort(
+      (a, b) => (countMap[String(b._id)] || 0) - (countMap[String(a._id)] || 0),
+    );
+
     res.json(enriched);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -283,8 +287,7 @@ app.get("/api/products", async (req, res) => {
     } else {
       sortObj = { _id: -1 };
     }
-    
-    // Sort by out of stock flag first, then by requested sort options
+
     pipeline.push({ $sort: { isOutOfStock: 1, ...sortObj } });
 
     const queryLimit = Math.max(1, parseInt(limit) || 24);
@@ -583,7 +586,9 @@ app.get("/api/user/orders", authenticate("user"), async (req, res) => {
 
 app.get("/api/admin/orders", authenticate("admin"), async (req, res) => {
   try {
-    const orders = await Order.find({ status: { $ne: "Pending Payment" } }).sort({ createdAt: -1 });
+    const orders = await Order.find({
+      status: { $ne: "Pending Payment" },
+    }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     console.error("Error fetching admin orders:", error);
@@ -764,7 +769,6 @@ app.post(
           );
         }
 
-        // Prevent negative prices
         newPrice = Math.max(0, newPrice);
         newOriginalPrice = Math.max(0, newOriginalPrice);
 
@@ -1064,23 +1068,19 @@ app.delete(
   },
 );
 
-app.put(
-  "/api/admin/coupons/:id",
-  authenticate("admin"),
-  async (req, res) => {
-    try {
-      const { isActive } = req.body;
-      const coupon = await Coupon.findByIdAndUpdate(
-        req.params.id,
-        { isActive },
-        { new: true }
-      );
-      res.json({ success: true, coupon });
-    } catch (err) {
-      res.status(500).json({ message: "Error updating coupon" });
-    }
+app.put("/api/admin/coupons/:id", authenticate("admin"), async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    const coupon = await Coupon.findByIdAndUpdate(
+      req.params.id,
+      { isActive },
+      { new: true },
+    );
+    res.json({ success: true, coupon });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating coupon" });
   }
-);
+});
 
 app.post("/api/razorpay/webhook", async (req, res) => {
   try {

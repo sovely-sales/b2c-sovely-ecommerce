@@ -121,89 +121,223 @@ export default function OrderSuccess() {
   const currentStep = getStatusStep(order.status);
 
   return (
-    <div className="order-success-page container section" style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
-      {/* Top Banner Info */}
-      <div className="success-header-banner" style={{ textAlign: "left", marginBottom: "30px", borderBottom: "var(--border-thick)", paddingBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
-          <div className="success-icon-wrapper animate-scaleIn" style={{ margin: 0, width: "60px", height: "60px", background: "var(--primary)", border: "var(--border-thick)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", boxShadow: "var(--shadow-neo)" }}>
+    <div
+      className="order-success-page container section"
+      style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}
+    >
+      {}
+      <div
+        className="success-header-banner"
+        style={{
+          textAlign: "left",
+          marginBottom: "30px",
+          borderBottom: "var(--border-thick)",
+          paddingBottom: "24px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            className="success-icon-wrapper animate-scaleIn"
+            style={{
+              margin: 0,
+              width: "60px",
+              height: "60px",
+              background: "var(--primary)",
+              border: "var(--border-thick)",
+              borderRadius: "var(--radius-sm)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#000",
+              boxShadow: "var(--shadow-neo)",
+            }}
+          >
             <CheckCircle size={32} />
           </div>
           <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: 900, textTransform: "uppercase", margin: 0 }}>Order Confirmed!</h1>
-            <p className="greeting-text" style={{ fontSize: "1rem", margin: "4px 0 0 0", textAlign: "left" }}>
-              Thank you, <strong>{order.customerName}</strong>. Your order has been received and is being processed.
+            <h1
+              style={{
+                fontSize: "2rem",
+                fontWeight: 900,
+                textTransform: "uppercase",
+                margin: 0,
+              }}
+            >
+              Order Confirmed!
+            </h1>
+            <p
+              className="greeting-text"
+              style={{
+                fontSize: "1rem",
+                margin: "4px 0 0 0",
+                textAlign: "left",
+              }}
+            >
+              Thank you, <strong>{order.customerName}</strong>. Your order has
+              been received and is being processed.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="success-details-grid" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "40px", alignItems: "start" }}>
-        {/* Left Column: Progress, Order Info, Items */}
+      <div
+        className="success-details-grid"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.6fr 1fr",
+          gap: "40px",
+          alignItems: "start",
+        }}
+      >
+        {}
         <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-          {/* Order Status Timeline Tracker */}
+          {}
           <div className="items-card glass" style={{ padding: "24px" }}>
-            <h3 style={{ margin: "0 0 20px 0", textTransform: "uppercase", fontSize: "1rem", fontWeight: 900 }}>Order Status Tracker</h3>
-            <div style={{ display: "flex", justifyContent: "space-between", position: "relative", padding: "10px 0" }}>
-              {/* Progress Line */}
-              <div style={{
-                position: "absolute",
-                top: "26px",
-                left: "40px",
-                right: "40px",
-                height: "4px",
-                background: "#e2e8f0",
-                zIndex: 1
-              }}>
-                <div style={{
-                  width: `${(currentStep / 3) * 100}%`,
-                  height: "100%",
-                  background: "var(--primary)",
-                  transition: "width 0.5s ease"
-                }} />
+            <h3
+              style={{
+                margin: "0 0 20px 0",
+                textTransform: "uppercase",
+                fontSize: "1rem",
+                fontWeight: 900,
+              }}
+            >
+              Order Status Tracker
+            </h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                position: "relative",
+                padding: "10px 0",
+              }}
+            >
+              {}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "26px",
+                  left: "40px",
+                  right: "40px",
+                  height: "4px",
+                  background: "#e2e8f0",
+                  zIndex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    width: `${(currentStep / 3) * 100}%`,
+                    height: "100%",
+                    background: "var(--primary)",
+                    transition: "width 0.5s ease",
+                  }}
+                />
               </div>
-              
-              {/* Steps */}
-              {["Confirmed", "Processing", "Shipped", "Delivered"].map((label, idx) => {
-                const isCompleted = idx <= currentStep;
-                const isActive = idx === currentStep;
-                return (
-                  <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", zIndex: 2, position: "relative", width: "80px" }}>
-                    <div style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      background: isCompleted ? "var(--primary)" : "#fff",
-                      border: "3px solid #000",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: "900",
-                      fontSize: "0.85rem",
-                      boxShadow: isActive ? "2px 2px 0px #000" : "none"
-                    }}>
-                      {isCompleted ? "✓" : idx + 1}
+
+              {}
+              {["Confirmed", "Processing", "Shipped", "Delivered"].map(
+                (label, idx) => {
+                  const isCompleted = idx <= currentStep;
+                  const isActive = idx === currentStep;
+                  return (
+                    <div
+                      key={label}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        zIndex: 2,
+                        position: "relative",
+                        width: "80px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          background: isCompleted ? "var(--primary)" : "#fff",
+                          border: "3px solid #000",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: "900",
+                          fontSize: "0.85rem",
+                          boxShadow: isActive ? "2px 2px 0px #000" : "none",
+                        }}
+                      >
+                        {isCompleted ? "✓" : idx + 1}
+                      </div>
+                      <span
+                        style={{
+                          marginTop: "8px",
+                          fontSize: "0.75rem",
+                          fontWeight: isCompleted ? "900" : "600",
+                          textTransform: "uppercase",
+                          color: isCompleted
+                            ? "var(--text-main)"
+                            : "var(--text-muted)",
+                          textAlign: "center",
+                        }}
+                      >
+                        {label}
+                      </span>
                     </div>
-                    <span style={{
-                      marginTop: "8px",
-                      fontSize: "0.75rem",
-                      fontWeight: isCompleted ? "900" : "600",
-                      textTransform: "uppercase",
-                      color: isCompleted ? "var(--text-main)" : "var(--text-muted)",
-                      textAlign: "center"
-                    }}>
-                      {label}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           </div>
 
-          {/* Order ID & Details Card */}
-          <div className="order-id-card glass" style={{ margin: 0, maxWidth: "none", textAlign: "left", padding: "24px" }}>
-            <span className="label" style={{ marginBottom: "8px", fontSize: "0.8rem", fontWeight: "800", letterSpacing: "1px", color: "var(--text-muted)", display: "block" }}>YOUR ORDER ID</span>
-            <div className="order-id-copy-row" style={{ justifyContent: "flex-start", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
-              <code className="order-id-code" style={{ fontSize: "1.2rem", padding: "8px 16px", borderRadius: "var(--radius-sm)", border: "var(--border-thin)", background: "var(--bg-main)" }}>
+          {}
+          <div
+            className="order-id-card glass"
+            style={{
+              margin: 0,
+              maxWidth: "none",
+              textAlign: "left",
+              padding: "24px",
+            }}
+          >
+            <span
+              className="label"
+              style={{
+                marginBottom: "8px",
+                fontSize: "0.8rem",
+                fontWeight: "800",
+                letterSpacing: "1px",
+                color: "var(--text-muted)",
+                display: "block",
+              }}
+            >
+              YOUR ORDER ID
+            </span>
+            <div
+              className="order-id-copy-row"
+              style={{
+                justifyContent: "flex-start",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <code
+                className="order-id-code"
+                style={{
+                  fontSize: "1.2rem",
+                  padding: "8px 16px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "var(--border-thin)",
+                  background: "var(--bg-main)",
+                }}
+              >
                 {order._id}
               </code>
               <button
@@ -218,39 +352,99 @@ export default function OrderSuccess() {
                   alignItems: "center",
                   gap: "6px",
                   padding: "10px 18px",
-                  fontWeight: "700"
+                  fontWeight: "700",
                 }}
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
-                <span style={{ fontWeight: 800, textTransform: "uppercase", fontSize: "0.8rem" }}>{copied ? "Copied!" : "Copy"}</span>
+                <span
+                  style={{
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    fontSize: "0.8rem",
+                  }}
+                >
+                  {copied ? "Copied!" : "Copy"}
+                </span>
               </button>
             </div>
-            <p className="tracking-notice" style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-muted)" }}>
+            <p
+              className="tracking-notice"
+              style={{
+                margin: 0,
+                fontSize: "0.85rem",
+                color: "var(--text-muted)",
+              }}
+            >
               Please save this Order ID to track your shipment later.
             </p>
           </div>
 
-          {/* Items Ordered Card */}
+          {}
           <div className="items-card glass" style={{ padding: "24px" }}>
-            <h3 style={{ margin: "0 0 20px 0", textTransform: "uppercase", fontSize: "1rem", fontWeight: 900, borderBottom: "var(--border-thin)", paddingBottom: "12px" }}>Items Ordered</h3>
+            <h3
+              style={{
+                margin: "0 0 20px 0",
+                textTransform: "uppercase",
+                fontSize: "1rem",
+                fontWeight: 900,
+                borderBottom: "var(--border-thin)",
+                paddingBottom: "12px",
+              }}
+            >
+              Items Ordered
+            </h3>
             <div className="ordered-items-list" style={{ gap: "16px" }}>
               {order.items?.map((item, idx) => (
-                <div key={idx} className="ordered-item-row" style={{ borderBottom: idx === order.items.length - 1 ? "none" : "var(--border-thin)", paddingBottom: idx === order.items.length - 1 ? 0 : "16px" }}>
+                <div
+                  key={idx}
+                  className="ordered-item-row"
+                  style={{
+                    borderBottom:
+                      idx === order.items.length - 1
+                        ? "none"
+                        : "var(--border-thin)",
+                    paddingBottom: idx === order.items.length - 1 ? 0 : "16px",
+                  }}
+                >
                   <img
                     src={item.image}
                     alt={item.name}
                     className="item-thumbnail"
-                    style={{ width: "60px", height: "60px", objectFit: "contain", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", background: "#fff", padding: "4px" }}
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      objectFit: "contain",
+                      border: "var(--border-thin)",
+                      borderRadius: "var(--radius-sm)",
+                      background: "#fff",
+                      padding: "4px",
+                    }}
                   />
                   <div className="item-info" style={{ flex: 1 }}>
-                    <strong className="item-name" style={{ fontSize: "0.95rem", fontWeight: 800 }}>{item.name}</strong>
-                    <span className="item-qty" style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Quantity: {item.quantity}</span>
+                    <strong
+                      className="item-name"
+                      style={{ fontSize: "0.95rem", fontWeight: 800 }}
+                    >
+                      {item.name}
+                    </strong>
+                    <span
+                      className="item-qty"
+                      style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}
+                    >
+                      Quantity: {item.quantity}
+                    </span>
                   </div>
                   <div className="item-price" style={{ textAlign: "right" }}>
-                    <span className="unit-price" style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                    <span
+                      className="unit-price"
+                      style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}
+                    >
                       {formatPrice(item.price)} each
                     </span>
-                    <strong className="total-price" style={{ fontSize: "1rem", color: "var(--primary-dark)" }}>
+                    <strong
+                      className="total-price"
+                      style={{ fontSize: "1rem", color: "var(--primary-dark)" }}
+                    >
                       {formatPrice(item.price * item.quantity)}
                     </strong>
                   </div>
@@ -260,52 +454,156 @@ export default function OrderSuccess() {
           </div>
         </div>
 
-        {/* Right Column: Address, Payment breakdown, Actions */}
+        {}
         <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-          {/* Shipping Details */}
+          {}
           <div className="details-subcard glass" style={{ padding: "24px" }}>
-            <div className="card-title-row" style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "var(--border-thin)", paddingBottom: "12px", marginBottom: "16px" }}>
+            <div
+              className="card-title-row"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                borderBottom: "var(--border-thin)",
+                paddingBottom: "12px",
+                marginBottom: "16px",
+              }}
+            >
               <MapPin size={20} className="text-primary" />
-              <h4 style={{ margin: 0, textTransform: "uppercase", fontSize: "0.85rem", fontWeight: 900 }}>Shipping Details</h4>
+              <h4
+                style={{
+                  margin: 0,
+                  textTransform: "uppercase",
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                }}
+              >
+                Shipping Details
+              </h4>
             </div>
-            <div className="subcard-content" style={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
-              <strong style={{ display: "block", marginBottom: "8px", fontSize: "0.95rem" }}>{order.customerName}</strong>
+            <div
+              className="subcard-content"
+              style={{ fontSize: "0.85rem", lineHeight: 1.5 }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontSize: "0.95rem",
+                }}
+              >
+                {order.customerName}
+              </strong>
               <p style={{ margin: "0 0 4px 0" }}>{order.address}</p>
               <p style={{ margin: "0 0 12px 0" }}>
                 {order.city} - {order.postalCode}
               </p>
-              <div className="contact-info" style={{ borderTop: "var(--border-thin)", paddingTop: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
-                <p style={{ margin: 0 }}><strong>Phone:</strong> {order.phone || "N/A"}</p>
-                <p style={{ margin: 0 }}><strong>Email:</strong> {order.email}</p>
+              <div
+                className="contact-info"
+                style={{
+                  borderTop: "var(--border-thin)",
+                  paddingTop: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}
+              >
+                <p style={{ margin: 0 }}>
+                  <strong>Phone:</strong> {order.phone || "N/A"}
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Email:</strong> {order.email}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Payment Summary */}
+          {}
           <div className="details-subcard glass" style={{ padding: "24px" }}>
-            <div className="card-title-row" style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "var(--border-thin)", paddingBottom: "12px", marginBottom: "16px" }}>
+            <div
+              className="card-title-row"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                borderBottom: "var(--border-thin)",
+                paddingBottom: "12px",
+                marginBottom: "16px",
+              }}
+            >
               <CreditCard size={20} className="text-primary" />
-              <h4 style={{ margin: 0, textTransform: "uppercase", fontSize: "0.85rem", fontWeight: 900 }}>Payment Summary</h4>
+              <h4
+                style={{
+                  margin: 0,
+                  textTransform: "uppercase",
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                }}
+              >
+                Payment Summary
+              </h4>
             </div>
             <div className="subcard-content" style={{ fontSize: "0.85rem" }}>
-              <div className="price-row" style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div
+                className="price-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "8px",
+                }}
+              >
                 <span>Subtotal</span>
                 <span>
                   {formatPrice(order.total - (order.total >= 999 ? 0 : 50))}
                 </span>
               </div>
-              <div className="price-row" style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div
+                className="price-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "8px",
+                }}
+              >
                 <span>Delivery</span>
-                <span style={{ color: order.total >= 999 ? "var(--primary-dark)" : "inherit", fontWeight: order.total >= 999 ? 800 : "normal" }}>
+                <span
+                  style={{
+                    color:
+                      order.total >= 999 ? "var(--primary-dark)" : "inherit",
+                    fontWeight: order.total >= 999 ? 800 : "normal",
+                  }}
+                >
                   {order.total >= 999 ? "FREE" : formatPrice(50)}
                 </span>
               </div>
               <div className="divider" style={{ margin: "12px 0" }}></div>
-              <div className="price-row grand-total" style={{ display: "flex", justifyContent: "space-between", fontSize: "1.1rem", fontWeight: 900, marginBottom: "16px" }}>
+              <div
+                className="price-row grand-total"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "1.1rem",
+                  fontWeight: 900,
+                  marginBottom: "16px",
+                }}
+              >
                 <span>Total Paid</span>
-                <strong style={{ color: "var(--primary-dark)" }}>{formatPrice(order.total)}</strong>
+                <strong style={{ color: "var(--primary-dark)" }}>
+                  {formatPrice(order.total)}
+                </strong>
               </div>
-              <div className="payment-method-badge" style={{ padding: "10px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "6px" }}>
+              <div
+                className="payment-method-badge"
+                style={{
+                  padding: "10px",
+                  background: "var(--bg-main)",
+                  border: "var(--border-thin)",
+                  borderRadius: "var(--radius-sm)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
                 <span>
                   Method:{" "}
                   <strong>
@@ -318,14 +616,41 @@ export default function OrderSuccess() {
             </div>
           </div>
 
-          {/* Quick Actions Panel */}
-          <div className="details-subcard glass" style={{ padding: "24px", background: "linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%)", border: "2px solid #000" }}>
-            <h4 style={{ margin: "0 0 16px 0", textTransform: "uppercase", fontSize: "0.85rem", fontWeight: 900 }}>Actions</h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {}
+          <div
+            className="details-subcard glass"
+            style={{
+              padding: "24px",
+              background:
+                "linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%)",
+              border: "2px solid #000",
+            }}
+          >
+            <h4
+              style={{
+                margin: "0 0 16px 0",
+                textTransform: "uppercase",
+                fontSize: "0.85rem",
+                fontWeight: 900,
+              }}
+            >
+              Actions
+            </h4>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               <Link
                 to={`/track?orderId=${order._id}`}
                 className="btn btn-primary track-status-btn"
-                style={{ width: "100%", justifyContent: "center", display: "flex", gap: "8px", textTransform: "uppercase", fontWeight: 900, fontSize: "0.85rem" }}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  display: "flex",
+                  gap: "8px",
+                  textTransform: "uppercase",
+                  fontWeight: 900,
+                  fontSize: "0.85rem",
+                }}
               >
                 <span>Track Order Status</span>
                 <ArrowRight size={16} />
@@ -333,7 +658,15 @@ export default function OrderSuccess() {
               <button
                 onClick={() => window.print()}
                 className="btn btn-outline"
-                style={{ width: "100%", justifyContent: "center", display: "flex", gap: "8px", textTransform: "uppercase", fontWeight: 900, fontSize: "0.85rem" }}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  display: "flex",
+                  gap: "8px",
+                  textTransform: "uppercase",
+                  fontWeight: 900,
+                  fontSize: "0.85rem",
+                }}
               >
                 <Download size={16} />
                 <span>Download Invoice</span>
@@ -341,7 +674,15 @@ export default function OrderSuccess() {
               <Link
                 to="/products"
                 className="btn btn-outline"
-                style={{ width: "100%", justifyContent: "center", display: "flex", gap: "8px", textTransform: "uppercase", fontWeight: 900, fontSize: "0.85rem" }}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  display: "flex",
+                  gap: "8px",
+                  textTransform: "uppercase",
+                  fontWeight: 900,
+                  fontSize: "0.85rem",
+                }}
               >
                 <ShoppingBag size={16} />
                 <span>Continue Shopping</span>

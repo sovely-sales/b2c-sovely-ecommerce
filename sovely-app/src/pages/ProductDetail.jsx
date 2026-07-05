@@ -14,7 +14,6 @@ import ProductCard from "../components/ProductCard";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
-
   const { id } = useParams();
   const {
     products,
@@ -30,16 +29,19 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(null);
   const [productReviews, setProductReviews] = useState([]);
-
   const [ratingInput, setRatingInput] = useState(5);
   const [commentInput, setCommentInput] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+
+  // Touch Swipe State
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchEndX, setTouchEndX] = useState(null);
+
   const timerRef = useRef(null);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -47,7 +49,6 @@ export default function ProductDetail() {
   }, []);
 
   useEffect(() => {
-    // Reset state when ID changes
     setLoading(true);
     setQuantity(1);
 
@@ -63,12 +64,10 @@ export default function ProductDetail() {
 
     const fetchProduct = async () => {
       const API_URL = import.meta.env.VITE_API_URL;
-
       try {
         const res = await fetch(`${API_URL}/api/products/${id}`);
         if (res.ok) {
           const p = await res.json();
-          // ... (Your identical mapping logic)
           const categoryMap = {};
           categories.forEach((c) => {
             categoryMap[String(c.id || c._id)] = c.name;
@@ -88,12 +87,21 @@ export default function ProductDetail() {
             name: p.title || p.name,
             category: categoryName,
             categoryId: rawCategory,
-            price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
-              rating: p.averageRating || p.rating || 0,
-              reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+            price:
+              p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
+            originalPrice:
+              p.originalPrice !== undefined
+                ? p.originalPrice
+                : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+            rating: p.averageRating || p.rating || 0,
+            reviews: p.reviewCount || p.reviews || 0,
+            badge:
+              p.badge ||
+              ((p.originalPrice || p.suggestedRetailPrice) >
+              (p.price || p.dropshipBasePrice)
+                ? "Sale"
+                : null),
+            badgeColor: p.badgeColor || "#ef4444",
             image: activeImg,
             images:
               p.images && p.images.length > 0
@@ -117,9 +125,7 @@ export default function ProductDetail() {
       }
     };
 
-    if (!contextLoading) {
-      fetchProduct();
-    }
+    if (!contextLoading) fetchProduct();
   }, [id, products, contextLoading, categories]);
 
   useEffect(() => {
@@ -151,10 +157,8 @@ export default function ProductDetail() {
     }
     setIsSubmitting(true);
     setSubmitError("");
-
     const API_URL = import.meta.env.VITE_API_URL;
     const token = localStorage.getItem("userToken");
-
     try {
       const res = await fetch(`${API_URL}/api/products/${product.id}/reviews`, {
         method: "POST",
@@ -164,7 +168,6 @@ export default function ProductDetail() {
         },
         body: JSON.stringify({ rating: ratingInput, comment: commentInput }),
       });
-
       const data = await res.json();
       if (res.ok) {
         setProductReviews(data.product.reviewsList);
@@ -184,32 +187,52 @@ export default function ProductDetail() {
       setIsSubmitting(false);
     }
   };
+
+  const handleTouchStart = (e) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (
+      !touchStartX ||
+      !touchEndX ||
+      !product?.images ||
+      product.images.length <= 1
+    )
+      return;
+    const distance = touchStartX - touchEndX;
+    const currentIndex = product.images.findIndex(
+      (img) => img.url === activeImage,
+    );
+
+    if (currentIndex === -1) return;
+
+    if (distance > 50) {
+      const nextIndex = (currentIndex + 1) % product.images.length;
+      setActiveImage(product.images[nextIndex].url);
+    }
+    if (distance < -50) {
+      const prevIndex =
+        (currentIndex - 1 + product.images.length) % product.images.length;
+      setActiveImage(product.images[prevIndex].url);
+    }
+  };
+
   if (loading)
     return (
-      <div
-        className="section container"
-        style={{
-          minHeight: "80vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div className="section container pd-loading-state">
         <div className="empty-state">Loading product details...</div>
       </div>
     );
 
   if (!product)
     return (
-      <div
-        className="section container"
-        style={{
-          minHeight: "80vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div className="section container pd-loading-state">
         <div className="empty-state">
           Product not found. <Link to="/products">Back to products</Link>
         </div>
@@ -235,10 +258,14 @@ export default function ProductDetail() {
 
   return (
     <div className="product-detail-page">
-      {}
       <div className="pd-grid">
         <div className="pd-image-section">
-          <div className="pd-main-img-wrap">
+          <div
+            className="pd-main-img-wrap"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={activeImage || product.image}
               alt={product.name}
@@ -253,7 +280,6 @@ export default function ProductDetail() {
               </span>
             )}
           </div>
-
           {product.images && product.images.length > 0 && (
             <div className="pd-thumbnails">
               {product.images.map((img, idx) => (
@@ -287,7 +313,9 @@ export default function ProductDetail() {
               <span className="pd-discount">{discount}% OFF</span>
             )}
             {product.stock === 0 && (
-              <span className="pd-discount" style={{ backgroundColor: "#ef4444", color: "#fff", borderColor: "#000" }}>OUT OF STOCK</span>
+              <span className="pd-discount out-of-stock-badge">
+                OUT OF STOCK
+              </span>
             )}
           </div>
 
@@ -315,25 +343,28 @@ export default function ProductDetail() {
                 </button>
               </div>
             )}
-            <div className="pd-btn-group" style={{ width: product.stock === 0 ? '100%' : 'auto' }}>
+            <div
+              className={`pd-btn-group ${product.stock === 0 ? "full-width" : ""}`}
+            >
               {product.stock > 0 ? (
                 <button
                   className={`btn btn-primary pd-cart-btn ${added ? "added" : ""}`}
                   onClick={handleAddToCart}
                   aria-live="polite"
                 >
-                  <ShoppingCart size={18} style={{ marginRight: "8px" }} />
+                  <ShoppingCart size={18} className="icon-mr" />
                   {added ? "Added to Cart!" : "Add to Cart"}
                 </button>
               ) : (
                 <button
-                  className="btn btn-primary pd-cart-btn"
-                  style={{ backgroundColor: wishlist.includes(String(product.id)) ? "#ef4444" : "var(--primary)" }}
+                  className={`btn btn-primary pd-cart-btn ${wishlist.includes(String(product.id)) ? "wishlisted-btn" : ""}`}
                   onClick={() => toggleWishlist(product.id)}
                   aria-live="polite"
                 >
-                  <Heart size={18} style={{ marginRight: "8px" }} />
-                  {wishlist.includes(String(product.id)) ? "Remove from Wishlist" : "Add to Wishlist"}
+                  <Heart size={18} className="icon-mr" />
+                  {wishlist.includes(String(product.id))
+                    ? "Remove from Wishlist"
+                    : "Add to Wishlist"}
                 </button>
               )}
               {product.stock > 0 && (

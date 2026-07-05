@@ -35,11 +35,13 @@
   max-width: 90%;
   max-height: 90%;
   object-fit: contain;
-  transition: transform 0.3s ease;
+  transition:
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease;
 }
 
 .autorev-product-card:hover .card-img-wrap img {
-  transform: scale(1.08);
+  transform: scale(1.08) translateY(-4px);
 }
 
 .card-wishlist-btn {
@@ -96,14 +98,6 @@
   background: var(--text-main);
   color: var(--bg-main);
   border-color: var(--text-main);
-}
-
-.card-add-btn:disabled {
-  background: var(--bg-main);
-  color: var(--text-muted);
-  border-color: var(--text-muted);
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
 .card-info-wrap {
@@ -175,7 +169,6 @@
   line-height: 1.4;
   margin: 4px 0 2px 0;
   font-family: var(--font-main);
-  text-transform: none;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -189,97 +182,9 @@
   font-weight: 600;
 }
 
-.card-rating-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.card-rating-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg-main);
-  border: var(--border-thin);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-}
-
-.card-star-icon {
-  fill: var(--accent);
-  stroke: var(--accent);
-}
-
-.card-rating-score {
-  color: var(--text-main);
-  font-weight: 800;
-  font-size: 0.85rem;
-}
-
-.card-reviews-count {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-@media (max-width: 640px) {
-  .autorev-product-card {
-    padding: 6px;
-    border-radius: 8px;
-  }
-
-  .card-img-wrap {
-    padding: 6px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-  }
-
-  .card-add-btn {
-    right: 6px;
-    bottom: -6px;
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    border-radius: 6px;
-  }
-
-  .card-wishlist-btn {
-    top: 8px;
-    right: 8px;
-    width: 28px;
-    height: 28px;
-  }
-
-  .card-price-badge {
-    font-size: 0.85rem;
-    padding: 2px 4px;
-  }
-
-  .card-original-price {
-    font-size: 0.75rem;
-  }
-
-  .card-discount-text {
-    font-size: 0.7rem;
-  }
-
-  .card-title {
-    font-size: 0.75rem;
-    height: 2.8em;
-  }
-  .card-size,
-  .card-rating-score,
-  .card-reviews-count {
-    font-size: 0.7rem;
-  }
-}
-
 .card-soldout-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: center;
@@ -304,4 +209,44 @@
 .card-add-btn.soldout:hover {
   transform: scale(1.05) translate(-1px, -1px);
   box-shadow: var(--shadow-neo-hover);
+}
+
+@media (max-width: 768px) {
+  .card-img-wrap {
+    padding: 12px;
+  }
+  .card-info-wrap {
+    padding: 12px;
+    gap: 6px;
+  }
+
+  .card-wishlist-btn {
+    width: 34px;
+    height: 34px;
+    top: 8px;
+    right: 8px;
+  }
+  .card-add-btn {
+    right: 8px;
+    bottom: -12px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .card-price-badge {
+    font-size: 0.95rem;
+    padding: 4px 8px;
+  }
+  .card-original-price {
+    font-size: 0.8rem;
+  }
+  .card-discount-text {
+    font-size: 0.75rem;
+  }
+  .card-title {
+    font-size: 0.85rem;
+  }
+  .card-size {
+    font-size: 0.75rem;
+  }
 }

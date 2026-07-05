@@ -179,10 +179,7 @@ export default function Admin() {
   const [bulkDecreaseLoading, setBulkDecreaseLoading] = useState(false);
   const [coupons, setCoupons] = useState([]);
 
-  const {
-    categories,
-    products: globalProducts,
-  } = useData();
+  const { categories, products: globalProducts } = useData();
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     discountPercent: "",
@@ -373,7 +370,10 @@ export default function Admin() {
                   ...p,
                   price: data.product.price,
                   originalPrice: data.product.originalPrice,
-                  stock: data.product.inventory?.stock !== undefined ? data.product.inventory.stock : p.stock,
+                  stock:
+                    data.product.inventory?.stock !== undefined
+                      ? data.product.inventory.stock
+                      : p.stock,
                 }
               : p,
           ),
@@ -432,7 +432,11 @@ export default function Admin() {
 
   const handleBulkPriceDecrease = async (e) => {
     e.preventDefault();
-    if (!bulkDecreaseValue || isNaN(bulkDecreaseValue) || Number(bulkDecreaseValue) <= 0) {
+    if (
+      !bulkDecreaseValue ||
+      isNaN(bulkDecreaseValue) ||
+      Number(bulkDecreaseValue) <= 0
+    ) {
       return alert("Please enter a valid positive number.");
     }
     const val = Number(bulkDecreaseValue);
@@ -493,7 +497,12 @@ export default function Admin() {
     if (res.ok) {
       const data = await res.json();
       setCoupons([data.coupon, ...coupons]);
-      setNewCoupon({ code: "", discountPercent: "", expirationDate: "", usageLimit: "" });
+      setNewCoupon({
+        code: "",
+        discountPercent: "",
+        expirationDate: "",
+        usageLimit: "",
+      });
     }
   };
 
@@ -512,8 +521,8 @@ export default function Admin() {
       if (res.ok) {
         setCoupons(
           coupons.map((c) =>
-            c._id === id ? { ...c, isActive: !target.isActive } : c
-          )
+            c._id === id ? { ...c, isActive: !target.isActive } : c,
+          ),
         );
       }
     } catch (err) {
@@ -995,78 +1004,405 @@ export default function Admin() {
                               {isExpanded && (
                                 <tr className="order-details-row">
                                   <td colSpan={7} style={{ padding: 0 }}>
-                                    <div className="order-details-expanded" style={{ padding: "20px 30px", background: "#f8fafc", borderLeft: "4px solid var(--primary)" }}>
-                                      <div className="details-grid" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "24px" }}>
+                                    <div
+                                      className="order-details-expanded"
+                                      style={{
+                                        padding: "20px 30px",
+                                        background: "#f8fafc",
+                                        borderLeft: "4px solid var(--primary)",
+                                      }}
+                                    >
+                                      <div
+                                        className="details-grid"
+                                        style={{
+                                          display: "grid",
+                                          gridTemplateColumns: "1.5fr 1fr",
+                                          gap: "24px",
+                                        }}
+                                      >
                                         <div className="details-block">
-                                          <h4 style={{ marginBottom: "12px", textTransform: "uppercase", fontSize: "0.85rem", fontWeight: 900 }}>Products in this Order</h4>
-                                          <div className="products-table-wrap" style={{ background: "var(--bg-card)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", overflow: "hidden" }}>
-                                            <table className="products-detail-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+                                          <h4
+                                            style={{
+                                              marginBottom: "12px",
+                                              textTransform: "uppercase",
+                                              fontSize: "0.85rem",
+                                              fontWeight: 900,
+                                            }}
+                                          >
+                                            Products in this Order
+                                          </h4>
+                                          <div
+                                            className="products-table-wrap"
+                                            style={{
+                                              background: "var(--bg-card)",
+                                              border: "var(--border-thin)",
+                                              borderRadius: "var(--radius-sm)",
+                                              overflow: "hidden",
+                                            }}
+                                          >
+                                            <table
+                                              className="products-detail-table"
+                                              style={{
+                                                width: "100%",
+                                                borderCollapse: "collapse",
+                                              }}
+                                            >
                                               <thead>
-                                                <tr style={{ background: "var(--bg-main)", borderBottom: "var(--border-thin)" }}>
-                                                  <th style={{ padding: "10px 16px", fontSize: "0.75rem", fontWeight: 900, textTransform: "uppercase" }}>Product</th>
-                                                  <th style={{ padding: "10px 16px", fontSize: "0.75rem", fontWeight: 900, textTransform: "uppercase" }}>Price</th>
-                                                  <th style={{ padding: "10px 16px", fontSize: "0.75rem", fontWeight: 900, textTransform: "uppercase" }}>Qty</th>
-                                                  <th style={{ padding: "10px 16px", fontSize: "0.75rem", fontWeight: 900, textTransform: "uppercase" }}>Total</th>
+                                                <tr
+                                                  style={{
+                                                    background:
+                                                      "var(--bg-main)",
+                                                    borderBottom:
+                                                      "var(--border-thin)",
+                                                  }}
+                                                >
+                                                  <th
+                                                    style={{
+                                                      padding: "10px 16px",
+                                                      fontSize: "0.75rem",
+                                                      fontWeight: 900,
+                                                      textTransform:
+                                                        "uppercase",
+                                                    }}
+                                                  >
+                                                    Product
+                                                  </th>
+                                                  <th
+                                                    style={{
+                                                      padding: "10px 16px",
+                                                      fontSize: "0.75rem",
+                                                      fontWeight: 900,
+                                                      textTransform:
+                                                        "uppercase",
+                                                    }}
+                                                  >
+                                                    Price
+                                                  </th>
+                                                  <th
+                                                    style={{
+                                                      padding: "10px 16px",
+                                                      fontSize: "0.75rem",
+                                                      fontWeight: 900,
+                                                      textTransform:
+                                                        "uppercase",
+                                                    }}
+                                                  >
+                                                    Qty
+                                                  </th>
+                                                  <th
+                                                    style={{
+                                                      padding: "10px 16px",
+                                                      fontSize: "0.75rem",
+                                                      fontWeight: 900,
+                                                      textTransform:
+                                                        "uppercase",
+                                                    }}
+                                                  >
+                                                    Total
+                                                  </th>
                                                 </tr>
                                               </thead>
                                               <tbody>
-                                                {order.items?.map((item, idx) => {
-                                                  const foundProduct = globalProducts.find(
-                                                    (p) => String(p.id || p._id) === String(item.id || item.productId)
-                                                  );
-                                                  const itemImage = item.image && !item.image.includes("undefined")
-                                                    ? item.image
-                                                    : (foundProduct?.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop");
-                                                  const itemTitle = item.name && item.name !== "Product" && item.name !== "undefined"
-                                                    ? item.name
-                                                    : (foundProduct?.name || foundProduct?.title || "Product");
+                                                {order.items?.map(
+                                                  (item, idx) => {
+                                                    const foundProduct =
+                                                      globalProducts.find(
+                                                        (p) =>
+                                                          String(
+                                                            p.id || p._id,
+                                                          ) ===
+                                                          String(
+                                                            item.id ||
+                                                              item.productId,
+                                                          ),
+                                                      );
+                                                    const itemImage =
+                                                      item.image &&
+                                                      !item.image.includes(
+                                                        "undefined",
+                                                      )
+                                                        ? item.image
+                                                        : foundProduct?.image ||
+                                                          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop";
+                                                    const itemTitle =
+                                                      item.name &&
+                                                      item.name !== "Product" &&
+                                                      item.name !== "undefined"
+                                                        ? item.name
+                                                        : foundProduct?.name ||
+                                                          foundProduct?.title ||
+                                                          "Product";
 
-                                                  return (
-                                                    <tr key={idx} style={{ borderBottom: idx === order.items.length - 1 ? "none" : "var(--border-thin)" }}>
-                                                      <td style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "12px" }}>
-                                                        <img
-                                                          src={itemImage}
-                                                          alt={itemTitle}
-                                                          className="admin-product-thumb"
-                                                          style={{ width: "40px", height: "40px", objectFit: "contain", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", background: "#fff" }}
-                                                        />
-                                                        <span className="product-title-cell" style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text-main)" }}>{itemTitle}</span>
-                                                      </td>
-                                                      <td style={{ padding: "10px 16px", fontSize: "0.85rem", fontWeight: 700 }}>₹{item.price}</td>
-                                                      <td style={{ padding: "10px 16px", fontSize: "0.85rem", fontWeight: 700 }}>{item.quantity}</td>
-                                                      <td style={{ padding: "10px 16px", fontSize: "0.85rem", fontWeight: 900, color: "var(--primary-dark)" }}>₹{item.price * item.quantity}</td>
-                                                    </tr>
-                                                  );
-                                                })}
+                                                    return (
+                                                      <tr
+                                                        key={idx}
+                                                        style={{
+                                                          borderBottom:
+                                                            idx ===
+                                                            order.items.length -
+                                                              1
+                                                              ? "none"
+                                                              : "var(--border-thin)",
+                                                        }}
+                                                      >
+                                                        <td
+                                                          style={{
+                                                            padding:
+                                                              "10px 16px",
+                                                            display: "flex",
+                                                            alignItems:
+                                                              "center",
+                                                            gap: "12px",
+                                                          }}
+                                                        >
+                                                          <img
+                                                            src={itemImage}
+                                                            alt={itemTitle}
+                                                            className="admin-product-thumb"
+                                                            style={{
+                                                              width: "40px",
+                                                              height: "40px",
+                                                              objectFit:
+                                                                "contain",
+                                                              border:
+                                                                "var(--border-thin)",
+                                                              borderRadius:
+                                                                "var(--radius-sm)",
+                                                              background:
+                                                                "#fff",
+                                                            }}
+                                                          />
+                                                          <span
+                                                            className="product-title-cell"
+                                                            style={{
+                                                              fontWeight: 700,
+                                                              fontSize:
+                                                                "0.85rem",
+                                                              color:
+                                                                "var(--text-main)",
+                                                            }}
+                                                          >
+                                                            {itemTitle}
+                                                          </span>
+                                                        </td>
+                                                        <td
+                                                          style={{
+                                                            padding:
+                                                              "10px 16px",
+                                                            fontSize: "0.85rem",
+                                                            fontWeight: 700,
+                                                          }}
+                                                        >
+                                                          ₹{item.price}
+                                                        </td>
+                                                        <td
+                                                          style={{
+                                                            padding:
+                                                              "10px 16px",
+                                                            fontSize: "0.85rem",
+                                                            fontWeight: 700,
+                                                          }}
+                                                        >
+                                                          {item.quantity}
+                                                        </td>
+                                                        <td
+                                                          style={{
+                                                            padding:
+                                                              "10px 16px",
+                                                            fontSize: "0.85rem",
+                                                            fontWeight: 900,
+                                                            color:
+                                                              "var(--primary-dark)",
+                                                          }}
+                                                        >
+                                                          ₹
+                                                          {item.price *
+                                                            item.quantity}
+                                                        </td>
+                                                      </tr>
+                                                    );
+                                                  },
+                                                )}
                                               </tbody>
                                             </table>
                                           </div>
                                         </div>
-                                        <div className="info-sidebar-block" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                                          <div className="info-section" style={{ background: "var(--bg-card)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", padding: "16px" }}>
-                                            <h4 style={{ margin: "0 0 10px 0", borderBottom: "var(--border-thin)", paddingBottom: "6px", fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 900 }}>Shipping Details</h4>
-                                            <div className="info-content" style={{ fontSize: "0.8rem", lineHeight: 1.5 }}>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Name:</strong> {order.customerName}</p>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Address:</strong> {order.address}</p>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>City:</strong> {order.city}</p>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Postal Code:</strong> {order.postalCode}</p>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Phone:</strong> {order.phone}</p>
-                                              <p style={{ margin: "0 0 0 0" }}><strong>Email:</strong> {order.email}</p>
+                                        <div
+                                          className="info-sidebar-block"
+                                          style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "16px",
+                                          }}
+                                        >
+                                          <div
+                                            className="info-section"
+                                            style={{
+                                              background: "var(--bg-card)",
+                                              border: "var(--border-thin)",
+                                              borderRadius: "var(--radius-sm)",
+                                              padding: "16px",
+                                            }}
+                                          >
+                                            <h4
+                                              style={{
+                                                margin: "0 0 10px 0",
+                                                borderBottom:
+                                                  "var(--border-thin)",
+                                                paddingBottom: "6px",
+                                                fontSize: "0.8rem",
+                                                textTransform: "uppercase",
+                                                fontWeight: 900,
+                                              }}
+                                            >
+                                              Shipping Details
+                                            </h4>
+                                            <div
+                                              className="info-content"
+                                              style={{
+                                                fontSize: "0.8rem",
+                                                lineHeight: 1.5,
+                                              }}
+                                            >
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Name:</strong>{" "}
+                                                {order.customerName}
+                                              </p>
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Address:</strong>{" "}
+                                                {order.address}
+                                              </p>
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>City:</strong>{" "}
+                                                {order.city}
+                                              </p>
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Postal Code:</strong>{" "}
+                                                {order.postalCode}
+                                              </p>
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Phone:</strong>{" "}
+                                                {order.phone}
+                                              </p>
+                                              <p style={{ margin: "0 0 0 0" }}>
+                                                <strong>Email:</strong>{" "}
+                                                {order.email}
+                                              </p>
                                             </div>
                                           </div>
-                                          <div className="info-section" style={{ background: "var(--bg-card)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", padding: "16px" }}>
-                                            <h4 style={{ margin: "0 0 10px 0", borderBottom: "var(--border-thin)", paddingBottom: "6px", fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 900 }}>Payment Details</h4>
-                                            <div className="info-content" style={{ fontSize: "0.8rem", lineHeight: 1.5 }}>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Method:</strong> {order.paymentMethod || "Razorpay"}</p>
-                                              <p style={{ margin: "0 0 4px 0" }}><strong>Status:</strong> {order.status}</p>
+                                          <div
+                                            className="info-section"
+                                            style={{
+                                              background: "var(--bg-card)",
+                                              border: "var(--border-thin)",
+                                              borderRadius: "var(--radius-sm)",
+                                              padding: "16px",
+                                            }}
+                                          >
+                                            <h4
+                                              style={{
+                                                margin: "0 0 10px 0",
+                                                borderBottom:
+                                                  "var(--border-thin)",
+                                                paddingBottom: "6px",
+                                                fontSize: "0.8rem",
+                                                textTransform: "uppercase",
+                                                fontWeight: 900,
+                                              }}
+                                            >
+                                              Payment Details
+                                            </h4>
+                                            <div
+                                              className="info-content"
+                                              style={{
+                                                fontSize: "0.8rem",
+                                                lineHeight: 1.5,
+                                              }}
+                                            >
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Method:</strong>{" "}
+                                                {order.paymentMethod ||
+                                                  "Razorpay"}
+                                              </p>
+                                              <p
+                                                style={{ margin: "0 0 4px 0" }}
+                                              >
+                                                <strong>Status:</strong>{" "}
+                                                {order.status}
+                                              </p>
                                               {order.couponCode && (
-                                                <p style={{ margin: "0 0 4px 0" }}><strong>Coupon:</strong> <span style={{ fontFamily: "monospace", background: "var(--bg-main)", padding: "2px 4px", borderRadius: "2px" }}>{order.couponCode}</span></p>
+                                                <p
+                                                  style={{
+                                                    margin: "0 0 4px 0",
+                                                  }}
+                                                >
+                                                  <strong>Coupon:</strong>{" "}
+                                                  <span
+                                                    style={{
+                                                      fontFamily: "monospace",
+                                                      background:
+                                                        "var(--bg-main)",
+                                                      padding: "2px 4px",
+                                                      borderRadius: "2px",
+                                                    }}
+                                                  >
+                                                    {order.couponCode}
+                                                  </span>
+                                                </p>
                                               )}
                                               {order.razorpayOrderId && (
-                                                <p style={{ margin: "0 0 4px 0" }}><strong>RP Order ID:</strong> <span style={{ fontFamily: "monospace", background: "var(--bg-main)", padding: "2px 4px", borderRadius: "2px", fontSize: "0.75rem" }}>{order.razorpayOrderId}</span></p>
+                                                <p
+                                                  style={{
+                                                    margin: "0 0 4px 0",
+                                                  }}
+                                                >
+                                                  <strong>RP Order ID:</strong>{" "}
+                                                  <span
+                                                    style={{
+                                                      fontFamily: "monospace",
+                                                      background:
+                                                        "var(--bg-main)",
+                                                      padding: "2px 4px",
+                                                      borderRadius: "2px",
+                                                      fontSize: "0.75rem",
+                                                    }}
+                                                  >
+                                                    {order.razorpayOrderId}
+                                                  </span>
+                                                </p>
                                               )}
                                               {order.razorpayPaymentId && (
-                                                <p style={{ margin: "0 0 0 0" }}><strong>RP Payment ID:</strong> <span style={{ fontFamily: "monospace", background: "var(--bg-main)", padding: "2px 4px", borderRadius: "2px", fontSize: "0.75rem" }}>{order.razorpayPaymentId}</span></p>
+                                                <p
+                                                  style={{ margin: "0 0 0 0" }}
+                                                >
+                                                  <strong>
+                                                    RP Payment ID:
+                                                  </strong>{" "}
+                                                  <span
+                                                    style={{
+                                                      fontFamily: "monospace",
+                                                      background:
+                                                        "var(--bg-main)",
+                                                      padding: "2px 4px",
+                                                      borderRadius: "2px",
+                                                      fontSize: "0.75rem",
+                                                    }}
+                                                  >
+                                                    {order.razorpayPaymentId}
+                                                  </span>
+                                                </p>
                                               )}
                                             </div>
                                           </div>
@@ -1151,9 +1487,10 @@ export default function Admin() {
                       color: "#64748b",
                     }}
                   >
-                    Increase or decrease the B2C price (both Selling Price and Original
-                    Price) of ALL products in the inventory instantly by a flat
-                    amount or percentage. B2B prices will remain untouched.
+                    Increase or decrease the B2C price (both Selling Price and
+                    Original Price) of ALL products in the inventory instantly
+                    by a flat amount or percentage. B2B prices will remain
+                    untouched.
                   </p>
 
                   <div style={{ marginBottom: "16px" }}>
@@ -1195,7 +1532,7 @@ export default function Admin() {
                       alignItems: "flex-end",
                     }}
                   >
-                    {/* Increase Section */}
+                    {}
                     <form
                       onSubmit={handleBulkPriceIncrease}
                       style={{
@@ -1206,7 +1543,7 @@ export default function Admin() {
                         background: "#fff",
                         padding: "16px",
                         borderRadius: "8px",
-                        border: "1px solid #e2e8f0"
+                        border: "1px solid #e2e8f0",
                       }}
                     >
                       <div className="input-group" style={{ margin: 0 }}>
@@ -1216,7 +1553,7 @@ export default function Admin() {
                             fontWeight: "bold",
                             marginBottom: "6px",
                             display: "block",
-                            color: "#10b981"
+                            color: "#10b981",
                           }}
                         >
                           Increase Value
@@ -1255,14 +1592,14 @@ export default function Admin() {
                           background: "#10b981",
                           border: "none",
                           fontWeight: "bold",
-                          opacity: bulkLoading ? 0.7 : 1
+                          opacity: bulkLoading ? 0.7 : 1,
                         }}
                       >
                         {bulkLoading ? "Applying..." : "Apply Increase"}
                       </button>
                     </form>
 
-                    {/* Decrease Section */}
+                    {}
                     <form
                       onSubmit={handleBulkPriceDecrease}
                       style={{
@@ -1273,7 +1610,7 @@ export default function Admin() {
                         background: "#fff",
                         padding: "16px",
                         borderRadius: "8px",
-                        border: "1px solid #e2e8f0"
+                        border: "1px solid #e2e8f0",
                       }}
                     >
                       <div className="input-group" style={{ margin: 0 }}>
@@ -1283,7 +1620,7 @@ export default function Admin() {
                             fontWeight: "bold",
                             marginBottom: "6px",
                             display: "block",
-                            color: "#ef4444"
+                            color: "#ef4444",
                           }}
                         >
                           Decrease Value
@@ -1324,7 +1661,7 @@ export default function Admin() {
                           borderRadius: "8px",
                           cursor: "pointer",
                           fontWeight: "bold",
-                          opacity: bulkDecreaseLoading ? 0.7 : 1
+                          opacity: bulkDecreaseLoading ? 0.7 : 1,
                         }}
                       >
                         {bulkDecreaseLoading ? "Applying..." : "Apply Decrease"}
@@ -1483,7 +1820,9 @@ export default function Admin() {
                                     />
                                   ) : (
                                     <span style={{ fontWeight: 600 }}>
-                                      {product.stock !== undefined ? product.stock : "—"}
+                                      {product.stock !== undefined
+                                        ? product.stock
+                                        : "—"}
                                     </span>
                                   )}
                                 </td>
@@ -1572,7 +1911,10 @@ export default function Admin() {
                                           price: product.price || "",
                                           originalPrice:
                                             product.originalPrice || "",
-                                          stock: product.stock !== undefined ? product.stock : 0,
+                                          stock:
+                                            product.stock !== undefined
+                                              ? product.stock
+                                              : 0,
                                         });
                                       }}
                                     >

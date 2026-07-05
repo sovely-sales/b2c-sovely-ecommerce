@@ -38,13 +38,11 @@ export default function Checkout() {
     setCoupon,
     setCouponPercent,
   } = useData();
-
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [lastOrder, setLastOrder] = useState(null);
   const [selectedAddrId, setSelectedAddrId] = useState(null);
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
-
   const [form, setForm] = useState({
     firstName: user?.name?.split(" ")[0] || "",
     lastName: user?.name?.split(" ").slice(1).join(" ") || "",
@@ -55,7 +53,6 @@ export default function Checkout() {
     postalCode: "",
     payment: "razorpay",
   });
-
   const [saveAddress, setSaveAddress] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -71,9 +68,7 @@ export default function Checkout() {
       navigate("/products");
       return;
     }
-    if (token) {
-      fetchUserData();
-    }
+    if (token) fetchUserData();
   }, [token, cartItems, navigate]);
 
   const fetchUserData = async () => {
@@ -86,14 +81,12 @@ export default function Checkout() {
         setSavedAddresses(addrData);
         if (addrData.length > 0) setShowNewForm(false);
       }
-
       const orderRes = await fetch(`${API}/api/user/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const orderData = await orderRes.json();
-      if (Array.isArray(orderData) && orderData.length > 0) {
+      if (Array.isArray(orderData) && orderData.length > 0)
         setLastOrder(orderData[0]);
-      }
     } catch (err) {
       console.error("Failed to fetch user checkout data");
     }
@@ -121,20 +114,16 @@ export default function Checkout() {
   const handleApplyCoupon = () => {
     setCouponError("");
     if (!couponInput.trim()) return;
-    
     const found = availableCoupons.find(
-      (c) => c.code.toUpperCase() === couponInput.trim().toUpperCase()
+      (c) => c.code.toUpperCase() === couponInput.trim().toUpperCase(),
     );
-
     if (found && found.isActive) {
       setCoupon(found);
       setCouponPercent(found.discountPercent);
       setCouponInput("");
-    } else if (found && !found.isActive) {
+    } else if (found && !found.isActive)
       setCouponError("This coupon is currently inactive.");
-    } else {
-      setCouponError("Invalid coupon code.");
-    }
+    else setCouponError("Invalid coupon code.");
   };
 
   const handleRemoveCoupon = () => {
@@ -142,15 +131,11 @@ export default function Checkout() {
     setCouponPercent(0);
   };
 
-  // 3. ADDED: Elegant Quick Fill handler
   const handleQuickFillFromLastOrder = () => {
     if (!lastOrder) return;
-
-    // Attempt to split the name from the last order, or fallback to current user profile
     const nameParts = lastOrder.customerName
       ? lastOrder.customerName.split(" ")
       : user?.name?.split(" ") || ["", ""];
-
     setForm({
       ...form,
       firstName: nameParts[0] || "",
@@ -169,8 +154,6 @@ export default function Checkout() {
     e.preventDefault();
     setPlacing(true);
     setOrderError("");
-
-    // 1. Save new address if requested
     if (saveAddress && showNewForm && token) {
       try {
         await fetch(`${API}/api/user/address`, {
@@ -185,8 +168,6 @@ export default function Checkout() {
         console.error(err);
       }
     }
-
-    
     const orderPayload = {
       customerName: `${form.firstName} ${form.lastName}`,
       email: form.email,
@@ -198,9 +179,7 @@ export default function Checkout() {
       items: cartItems,
       couponCode: coupon?.code || null,
     };
-
     try {
-      
       const initRes = await fetch(`${API}/api/orders/init`, {
         method: "POST",
         headers: {
@@ -210,11 +189,9 @@ export default function Checkout() {
         body: JSON.stringify(orderPayload),
       });
       const initData = await initRes.json();
-
       if (!initData.success) throw new Error(initData.message);
 
       if (form.payment === "razorpay") {
-        
         const options = {
           key: RAZORPAY_KEY_ID,
           amount: initData.rzpOrder.amount,
@@ -230,7 +207,6 @@ export default function Checkout() {
           theme: { color: "#10b981" },
           handler: async (response) => {
             try {
-              
               const verifyRes = await fetch(`${API}/api/orders/verify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -242,7 +218,6 @@ export default function Checkout() {
                 }),
               });
               const verifyData = await verifyRes.json();
-
               if (verifyData.success) {
                 orderCompletedRef.current = true;
                 clearCart();
@@ -257,14 +232,12 @@ export default function Checkout() {
             }
           },
         };
-
         const rzp = new window.Razorpay(options);
-        rzp.on("payment.failed", function (response) {
+        rzp.on("payment.failed", function () {
           setOrderError("Payment failed or cancelled.");
         });
         rzp.open();
       } else {
-        
         orderCompletedRef.current = true;
         clearCart();
         navigate(`/order-success?orderId=${initData.dbOrderId}`);
@@ -284,26 +257,35 @@ export default function Checkout() {
     }).format(n);
 
   const getWhatsAppLink = () => {
-    const itemList = cartItems.map(item => `- ${item.name} (Qty: ${item.quantity})`).join("%0A");
+    const itemList = cartItems
+      .map((item) => `- ${item.name} (Qty: ${item.quantity})`)
+      .join("%0A");
     const text = `Hi! I'm on the checkout page of Sovely and want to place an order:%0A%0A${itemList}%0A%0ATotal Amount: ${formatPrice(cartTotal)}%0A%0APlease help me confirm.`;
     return `https://wa.me/919535094003?text=${text}`;
   };
 
   const handleShareToWhatsApp = async (e) => {
     e.preventDefault();
-    const itemListText = cartItems.map(item => `- ${item.name} (Qty: ${item.quantity})`).join("\n");
+    const itemListText = cartItems
+      .map((item) => `- ${item.name} (Qty: ${item.quantity})`)
+      .join("\n");
     const shareText = `Hi! I'm on the checkout page of Sovely and want to place an order:\n\n${itemListText}\n\nTotal Amount: ${formatPrice(cartTotal)}\n\nPlease help me confirm.`;
-
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [] }) && cartItems.length > 0) {
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [] }) &&
+        cartItems.length > 0
+      ) {
         const firstItem = cartItems[0];
-        const imgUrl = firstItem.image && !firstItem.image.includes("undefined") ? firstItem.image : null;
-
+        const imgUrl =
+          firstItem.image && !firstItem.image.includes("undefined")
+            ? firstItem.image
+            : null;
         if (imgUrl) {
           const response = await fetch(imgUrl);
           const blob = await response.blob();
           const file = new File([blob], "product.jpg", { type: blob.type });
-
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
               title: "Sovely Order Request",
@@ -316,7 +298,6 @@ export default function Checkout() {
       }
       window.open(getWhatsAppLink(), "_blank", "noopener,noreferrer");
     } catch (err) {
-      console.warn("Sharing failed, falling back to URL redirect:", err);
       window.open(getWhatsAppLink(), "_blank", "noopener,noreferrer");
     }
   };
@@ -339,12 +320,8 @@ export default function Checkout() {
               <h2>Shipping Address</h2>
             </div>
 
-            {}
             {savedAddresses.length > 0 && (
-              <div
-                className="address-selection-grid"
-                style={{ marginBottom: "20px" }}
-              >
+              <div className="address-selection-grid">
                 {savedAddresses.map((addr) => (
                   <div
                     key={addr._id || addr.address}
@@ -377,29 +354,18 @@ export default function Checkout() {
               </div>
             )}
 
-            {}
             {showNewForm && (
               <div className="new-address-form animate-slideDown">
-                {}
                 {lastOrder && (
                   <button
                     type="button"
-                    className="btn btn-outline"
+                    className="btn btn-outline quick-fill-btn"
                     onClick={handleQuickFillFromLastOrder}
-                    style={{
-                      marginBottom: "20px",
-                      display: "flex",
-                      gap: "8px",
-                      alignItems: "center",
-                      width: "100%",
-                      justifyContent: "center",
-                    }}
                   >
-                    <Zap size={18} color="#f59e0b" />
-                    Autofill from my last order
+                    <Zap size={18} color="#f59e0b" /> Autofill from my last
+                    order
                   </button>
                 )}
-
                 <div className="form-row">
                   <div className="input-group">
                     <label>First Name</label>
@@ -471,16 +437,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 {token && (
-                  <label
-                    className="save-check"
-                    style={{
-                      marginTop: "16px",
-                      display: "flex",
-                      gap: "8px",
-                      cursor: "pointer",
-                      fontWeight: "600",
-                    }}
-                  >
+                  <label className="save-check">
                     <input
                       type="checkbox"
                       checked={saveAddress}
@@ -511,7 +468,6 @@ export default function Checkout() {
               </div>
             </div>
           </section>
-
           {orderError && (
             <div className="checkout-error-msg animate-shake">{orderError}</div>
           )}
@@ -538,72 +494,59 @@ export default function Checkout() {
               ))}
             </div>
 
-            <div className="shipping-upsell-offers" style={{
-              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%)",
-              border: "2px dashed var(--primary)",
-              borderRadius: "var(--radius-sm)",
-              padding: "16px",
-              margin: "16px 0",
-              fontSize: "0.85rem",
-              lineHeight: "1.4"
-            }}>
-              <h4 style={{
-                margin: "0 0 10px 0",
-                fontWeight: "900",
-                color: "var(--text-main)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                textTransform: "uppercase",
-                fontSize: "0.75rem",
-                letterSpacing: "0.5px"
-              }}>
-                🔥 Special Shipping Offers
-              </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "1.1rem" }}>🚚</span>
-                  <div>
-                    <strong style={{ color: "var(--text-main)", display: "block" }}>Flat ₹50 Shipping</strong>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>On multiple products with a total weight of up to 500g.</span>
+            <div className="shipping-upsell-offers-co">
+              <h4 className="upsell-title-co">≡ƒöÑ Special Shipping Offers</h4>
+              <div className="upsell-list-co">
+                <div className="upsell-item-co">
+                  <span className="icon">≡ƒÜÜ</span>
+                  <div className="text">
+                    <strong>Flat Γé╣50 Shipping</strong>
+                    <span>
+                      On multiple products with a total weight of up to 500g.
+                    </span>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <span style={{ fontSize: "1.1rem" }}>🎉</span>
-                  <div>
-                    <strong style={{ color: "var(--text-main)", display: "block" }}>FREE Shipping</strong>
-                    <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>Get free shipping on all orders above ₹999.</span>
+                <div className="upsell-item-co">
+                  <span className="icon">≡ƒÄë</span>
+                  <div className="text">
+                    <strong>FREE Shipping</strong>
+                    <span>Get free shipping on all orders above Γé╣999.</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="coupon-section" style={{ marginTop: "16px", marginBottom: "16px" }}>
-              <h4 style={{ margin: "0 0 10px 0", fontWeight: "900", color: "var(--text-main)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Apply Coupon
-              </h4>
-              
+            <div className="coupon-section-co">
+              <h4 className="coupon-title-co">Apply Coupon</h4>
               {coupon ? (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "rgba(16, 185, 129, 0.1)", border: "1px dashed #10b981", borderRadius: "var(--radius-sm)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ color: "#10b981", fontWeight: "800", fontSize: "0.9rem" }}>✓ {coupon.code}</span>
-                    <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: "600" }}>({coupon.discountPercent}% OFF)</span>
+                <div className="applied-coupon-co">
+                  <div className="info">
+                    <span className="code">Γ£ô {coupon.code}</span>
+                    <span className="discount">
+                      ({coupon.discountPercent}% OFF)
+                    </span>
                   </div>
-                  <button onClick={handleRemoveCoupon} style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontWeight: "700", fontSize: "0.8rem", padding: "4px" }}>Remove</button>
+                  <button
+                    onClick={handleRemoveCoupon}
+                    className="remove-btn-co"
+                  >
+                    Remove
+                  </button>
                 </div>
               ) : (
                 <>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <input 
-                      type="text" 
+                  <div className="coupon-input-group-co">
+                    <input
+                      type="text"
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
-                      placeholder="Enter code" 
-                      style={{ flex: 1, padding: "10px", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", textTransform: "uppercase", fontSize: "0.9rem", fontWeight: "600", outline: "none", background: "var(--bg-main)", color: "var(--text-main)" }}
+                      placeholder="Enter code"
                     />
-                    <button onClick={handleApplyCoupon} style={{ padding: "10px 20px", background: "var(--primary)", color: "#fff", border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer", fontWeight: "800", textTransform: "uppercase", fontSize: "0.85rem" }}>Apply</button>
+                    <button onClick={handleApplyCoupon}>Apply</button>
                   </div>
-                  {couponError && <div style={{ color: "#ef4444", fontSize: "0.8rem", marginTop: "6px", fontWeight: "600" }}>{couponError}</div>}
+                  {couponError && (
+                    <div className="coupon-error-co">{couponError}</div>
+                  )}
                 </>
               )}
             </div>
@@ -620,10 +563,7 @@ export default function Checkout() {
                 </span>
               </div>
               {couponDiscount > 0 && (
-                <div
-                  className="detail-row"
-                  style={{ color: "var(--accent)", fontWeight: "700" }}
-                >
+                <div className="detail-row discount">
                   <span>Coupon Discount</span>
                   <span>- {formatPrice(couponDiscount)}</span>
                 </div>
@@ -651,95 +591,56 @@ export default function Checkout() {
 
             <button
               onClick={handleShareToWhatsApp}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-                width: "100%",
-                padding: "12px",
-                border: "2px solid #25D366",
-                borderRadius: "var(--radius-sm)",
-                background: "transparent",
-                color: "#25D366",
-                fontWeight: "800",
-                textTransform: "uppercase",
-                fontSize: "0.85rem",
-                textDecoration: "none",
-                marginTop: "16px",
-                transition: "all 0.3s",
-                cursor: "pointer"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#25D366";
-                e.currentTarget.style.color = "#fff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "#25D366";
-              }}
+              className="whatsapp-checkout-btn"
             >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.63 1.97 14.162.946 11.535.946c-5.438 0-9.863 4.372-9.867 9.802-.001 1.73.463 3.42 1.343 4.926l-1.014 3.705 3.821-.993zm11.272-7.01c-.3-.149-1.772-.864-2.047-.964-.275-.1-.475-.149-.675.15-.2.299-.775.964-.95 1.163-.175.199-.35.224-.65.075-.3-.149-1.265-.462-2.41-1.474-.89-.785-1.49-1.754-1.665-2.052-.175-.299-.019-.461.13-.609.135-.133.3-.349.45-.523.15-.174.2-.299.3-.499.1-.199.05-.374-.025-.524-.075-.15-.675-1.608-.925-2.203-.244-.582-.49-.5-.675-.509-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.772-.717 2.022-1.412.25-.694.25-1.29.175-1.413-.075-.124-.275-.199-.575-.349z"/>
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="currentColor"
+              >
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.63 1.97 14.162.946 11.535.946c-5.438 0-9.863 4.372-9.867 9.802-.001 1.73.463 3.42 1.343 4.926l-1.014 3.705 3.821-.993zm11.272-7.01c-.3-.149-1.772-.864-2.047-.964-.275-.1-.475-.149-.675.15-.2.299-.775.964-.95 1.163-.175.199-.35.224-.65.075-.3-.149-1.265-.462-2.41-1.474-.89-.785-1.49-1.754-1.665-2.052-.175-.299-.019-.461.13-.609.135-.133.3-.349.45-.523.15-.174.2-.299.3-.499.1-.199.05-.374-.025-.524-.075-.15-.675-1.608-.925-2.203-.244-.582-.49-.5-.675-.509-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.772-.717 2.022-1.412.25-.694.25-1.29.175-1.413-.075-.124-.275-.199-.575-.349z" />
               </svg>
               <span>Order On WhatsApp</span>
             </button>
 
-            <div className="our-approach-section" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "var(--border-thin)" }}>
-              <h4 style={{
-                margin: "0 0 16px 0",
-                fontWeight: "900",
-                color: "var(--text-main)",
-                textTransform: "uppercase",
-                fontSize: "0.8rem",
-                letterSpacing: "0.5px"
-              }}>
-                Our Approach
-              </h4>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Award size={18} className="text-primary" />
+            <div className="our-approach-section">
+              <h4>Our Approach</h4>
+              <div className="approach-grid">
+                <div className="approach-item">
+                  <div className="icon-wrap">
+                    <Award size={18} />
                   </div>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Best Quality</span>
+                  <span>Best Quality</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Banknote size={18} className="text-primary" />
+                <div className="approach-item">
+                  <div className="icon-wrap">
+                    <Banknote size={18} />
                   </div>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Cash On Delivery</span>
+                  <span>Cash On Delivery</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Truck size={18} className="text-primary" />
+                <div className="approach-item">
+                  <div className="icon-wrap">
+                    <Truck size={18} />
                   </div>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Free Shipping</span>
+                  <span>Free Shipping</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ padding: "8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <RotateCcw size={18} className="text-primary" />
+                <div className="approach-item">
+                  <div className="icon-wrap">
+                    <RotateCcw size={18} />
                   </div>
-                  <span style={{ fontSize: "0.75rem", fontWeight: "800", textTransform: "uppercase", color: "var(--text-main)" }}>Hassle Free Returns</span>
+                  <span>Hassle Free Returns</span>
                 </div>
               </div>
             </div>
 
-            <div className="safe-checkout-section" style={{ marginTop: "24px", paddingTop: "20px", borderTop: "var(--border-thin)" }}>
-              <h4 style={{
-                margin: "0 0 12px 0",
-                fontWeight: "900",
-                color: "var(--text-main)",
-                textTransform: "uppercase",
-                fontSize: "0.8rem",
-                letterSpacing: "0.5px"
-              }}>
-                Safe Checkout
-              </h4>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>✓ Norton Secured</span>
-                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🛡️ TRUSTe Privacy</span>
-                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🔑 VeriSign</span>
-                <span style={{ padding: "4px 8px", background: "var(--bg-main)", border: "var(--border-thin)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "900", color: "var(--text-main)", textTransform: "uppercase" }}>🔒 McAfee Secure</span>
+            <div className="safe-checkout-section">
+              <h4>Safe Checkout</h4>
+              <div className="safe-badges">
+                <span>Γ£ô Norton Secured</span>
+                <span>≡ƒ¢í∩╕Å TRUSTe Privacy</span>
+                <span>≡ƒöæ VeriSign</span>
+                <span>≡ƒöÆ McAfee Secure</span>
               </div>
             </div>
           </div>

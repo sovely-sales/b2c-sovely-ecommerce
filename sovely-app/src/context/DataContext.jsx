@@ -237,12 +237,13 @@ export function DataProvider({ children }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes, marketingRes, couponsRes] = await Promise.all([
-          fetch(`${API_URL}/api/products?limit=12`).catch(() => null),
-          fetch(`${API_URL}/api/categories`).catch(() => null),
-          fetch(`${API_URL}/api/marketing`).catch(() => null),
-          fetch(`${API_URL}/api/coupons`).catch(() => null),
-        ]);
+        const [productsRes, categoriesRes, marketingRes, couponsRes] =
+          await Promise.all([
+            fetch(`${API_URL}/api/products?limit=12`).catch(() => null),
+            fetch(`${API_URL}/api/categories`).catch(() => null),
+            fetch(`${API_URL}/api/marketing`).catch(() => null),
+            fetch(`${API_URL}/api/coupons`).catch(() => null),
+          ]);
 
         let categoriesData = [];
         const categoryMap = {};
@@ -366,7 +367,10 @@ export function DataProvider({ children }) {
           });
 
           setCategories(mappedCategories);
-          localStorage.setItem("cachedCategories", JSON.stringify(mappedCategories));
+          localStorage.setItem(
+            "cachedCategories",
+            JSON.stringify(mappedCategories),
+          );
         }
 
         if (productsRes && productsRes.ok) {
@@ -381,12 +385,23 @@ export function DataProvider({ children }) {
               name: p.title || p.name,
               category: categoryName,
               categoryId: rawCategory,
-              price: p.price !== undefined ? p.price : (p.dropshipBasePrice || 0) + 30,
-              originalPrice: p.originalPrice !== undefined ? p.originalPrice : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
+              price:
+                p.price !== undefined
+                  ? p.price
+                  : (p.dropshipBasePrice || 0) + 30,
+              originalPrice:
+                p.originalPrice !== undefined
+                  ? p.originalPrice
+                  : (p.suggestedRetailPrice || p.dropshipBasePrice || 0) + 30,
               rating: p.averageRating || p.rating || 0,
               reviews: p.reviewCount || p.reviews || 0,
-              badge: p.badge || ((p.originalPrice || p.suggestedRetailPrice) > (p.price || p.dropshipBasePrice) ? 'Sale' : null),
-              badgeColor: p.badgeColor || '#ef4444',
+              badge:
+                p.badge ||
+                ((p.originalPrice || p.suggestedRetailPrice) >
+                (p.price || p.dropshipBasePrice)
+                  ? "Sale"
+                  : null),
+              badgeColor: p.badgeColor || "#ef4444",
               image:
                 p.images && p.images.length > 0
                   ? p.images[0].url
@@ -410,13 +425,19 @@ export function DataProvider({ children }) {
             return stockB - stockA;
           });
           setProducts(sortedProducts);
-          localStorage.setItem("cachedProducts", JSON.stringify(mappedProducts));
+          localStorage.setItem(
+            "cachedProducts",
+            JSON.stringify(mappedProducts),
+          );
         }
 
         if (marketingRes && marketingRes.ok) {
           const marketingData = await marketingRes.json();
           setMarketing(marketingData);
-          localStorage.setItem("cachedMarketing", JSON.stringify(marketingData));
+          localStorage.setItem(
+            "cachedMarketing",
+            JSON.stringify(marketingData),
+          );
         }
 
         if (couponsRes && couponsRes.ok) {

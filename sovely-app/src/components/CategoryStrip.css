@@ -6,11 +6,17 @@
 
 .strip-scroll {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@media (min-width: 1240px) {
+  .strip-scroll {
+    justify-content: center;
+  }
 }
 
 .strip-scroll::-webkit-scrollbar {
@@ -22,7 +28,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  min-width: 90px;
+  min-width: 96px;
   padding: 8px 4px;
   background: none;
   border: none;
@@ -31,8 +37,8 @@
 }
 
 .strip-icon-circle {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -41,7 +47,7 @@
   box-shadow: var(--shadow-neo);
   transition: var(--transition);
   overflow: hidden;
-  background: var(--bg-card) !important;
+  background: var(--bg-card);
 }
 
 .strip-emoji {
@@ -50,10 +56,6 @@
   align-items: center;
   justify-content: center;
   user-select: none;
-}
-
-.strip-item:hover {
-  transform: none;
 }
 
 .strip-item:hover .strip-icon-circle {
@@ -80,31 +82,31 @@
 
 @media (max-width: 768px) {
   .category-strip {
-    padding: 16px 0 12px;
+    padding: 20px 0 12px;
   }
 
   .strip-scroll {
-    gap: 8px;
+    gap: 10px;
   }
 
   .strip-item {
-    min-width: 76px;
+    min-width: 80px;
     gap: 6px;
     padding: 4px 2px;
   }
 
   .strip-icon-circle {
-    width: 54px;
-    height: 54px;
-    border-width: 2.5px; /* slightly thinner neobrutalist border for mobile scaling */
+    width: 58px;
+    height: 58px;
+    border-width: 2px;
   }
 
   .strip-emoji {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
   .strip-label {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     margin-top: 2px;
   }
 }
