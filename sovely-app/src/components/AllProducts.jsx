@@ -24,6 +24,7 @@ export default function AllProducts() {
   const [appliedMinPrice, setAppliedMinPrice] = useState("");
   const [appliedMaxPrice, setAppliedMaxPrice] = useState("");
   const [sortOption, setSortOption] = useState("latest");
+  const [showFilters, setShowFilters] = useState(false);
 
   const loaderRef = useRef(null);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -40,6 +41,7 @@ export default function AllProducts() {
     setAppliedMinPrice("");
     setAppliedMaxPrice("");
     setSortOption("latest");
+    setSelectedCategory("");
   };
 
   const handleKeyDown = (e) => {
@@ -289,15 +291,17 @@ export default function AllProducts() {
       <div className="container">
         <div className="products-section-header">
           <h2 className="section-title-autorev">Explore Our Products</h2>
-          {!loadingProducts && (
-            <span className="products-count">
-              Showing {productsList.length} products
-            </span>
-          )}
+          <button
+            className="filter-toggle-btn"
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+          >
+            {showFilters ? "Hide ✕" : "Filter ⚙️"}
+          </button>
         </div>
 
-        {}
-        <div className="price-filter-bar">
+        {/* Price & Sort Filter Bar */}
+        <div className={`price-filter-bar ${showFilters ? "show-mobile" : "hide-mobile"}`}>
           <div className="price-filter-section">
             <span className="price-filter-title">Price Range:</span>
             <div className="price-input-wrapper">
@@ -327,18 +331,12 @@ export default function AllProducts() {
               <button className="price-btn-apply" onClick={handleApplyFilters}>
                 Apply
               </button>
-              {(appliedMinPrice ||
-                appliedMaxPrice ||
-                minPrice ||
-                maxPrice ||
-                sortOption !== "latest") && (
-                <button
-                  className="price-btn-clear"
-                  onClick={handleClearFilters}
-                >
-                  Clear
-                </button>
-              )}
+              <button
+                className="price-btn-clear"
+                onClick={handleClearFilters}
+              >
+                Clear Filters
+              </button>
             </div>
           </div>
 

@@ -993,7 +993,7 @@ app.post(
         product.reviewsList.reduce((acc, item) => item.rating + acc, 0) /
         product.reviewsList.length;
 
-      await product.save();
+      await product.save({ validateBeforeSave: false });
       res.status(201).json({ success: true, message: "Review added", product });
     } catch (error) {
       console.error("Review error:", error);

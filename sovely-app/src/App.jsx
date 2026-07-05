@@ -22,6 +22,7 @@ import { DataProvider } from "./context/DataContext";
 import { Navigate, useLocation, useNavigationType } from "react-router-dom";
 import { useData } from "./context/DataContext";
 import { useEffect } from "react";
+import FloatingVideo from "./components/FloatingVideo";
 import "./App.css";
 import Wishlist from "./pages/Wishlist";
 import Search from "./pages/Search";
@@ -80,6 +81,7 @@ export default function App() {
         <MobileBottomNav />
         <CartSidebar />
         <WhatsAppWidget />
+        <FloatingVideo />
         <Routes>
           <Route
             path="/"

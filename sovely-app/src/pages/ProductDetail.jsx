@@ -59,7 +59,6 @@ export default function ProductDetail() {
       setProductReviews(found.reviewsList || []);
       document.title = `${found.name} | Sovely`;
       setLoading(false);
-      return;
     }
 
     const fetchProduct = async () => {
@@ -412,6 +411,101 @@ export default function ProductDetail() {
               <Lock size={20} />
               <span>Razorpay Secured</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Reviews Section */}
+      <div className="pd-reviews-section">
+        <h2 className="reviews-section-title">Customer Reviews</h2>
+        
+        <div className="reviews-grid">
+          {/* Reviews List */}
+          <div className="reviews-list">
+            {productReviews.length === 0 ? (
+              <p className="no-reviews">No reviews yet. Be the first to write a review!</p>
+            ) : (
+              productReviews.map((rev, index) => (
+                <div key={rev._id || index} className="review-card">
+                  <div className="review-header">
+                    <span className="review-author">{rev.userName}</span>
+                    <div className="review-rating">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          fill={i < rev.rating ? "#ec4899" : "none"}
+                          color={i < rev.rating ? "#ec4899" : "currentColor"}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="review-comment">{rev.comment}</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Review Submission Form */}
+          <div className="review-form-container">
+            <h3>Share Your Thoughts</h3>
+            {user ? (
+              productReviews.some((rev) => String(rev.userId) === String(user.id)) ? (
+                <div className="already-reviewed-msg">
+                  <Lock size={16} className="icon-mr" />
+                  You have already reviewed this product.
+                </div>
+              ) : (
+                <form onSubmit={submitReview} className="review-form">
+                  <div className="form-group">
+                    <label>Rating:</label>
+                    <div className="star-rating-input">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setRatingInput(star)}
+                          className={`star-btn ${star <= ratingInput ? "active" : ""}`}
+                          aria-label={`Rate ${star} stars`}
+                        >
+                          <Star
+                            size={20}
+                            fill={star <= ratingInput ? "#ec4899" : "none"}
+                            color={star <= ratingInput ? "#ec4899" : "currentColor"}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="review-comment">Your Review:</label>
+                    <textarea
+                      id="review-comment"
+                      rows="4"
+                      placeholder="Write your review here..."
+                      value={commentInput}
+                      onChange={(e) => setCommentInput(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                  {submitError && <div className="error-alert">{submitError}</div>}
+                  <button
+                    type="submit"
+                    className="btn btn-primary submit-review-btn"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Review"}
+                  </button>
+                </form>
+              )
+            ) : (
+              <div className="login-prompt-msg">
+                <p>Please log in to write a review for this product.</p>
+                <Link to="/login" className="btn btn-outline login-link-btn">
+                  Log In / Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

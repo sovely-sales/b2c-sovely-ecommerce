@@ -1,0 +1,169 @@
+.floating-video-bubble {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 220px;
+  height: 340px;
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-neo);
+  background: #000;
+  overflow: hidden;
+  z-index: 9998;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  filter: brightness(0.85) contrast(0.95);
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.floating-video-bubble:hover {
+  filter: brightness(1) contrast(1);
+  box-shadow: var(--shadow-neo-lg);
+}
+
+.floating-video-bubble:active {
+  cursor: grabbing;
+}
+
+.bubble-video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.bubble-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.floating-video-bubble:hover .bubble-controls {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.video-bubble-btn {
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  color: #000;
+  border: 1.5px solid #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 1px 1px 0px #000;
+  transition: var(--transition);
+  padding: 0;
+}
+
+.video-bubble-btn:hover {
+  transform: translate(0.5px, 0.5px);
+  box-shadow: 0.5px 0.5px 0px #000;
+}
+
+.close-btn {
+  background: #ef4444 !important;
+  color: #fff !important;
+}
+
+/* Full Screen Popup Modal */
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.video-modal-content {
+  position: relative;
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-neo-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  aspect-ratio: 9/16;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: zoomIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  background: #ef4444;
+  color: #fff;
+  border: var(--border-thick);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-neo);
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.modal-close-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-neo-hover);
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .floating-video-bubble {
+    width: 120px !important;
+    height: 190px !important;
+    bottom: 90px !important;
+    left: 16px !important;
+    right: auto !important;
+  }
+  
+  .video-modal-content {
+    max-height: 75vh;
+  }
+}

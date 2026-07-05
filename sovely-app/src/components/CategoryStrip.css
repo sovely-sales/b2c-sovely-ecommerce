@@ -6,17 +6,11 @@
 
 .strip-scroll {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   overflow-x: auto;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-@media (min-width: 1240px) {
-  .strip-scroll {
-    justify-content: center;
-  }
 }
 
 .strip-scroll::-webkit-scrollbar {
@@ -28,7 +22,7 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  min-width: 96px;
+  min-width: 90px;
   padding: 8px 4px;
   background: none;
   border: none;
@@ -37,8 +31,8 @@
 }
 
 .strip-icon-circle {
-  width: 76px;
-  height: 76px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -47,7 +41,7 @@
   box-shadow: var(--shadow-neo);
   transition: var(--transition);
   overflow: hidden;
-  background: var(--bg-card);
+  background: var(--bg-card) !important;
 }
 
 .strip-emoji {
@@ -56,6 +50,10 @@
   align-items: center;
   justify-content: center;
   user-select: none;
+}
+
+.strip-item:hover {
+  transform: none;
 }
 
 .strip-item:hover .strip-icon-circle {
@@ -82,31 +80,32 @@
 
 @media (max-width: 768px) {
   .category-strip {
-    padding: 20px 0 12px;
+    padding: 12px 0 8px !important;
   }
 
   .strip-scroll {
-    gap: 10px;
+    gap: 6px !important;
   }
 
   .strip-item {
-    min-width: 80px;
-    gap: 6px;
-    padding: 4px 2px;
+    min-width: 64px !important;
+    gap: 4px !important;
+    padding: 2px 1px !important;
   }
 
   .strip-icon-circle {
-    width: 58px;
-    height: 58px;
-    border-width: 2px;
+    width: 44px !important;
+    height: 44px !important;
+    border-width: 2px !important;
   }
 
   .strip-emoji {
-    font-size: 1.6rem;
+    font-size: 1.2rem !important;
   }
 
   .strip-label {
-    font-size: 0.7rem;
-    margin-top: 2px;
+    font-size: 0.6rem !important;
+    margin-top: 1px !important;
+    letter-spacing: -0.2px !important;
   }
 }

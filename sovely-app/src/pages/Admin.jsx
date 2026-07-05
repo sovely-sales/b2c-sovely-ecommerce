@@ -206,6 +206,10 @@ export default function Admin() {
   const [previewSlideIdx, setPreviewSlideIdx] = useState(0);
 
   const [dealsConfig, setDealsConfig] = useState(DEFAULT_DEALS);
+  const [videoConfig, setVideoConfig] = useState({
+    enabled: true,
+    url: "https://assets.mixkit.co/videos/preview/mixkit-holding-a-cellphone-running-in-a-vertical-format-42319-large.mp4"
+  });
 
   const navigate = useNavigate();
 
@@ -306,6 +310,9 @@ export default function Admin() {
 
           const dealDoc = mData.find((m) => m.section === "deal-banners");
           if (dealDoc && dealDoc.data) setDealsConfig(dealDoc.data);
+
+          const videoDoc = mData.find((m) => m.section === "floating-video");
+          if (videoDoc && videoDoc.data) setVideoConfig(videoDoc.data);
         }
       } catch (e) {
         console.error("Marketing config fetch skipped/failed");
@@ -2145,6 +2152,22 @@ export default function Admin() {
                   >
                     Deal Cards
                   </button>
+                  <button
+                    onClick={() => setMarketingSubTab("video")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: "none",
+                      background:
+                        marketingSubTab === "video" ? "#0f172a" : "transparent",
+                      color: marketingSubTab === "video" ? "#fff" : "#64748b",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    Floating Video
+                  </button>
                 </div>
 
                 {}
@@ -2929,6 +2952,84 @@ export default function Admin() {
                             <strong>Add Deal Card</strong>
                           </div>
                         )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {marketingSubTab === "video" && (
+                  <div
+                    className="designer-layout animate-fadeUp"
+                    style={{
+                      display: "flex",
+                      gap: "24px",
+                      alignItems: "flex-start",
+                      flexWrap: "wrap",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <div className="card" style={{ width: "100%" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "16px",
+                        }}
+                      >
+                        <h4>Manage Floating Marketing Video</h4>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() =>
+                            saveMarketingData("floating-video", videoConfig)
+                          }
+                        >
+                          Publish Video Settings
+                        </button>
+                      </div>
+
+                      <div className="form-group" style={{ marginBottom: "20px" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", cursor: "pointer" }}>
+                          <input
+                            type="checkbox"
+                            checked={videoConfig.enabled}
+                            onChange={(e) =>
+                              setVideoConfig((prev) => ({
+                                ...prev,
+                                enabled: e.target.checked,
+                              }))
+                            }
+                            style={{ width: "18px", height: "18px" }}
+                          />
+                          Enable Floating Video Widget
+                        </label>
+                      </div>
+
+                      <div className="form-group">
+                        <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+                          Video URL (Direct link to an .mp4 file)
+                        </label>
+                        <input
+                          type="text"
+                          value={videoConfig.url}
+                          onChange={(e) =>
+                            setVideoConfig((prev) => ({
+                              ...prev,
+                              url: e.target.value,
+                            }))
+                          }
+                          placeholder="https://assets.mixkit.co/videos/preview/mixkit-..."
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "6px",
+                            fontSize: "14px",
+                          }}
+                        />
+                        <small style={{ display: "block", marginTop: "6px", color: "#64748b" }}>
+                          Please enter a direct link to an MP4 video file. You can host your video on CDNs, AWS S3, Dropbox (changing the end query of URL to <code>raw=1</code>), or any web server.
+                        </small>
                       </div>
                     </div>
                   </div>
