@@ -252,6 +252,7 @@ export default function Admin() {
                 : p.image ||
                   "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
             stock: p.inventory?.stock,
+            sku: p.sku || "",
           };
         });
 
@@ -1179,18 +1180,34 @@ export default function Admin() {
                                                                 "#fff",
                                                             }}
                                                           />
-                                                          <span
-                                                            className="product-title-cell"
-                                                            style={{
-                                                              fontWeight: 700,
-                                                              fontSize:
-                                                                "0.85rem",
-                                                              color:
-                                                                "var(--text-main)",
-                                                            }}
-                                                          >
-                                                            {itemTitle}
-                                                          </span>
+                                                          <div style={{ display: "flex", flexDirection: "column" }}>
+                                                            <span
+                                                              className="product-title-cell"
+                                                              style={{
+                                                                fontWeight: 700,
+                                                                fontSize:
+                                                                  "0.85rem",
+                                                                color:
+                                                                  "var(--text-main)",
+                                                                lineHeight: 1.2,
+                                                              }}
+                                                            >
+                                                              {itemTitle}
+                                                            </span>
+                                                            {(item.sku || foundProduct?.sku) && (
+                                                              <span
+                                                                className="product-sku-cell"
+                                                                style={{
+                                                                  fontSize: "0.75rem",
+                                                                  color: "#64748b",
+                                                                  fontWeight: 500,
+                                                                  marginTop: "2px",
+                                                                }}
+                                                              >
+                                                                SKU: {item.sku || foundProduct?.sku}
+                                                              </span>
+                                                            )}
+                                                          </div>
                                                         </td>
                                                         <td
                                                           style={{
@@ -1747,7 +1764,7 @@ export default function Admin() {
                                           color: "#64748b",
                                         }}
                                       >
-                                        ID: {product.id}
+                                        ID: {product.id} {product.sku && `| SKU: ${product.sku}`}
                                       </span>
                                     </div>
                                   </div>

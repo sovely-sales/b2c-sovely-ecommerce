@@ -416,6 +416,7 @@ export function DataProvider({ children }) {
               freeDelivery:
                 p.freeDelivery !== undefined ? p.freeDelivery : false,
               stock: p.inventory?.stock,
+              sku: p.sku || "",
             };
           });
 

@@ -74,13 +74,19 @@ const calculateCartTotal = async (items, couponCode = null) => {
       const itemPrice = (product.dropshipBasePrice || product.price || 0) + 30;
       calculatedSubtotal += itemPrice * qty;
 
+      const itemImage =
+        product.images && product.images.length > 0
+          ? product.images[0].url
+          : product.image;
+
       sanitizedItems.push({
         id: String(product.id || product._id),
         productId: product._id,
-        name: product.name || product.title || "Product",
+        name: product.title || product.name || "Product",
         price: itemPrice,
         quantity: qty,
-        image: product.image,
+        image: itemImage,
+        sku: product.sku || "",
       });
     } else {
       throw new Error(`Product not found for ID: ${item.id}`);

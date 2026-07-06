@@ -18,7 +18,9 @@ const productSchema = new mongoose.Schema(
   {
     id: { type: Number, required: true, unique: true },
     name: { type: String, required: true },
+    title: { type: String },
     category: { type: String, required: true, index: true },
+    images: [{ url: String }],
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -26,6 +28,7 @@ const productSchema = new mongoose.Schema(
     },
     price: { type: Number, required: true },
     originalPrice: { type: Number, required: true },
+    sku: { type: String },
     dropshipBasePrice: { type: Number },
     suggestedRetailPrice: { type: Number },
     rating: { type: Number, default: 0 },
