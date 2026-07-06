@@ -206,22 +206,22 @@ export default function Cart() {
             </div>
 
             <div className="shipping-upsell-offers">
-              <h4 className="upsell-title">≡ƒöÑ Special Shipping Offers</h4>
+              <h4 className="upsell-title">🔥 Special Shipping Offers</h4>
               <div className="upsell-list">
                 <div className="upsell-item">
-                  <span className="upsell-icon">≡ƒÜÜ</span>
+                  <span className="upsell-icon">🚚</span>
                   <div className="upsell-text">
-                    <strong>Flat Γé╣50 Shipping</strong>
+                    <strong>Flat ₹50 Shipping</strong>
                     <span>
                       On multiple products with a total weight of up to 500g.
                     </span>
                   </div>
                 </div>
                 <div className="upsell-item">
-                  <span className="upsell-icon">≡ƒÄë</span>
+                  <span className="upsell-icon">🎉</span>
                   <div className="upsell-text">
                     <strong>FREE Shipping</strong>
-                    <span>Get free shipping on all orders above Γé╣999.</span>
+                    <span>Get free shipping on all orders above ₹999.</span>
                   </div>
                 </div>
               </div>

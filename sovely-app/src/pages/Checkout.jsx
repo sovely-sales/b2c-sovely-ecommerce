@@ -495,22 +495,22 @@ export default function Checkout() {
             </div>
 
             <div className="shipping-upsell-offers-co">
-              <h4 className="upsell-title-co">≡ƒöÑ Special Shipping Offers</h4>
+              <h4 className="upsell-title-co">🔥 Special Shipping Offers</h4>
               <div className="upsell-list-co">
                 <div className="upsell-item-co">
-                  <span className="icon">≡ƒÜÜ</span>
+                  <span className="icon">🚚</span>
                   <div className="text">
-                    <strong>Flat Γé╣50 Shipping</strong>
+                    <strong>Flat ₹50 Shipping</strong>
                     <span>
                       On multiple products with a total weight of up to 500g.
                     </span>
                   </div>
                 </div>
                 <div className="upsell-item-co">
-                  <span className="icon">≡ƒÄë</span>
+                  <span className="icon">🎉</span>
                   <div className="text">
                     <strong>FREE Shipping</strong>
-                    <span>Get free shipping on all orders above Γé╣999.</span>
+                    <span>Get free shipping on all orders above ₹999.</span>
                   </div>
                 </div>
               </div>
@@ -521,7 +521,7 @@ export default function Checkout() {
               {coupon ? (
                 <div className="applied-coupon-co">
                   <div className="info">
-                    <span className="code">Γ£ô {coupon.code}</span>
+                    <span className="code">✔ {coupon.code}</span>
                     <span className="discount">
                       ({coupon.discountPercent}% OFF)
                     </span>
@@ -637,10 +637,10 @@ export default function Checkout() {
             <div className="safe-checkout-section">
               <h4>Safe Checkout</h4>
               <div className="safe-badges">
-                <span>Γ£ô Norton Secured</span>
-                <span>≡ƒ¢í∩╕Å TRUSTe Privacy</span>
-                <span>≡ƒöæ VeriSign</span>
-                <span>≡ƒöÆ McAfee Secure</span>
+                <span>✔ Norton Secured</span>
+                <span>🛡️ TRUSTe Privacy</span>
+                <span>🔒 VeriSign</span>
+                <span>🔒 McAfee Secure</span>
               </div>
             </div>
           </div>
