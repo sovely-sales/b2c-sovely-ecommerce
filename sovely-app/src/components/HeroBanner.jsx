@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useData } from "../context/DataContext";
 import "./HeroBanner.css";
 
-const OFFERS = [
+const DEFAULT_OFFERS = [
   {
     image:
       "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=2000&q=80",
@@ -27,20 +28,25 @@ const OFFERS = [
 ];
 
 export default function HeroBanner() {
+  const { marketing } = useData();
   const [current, setCurrent] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
   const [touchEndX, setTouchEndX] = useState(null);
 
+  // Safely extract the hero slides from the global marketing state
+  const heroDoc = marketing?.find((m) => m.section === "hero-slideshow");
+  const slides = heroDoc?.data?.length > 0 ? heroDoc.data : DEFAULT_OFFERS;
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % OFFERS.length);
+      setCurrent((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]); // Ensure interval updates if slide length changes
 
-  const nextSlide = () => setCurrent((prev) => (prev + 1) % OFFERS.length);
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
   const prevSlide = () =>
-    setCurrent((prev) => (prev - 1 + OFFERS.length) % OFFERS.length);
+    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
 
   const handleTouchStart = (e) => {
     setTouchEndX(null);
@@ -73,7 +79,7 @@ export default function HeroBanner() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {OFFERS.map((offer, idx) => (
+        {slides.map((offer, idx) => (
           <div
             key={idx}
             className="slide-item"
@@ -110,7 +116,7 @@ export default function HeroBanner() {
       </button>
 
       <div className="slider-dots">
-        {OFFERS.map((_, idx) => (
+        {slides.map((_, idx) => (
           <button
             key={idx}
             className={`slider-dot ${idx === current ? "active" : ""}`}
