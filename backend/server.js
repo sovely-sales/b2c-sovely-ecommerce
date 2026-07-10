@@ -172,6 +172,67 @@ app.get("/api/categories", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+app.get(["/sitemap.xml", "/api/sitemap.xml"], async (req, res) => {
+  try {
+    const products = await Product.find({}, "id updatedAt").lean();
+    const DOMAIN = "https://sovely.in";
+    const staticPaths = [
+      "",
+      "/products",
+      "/categories",
+      "/deals",
+      "/wishlist",
+      "/search",
+      "/checkout",
+      "/login",
+      "/about",
+      "/contact",
+      "/track",
+      "/seller",
+      "/returns",
+      "/shipping",
+      "/faq",
+      "/careers",
+      "/press",
+      "/privacy",
+      "/terms",
+      "/cookies"
+    ];
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    const today = new Date().toISOString().split("T")[0];
+    staticPaths.forEach((path) => {
+      xml += `  <url>\n`;
+      xml += `    <loc>${DOMAIN}${path}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>${path === "" ? "daily" : "weekly"}</changefreq>\n`;
+      xml += `    <priority>${path === "" ? "1.0" : "0.5"}</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    products.forEach((prod) => {
+      const lastMod = prod.updatedAt
+        ? new Date(prod.updatedAt).toISOString().split("T")[0]
+        : today;
+      xml += `  <url>\n`;
+      xml += `    <loc>${DOMAIN}/product/${prod.id}</loc>\n`;
+      xml += `    <lastmod>${lastMod}</lastmod>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.7</priority>\n`;
+      xml += `  </url>\n`;
+    });
+
+    xml += `</urlset>\n`;
+
+    res.header("Content-Type", "application/xml");
+    res.send(xml);
+  } catch (error) {
+    console.error("Error generating sitemap:", error);
+    res.status(500).send("Error generating sitemap");
+  }
+});
 
 app.get("/api/products", async (req, res) => {
   try {
