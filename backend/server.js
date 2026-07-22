@@ -174,7 +174,7 @@ app.get("/api/categories", async (req, res) => {
 });
 app.get(["/sitemap.xml", "/api/sitemap.xml"], async (req, res) => {
   try {
-    const products = await Product.find({}, "id updatedAt").lean();
+    const products = await Product.find({}, "_id updatedAt").lean();
     const DOMAIN = "https://sovely.in";
     const staticPaths = [
       "",
@@ -217,7 +217,7 @@ app.get(["/sitemap.xml", "/api/sitemap.xml"], async (req, res) => {
         ? new Date(prod.updatedAt).toISOString().split("T")[0]
         : today;
       xml += `  <url>\n`;
-      xml += `    <loc>${DOMAIN}/product/${prod.id}</loc>\n`;
+      xml += `    <loc>${DOMAIN}/product/${prod._id}</loc>\n`;
       xml += `    <lastmod>${lastMod}</lastmod>\n`;
       xml += `    <changefreq>weekly</changefreq>\n`;
       xml += `    <priority>0.7</priority>\n`;
