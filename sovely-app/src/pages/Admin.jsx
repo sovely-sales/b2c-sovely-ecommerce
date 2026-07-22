@@ -182,7 +182,9 @@ export default function Admin() {
   const { categories, products: globalProducts } = useData();
   const [newCoupon, setNewCoupon] = useState({
     code: "",
+    discountType: "percent",
     discountPercent: "",
+    discountAmount: "",
     expirationDate: "",
     usageLimit: "",
   });
@@ -489,9 +491,14 @@ export default function Admin() {
   const handleCreateCoupon = async (e) => {
     e.preventDefault();
     const payload = {
-      code: newCoupon.code.toUpperCase(),
-      discountPercent: Number(newCoupon.discountPercent),
+      code: newCoupon.code.toUpperCase().trim(),
+      discountType: newCoupon.discountType || "percent",
     };
+    if (payload.discountType === "fixed") {
+      payload.discountAmount = Number(newCoupon.discountAmount);
+    } else {
+      payload.discountPercent = Number(newCoupon.discountPercent);
+    }
 
     const res = await fetch(`${API}/api/admin/coupons`, {
       method: "POST",
@@ -507,7 +514,9 @@ export default function Admin() {
       setCoupons([data.coupon, ...coupons]);
       setNewCoupon({
         code: "",
+        discountType: "percent",
         discountPercent: "",
+        discountAmount: "",
         expirationDate: "",
         usageLimit: "",
       });
@@ -2026,23 +2035,68 @@ export default function Admin() {
                             code: e.target.value.toUpperCase(),
                           })
                         }
+                        required
                       />
                     </div>
                     <div className="input-group">
-                      <label>Discount %</label>
-                      <input
-                        type="number"
-                        min="1"
-                        max="100"
-                        value={newCoupon.discountPercent}
+                      <label>Type</label>
+                      <select
+                        style={{
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          border: "1.5px solid #cbd5e1",
+                          fontSize: "14px",
+                          outline: "none",
+                          height: "42px",
+                          background: "#fff",
+                          minWidth: "140px"
+                        }}
+                        value={newCoupon.discountType || "percent"}
                         onChange={(e) =>
                           setNewCoupon({
                             ...newCoupon,
-                            discountPercent: e.target.value,
+                            discountType: e.target.value,
                           })
                         }
-                      />
+                      >
+                        <option value="percent">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (₹)</option>
+                      </select>
                     </div>
+                    {newCoupon.discountType === "fixed" ? (
+                      <div className="input-group">
+                        <label>Amount (₹)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={newCoupon.discountAmount || ""}
+                          onChange={(e) =>
+                            setNewCoupon({
+                              ...newCoupon,
+                              discountAmount: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                    ) : (
+                      <div className="input-group">
+                        <label>Discount %</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={newCoupon.discountPercent || ""}
+                          onChange={(e) =>
+                            setNewCoupon({
+                              ...newCoupon,
+                              discountPercent: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                    )}
                     <button
                       type="submit"
                       className="btn btn-primary"
@@ -2069,7 +2123,11 @@ export default function Admin() {
                             <td>
                               <strong>{coupon.code}</strong>
                             </td>
-                            <td>{coupon.discountPercent}%</td>
+                             <td>
+                              {coupon.discountType === "fixed"
+                                ? `₹${coupon.discountAmount}`
+                                : `${coupon.discountPercent}%`}
+                            </td>
                             <td>
                               <button
                                 onClick={() => handleToggleCoupon(coupon._id)}
