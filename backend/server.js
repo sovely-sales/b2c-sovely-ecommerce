@@ -1105,6 +1105,38 @@ app.post("/api/razorpay/order", async (req, res) => {
   }
 });
 
+app.get("/sitemap.xml", async (req, res) => {
+  try {
+    const products = await Product.find({}, "id _id").lean();
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://sovely.in/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`;
+
+    products.forEach((product) => {
+      const productId = product.id || product._id;
+      xml += `
+  <url>
+    <loc>https://sovely.in/product/${productId}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+    });
+
+    xml += `\n</urlset>`;
+
+    res.header("Content-Type", "application/xml");
+    res.send(xml);
+  } catch (error) {
+    console.error("Sitemap error:", error);
+    res.status(500).send("Error generating sitemap");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
