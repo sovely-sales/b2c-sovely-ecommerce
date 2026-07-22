@@ -119,7 +119,7 @@ export default function Checkout() {
     );
     if (found && found.isActive) {
       setCoupon(found);
-      setCouponPercent(found.discountPercent);
+      setCouponPercent(found.discountType === "fixed" ? 0 : found.discountPercent);
       setCouponInput("");
     } else if (found && !found.isActive)
       setCouponError("This coupon is currently inactive.");
@@ -523,7 +523,11 @@ export default function Checkout() {
                   <div className="info">
                     <span className="code">✔ {coupon.code}</span>
                     <span className="discount">
-                      ({coupon.discountPercent}% OFF)
+                      (
+                      {coupon.discountType === "fixed"
+                        ? `${formatPrice(coupon.discountAmount)} OFF`
+                        : `${coupon.discountPercent}% OFF`}
+                      )
                     </span>
                   </div>
                   <button

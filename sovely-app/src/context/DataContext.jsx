@@ -116,6 +116,7 @@ export function DataProvider({ children }) {
       {
         _id: "1",
         code: "SAVE10",
+        discountType: "percent",
         discountPercent: 10,
         isActive: true,
         timesUsed: 0,
@@ -125,6 +126,7 @@ export function DataProvider({ children }) {
       {
         _id: "2",
         code: "WELCOME20",
+        discountType: "percent",
         discountPercent: 20,
         isActive: true,
         timesUsed: 0,
@@ -161,10 +163,32 @@ export function DataProvider({ children }) {
     saveCoupons(availableCoupons.filter((c) => c._id !== id));
   };
 
-  const couponDiscount =
-    coupon && couponPercent > 0
-      ? Math.round(cartSubtotal * (couponPercent / 100))
-      : 0;
+  const couponDiscount = useMemo(() => {
+    if (!coupon) return 0;
+    
+    // Check if coupon is an object
+    if (typeof coupon === "object") {
+      if (coupon.discountType === "fixed") {
+        return Math.min(coupon.discountAmount, cartSubtotal);
+      }
+      const percent = coupon.discountPercent || couponPercent || 0;
+      return Math.round(cartSubtotal * (percent / 100));
+    }
+    
+    // If it's a string code
+    const found = availableCoupons.find(
+      (c) => c.code.toUpperCase() === coupon.toUpperCase()
+    );
+    if (found) {
+      if (found.discountType === "fixed") {
+        return Math.min(found.discountAmount, cartSubtotal);
+      }
+      return Math.round(cartSubtotal * (found.discountPercent / 100));
+    }
+    
+    return Math.round(cartSubtotal * (couponPercent / 100));
+  }, [coupon, couponPercent, cartSubtotal, availableCoupons]);
+
   const cartDelivery = cartSubtotal > 999 ? 0 : 50;
   const cartTotal = cartSubtotal - couponDiscount + cartDelivery;
 

@@ -118,9 +118,13 @@ const calculateCartTotal = async (items, couponCode = null) => {
         throw new Error("This coupon has reached its usage limit.");
       }
 
-      discountAmount = Math.round(
-        calculatedSubtotal * (validCoupon.discountPercent / 100),
-      );
+      if (validCoupon.discountType === "fixed") {
+        discountAmount = Math.min(validCoupon.discountAmount, calculatedSubtotal);
+      } else {
+        discountAmount = Math.round(
+          calculatedSubtotal * (validCoupon.discountPercent / 100),
+        );
+      }
       appliedCoupon = validCoupon.code;
     } else {
       throw new Error("Invalid coupon code.");

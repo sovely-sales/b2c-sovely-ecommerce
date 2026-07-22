@@ -71,8 +71,8 @@ export default function Cart() {
       return;
     }
 
-    setCoupon(matchedCoupon.code);
-    setCouponPercent(matchedCoupon.discountPercent);
+    setCoupon(matchedCoupon);
+    setCouponPercent(matchedCoupon.discountType === "fixed" ? 0 : matchedCoupon.discountPercent);
     setCouponError("");
   };
 
@@ -174,7 +174,7 @@ export default function Cart() {
                   <div className="coupon-success">
                     <Tag size={16} />
                     <span>
-                      Coupon <strong>{coupon}</strong> applied!
+                      Coupon <strong>{coupon?.code || coupon}</strong> applied!
                     </span>
                   </div>
                   <button
